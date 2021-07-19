@@ -16,7 +16,7 @@
     <orderEntry type="jdk" jdkName="1.8" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Maven: junit:junit:4.4" level="project" />
-    <orderEntry type="module" module-name="compiler" />
+    <orderEntry type="library" name="Maven: org.rebecalang:compiler:2.8.10" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-core:4.3.20.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: commons-logging:commons-logging:1.2" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-context:4.3.20.RELEASE" level="project" />
