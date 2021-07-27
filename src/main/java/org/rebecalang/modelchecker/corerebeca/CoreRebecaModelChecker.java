@@ -38,11 +38,7 @@ import org.rebecalang.modelchecker.corerebeca.rilinterpreter.MethodCallInstructi
 import org.rebecalang.modelchecker.corerebeca.rilinterpreter.PopARInstructionInterpreter;
 import org.rebecalang.modelchecker.corerebeca.rilinterpreter.ProgramCounter;
 import org.rebecalang.modelchecker.corerebeca.rilinterpreter.PushARInstructionInterpreter;
-<<<<<<< HEAD
-import org.rebecalang.modelchecker.corerebeca.policy.CoarseGrainedPolicy;
-=======
 import org.rebecalang.modeltransformer.ril.RILModel;
->>>>>>> upstream/master
 import org.rebecalang.modeltransformer.ril.RILUtilities;
 import org.rebecalang.modeltransformer.ril.Rebeca2RILModelTransformer;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.AssignmentInstructionBean;
@@ -114,14 +110,6 @@ public class CoreRebecaModelChecker {
 		RILModel transformedRILModel = 
 				rebeca2RILModelTransformer.transformModel(model, extension, coreVersion);
 
-<<<<<<< HEAD
-		StatementTranslatorContainer.getInstance().setSymbolTable(compilationResult.getSecond());
-		StatementContainer.getInstance().registerSymbolTable(compilationResult.getSecond());
-		Rebeca2RILTransformer rilTransformer = new Rebeca2RILTransformer();
-		rilTransformer.transformModel(compilationResult, compilerFeatures);
-		transformedRILModel = rilTransformer.getTransformedRILModel();
-=======
->>>>>>> upstream/master
 		initializeStatementInterpreterContainer();
 		
 		generateFirstState(transformedRILModel, model.getFirst());
