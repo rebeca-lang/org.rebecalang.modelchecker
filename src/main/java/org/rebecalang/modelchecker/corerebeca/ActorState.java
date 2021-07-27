@@ -1,17 +1,16 @@
 package org.rebecalang.modelchecker.corerebeca;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.LinkedList;
 
 import org.rebecalang.modelchecker.corerebeca.policy.AbstractPolicy;
 import org.rebecalang.modelchecker.corerebeca.rilinterpreter.InstructionInterpreter;
 import org.rebecalang.modelchecker.corerebeca.rilinterpreter.InstructionUtilities;
 import org.rebecalang.modelchecker.corerebeca.rilinterpreter.ProgramCounter;
+import org.rebecalang.modeltransformer.ril.RILModel;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.InstructionBean;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.Variable;
-import org.rebecalang.modeltransformer.ril.corerebeca.translator.AbstractStatementTranslator;
+import org.rebecalang.modeltransformer.ril.corerebeca.translator.expresiontranslator.AbstractExpressionTranslator;
 
 @SuppressWarnings("serial")
 public class ActorState implements Serializable {
@@ -70,7 +69,7 @@ public class ActorState implements Serializable {
 	public void initializePC(String methodName, int lineNum) {
 //		String location = getLocationName(methodName);
 		addVariableToRecentScope(InstructionUtilities.PC_STRING, new ProgramCounter(methodName, lineNum));
-		addVariableToRecentScope(AbstractStatementTranslator.RETURN_VALUE,0);
+		addVariableToRecentScope(AbstractExpressionTranslator.RETURN_VALUE,0);
 		
 	}
 
@@ -155,7 +154,7 @@ public class ActorState implements Serializable {
 		return actorScopeStack.variableIsDefined(varName);
 	}
 
-	public void execute(State state, Hashtable<String, ArrayList<InstructionBean>> methodInstructions,
+	public void execute(State state, RILModel transformedRILModel,
 			AbstractPolicy policy) {
 
 		do {
@@ -163,7 +162,7 @@ public class ActorState implements Serializable {
 				ProgramCounter pc = getPC();
 				String methodName = pc.getMethodName();
 				int lineNumber = pc.getLineNumber();
-				InstructionBean instruction = methodInstructions.get(methodName).get(lineNumber);
+				InstructionBean instruction = transformedRILModel.getInstructionList(methodName).get(lineNumber);
 				InstructionInterpreter interpreter = StatementInterpreterContainer.getInstance()
 						.retrieveInterpreter(instruction);
 				policy.executedInstruction(instruction);

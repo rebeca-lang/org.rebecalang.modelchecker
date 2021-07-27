@@ -1,10 +1,8 @@
 package org.rebecalang.modelchecker.timedrebeca;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.PriorityQueue;
 
 import org.rebecalang.compiler.utils.Pair;
 import org.rebecalang.modelchecker.corerebeca.ActorState;
@@ -21,7 +19,7 @@ public class TimedState extends State {
 	public int getEnablingTime() throws ModelCheckingException {
 		int minExecutionTime = Integer.MAX_VALUE;
 		for (ActorState actorState : getAllActorStates()) {
-			int firstTimeActorCanPeekNewMsg = firstTimeActorCanPeekNewMsg(actorState);
+			int firstTimeActorCanPeekNewMsg = firstTimeActorCanPeekNewMessage(actorState);
 			minExecutionTime = Math.min(minExecutionTime, firstTimeActorCanPeekNewMsg);
 		}
 		return minExecutionTime;
@@ -32,7 +30,7 @@ public class TimedState extends State {
 		ArrayList<Pair<Integer, ActorState>> actorsMinExecutionTimes = new ArrayList<Pair<Integer, ActorState>>();
 		int minExecutionTime = Integer.MAX_VALUE;
 		for (ActorState actorState : getAllActorStates()) {
-			int firstTimeActorCanPeekNewMsg = firstTimeActorCanPeekNewMsg(actorState);
+			int firstTimeActorCanPeekNewMsg = firstTimeActorCanPeekNewMessage(actorState);
 			minExecutionTime = Math.min(minExecutionTime, firstTimeActorCanPeekNewMsg);
 			Pair<Integer, ActorState> actorTimePair = new Pair<Integer, ActorState>(firstTimeActorCanPeekNewMsg,
 					actorState);
@@ -47,7 +45,7 @@ public class TimedState extends State {
 		return enabledActors;
 	}
 
-	private int firstTimeActorCanPeekNewMsg(ActorState actorState) {
+	private int firstTimeActorCanPeekNewMessage(ActorState actorState) {
 		if (actorState.variableIsDefined(InstructionUtilities.PC_STRING)) {
 			throw new RuntimeException("This version supports coarse grained execution.");
 		} else {

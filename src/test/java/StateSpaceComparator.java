@@ -5,10 +5,8 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Set;
 
-import javax.swing.text.html.HTMLDocument.HTMLReader.ParagraphAction;
-
-import org.rebecalang.coarsegrainedmodelchecker.State;
 import org.rebecalang.compiler.utils.Pair;
+import org.rebecalang.modelchecker.corerebeca.State;
 
 import com.ibm.icu.util.StringTokenizer;
 

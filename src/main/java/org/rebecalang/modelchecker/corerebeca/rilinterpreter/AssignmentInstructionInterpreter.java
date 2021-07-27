@@ -14,7 +14,7 @@ public class AssignmentInstructionInterpreter extends InstructionInterpreter {
 		AssignmentInstructionBean aib = (AssignmentInstructionBean) ib;
 		Object valueFirst = InstructionUtilities.getValue(aib.getFirstOperand(), actorState);
 		Object valueSecond = InstructionUtilities.getValue(aib.getSecondOperand(), actorState);
-		Object result = valueFirst;//aib.getFirstOperand();
+		Object result = valueFirst;
 		String operator = aib.getOperator();
 		if (operator != null) {
 			if (valueFirst instanceof ActorState) {

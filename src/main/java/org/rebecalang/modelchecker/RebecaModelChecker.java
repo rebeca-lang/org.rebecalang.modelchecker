@@ -1,60 +1,41 @@
 package org.rebecalang.modelchecker;
 
-import java.io.File;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 
-import org.rebecalang.compiler.modelcompiler.timedrebeca.compiler.TimedRebecaCompleteBaseListener;
-import org.rebecalang.compiler.utils.CodeCompilationException;
-import org.rebecalang.compiler.utils.CompilerFeature;
-import org.rebecalang.compiler.utils.ExceptionContainer;
 import org.rebecalang.compiler.utils.Pair;
-import org.rebecalang.modelchecker.corerebeca.CoreRebecaModelChecker;
 import org.rebecalang.modelchecker.corerebeca.ModelCheckingException;
 import org.rebecalang.modelchecker.corerebeca.State;
-import org.rebecalang.modelchecker.timedrebeca.TimedRebecaModelChecker;
 
-public class Main {
+public class RebecaModelChecker {
 
-	public static CoreRebecaModelChecker getAppropriateModelChecker(Set<CompilerFeature> compilerFeatures, File rebecaFile) {
-		if (compilerFeatures.contains(CompilerFeature.TIMED_REBECA)) {
-			return new TimedRebecaModelChecker(compilerFeatures, rebecaFile);
-		}
-		return new CoreRebecaModelChecker(compilerFeatures, rebecaFile);
-	}
+//	public static CoreRebecaModelChecker getAppropriateModelChecker(Set<CompilerExtension> compilerFeatures, File rebecaFile) {
+//		if (compilerFeatures.contains(CompilerExtension.TIMED_REBECA)) {
+//			return new TimedRebecaModelChecker(compilerFeatures, rebecaFile);
+//		}
+//		return new CoreRebecaModelChecker(compilerFeatures, rebecaFile);
+//	}
 	
 	public static void main(String[] args) throws ModelCheckingException {
 
-		Set<CompilerFeature> compilerFeatures = new HashSet<CompilerFeature>();
-		compilerFeatures.add(CompilerFeature.CORE_2_3);
-		compilerFeatures.add(CompilerFeature.TIMED_REBECA);
-
-		File rebecaFile = new File("src/test/resources/TimedPingPong.rebeca");
-//		CoreRebecaModelChecker coreRebecaModelChecker = 
-
-		CoreRebecaModelChecker rebecaModelChecker = getAppropriateModelChecker(compilerFeatures, rebecaFile);
-//		coreRebecaModelChecker.configPolicy(CoreRebecaModelChecker.FINE_GRAINED_POLICY);
-		
-		
-		try {
-			rebecaModelChecker.modelCheck();
-			//coreRebecaModelChecker.modelCheck();
-		} catch (ExceptionContainer e) {
-			reportCompilerErrors(e);
-		}
-	}
-
-	private static void reportCompilerErrors(ExceptionContainer exceptionContainer) {
-		for (Exception e : exceptionContainer.getExceptions()) {
-			if (e instanceof CodeCompilationException) {
-				CodeCompilationException ce = (CodeCompilationException) e;
-				System.out.println("Line " + ce.getLine() + ", Error: " + ce.getMessage());
-			} else {
-				System.out.println(e.getMessage());
-				e.printStackTrace(System.out);
-			}
-		}
+//		Set<CompilerExtension> compilerFeatures = new HashSet<CompilerExtension>();
+//		compilerFeatures.add(CompilerExtension.CORE_2_3);
+////		compilerFeatures.add(CompilerFeature.TIMED_REBECA);
+//
+////		File rebecaFile = new File("src/test/resources/TimedPingPong.rebeca");
+//		File rebecaFile = new File("src/test/resources/phils.rebeca");
+//
+//		CoreRebecaModelChecker rebecaModelChecker = new CoreRebecaModelChecker(compilerFeatures, rebecaFile);//getAppropriateModelChecker(compilerFeatures, rebecaFile);
+////		rebecaModelChecker.configPolicy(CoreRebecaModelChecker.FINE_GRAINED_POLICY);
+//		rebecaModelChecker.configPolicy(CoreRebecaModelChecker.COARSE_GRAINED_POLICY);
+//		
+//		
+//		try {
+//			rebecaModelChecker.modelCheck();
+//		} catch (ExceptionContainer e) {
+//			reportCompilerErrors(e);
+//		}
 	}
 
 	public static void printStateSpace(State state) {

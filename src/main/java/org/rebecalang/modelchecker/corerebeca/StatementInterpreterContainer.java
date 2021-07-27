@@ -25,4 +25,17 @@ public class StatementInterpreterContainer {
 	public InstructionInterpreter retrieveInterpreter(InstructionBean ib) {
 		return (interpreters.get(ib.getClass()));
 	}
+
+	private boolean hasNonterminism;
+	public void reportNondeterminism() {
+		hasNonterminism = true;
+	}
+	
+	public void clearNondeterminism() {
+		hasNonterminism = false;
+	}
+	public boolean hasNondeterminism() {
+		return hasNonterminism;
+	}
+	
 }
