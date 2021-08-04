@@ -20,7 +20,7 @@ public class MethodCallInstructionInterpreter extends InstructionInterpreter {
 		for(int cnt = 0; cnt < mcib.getParameters().size(); cnt++) {
 			Object paramValue = mcib.getParameters().get(cnt);
 			if (paramValue instanceof Variable)
-				calculatedValuesOfParams.add(actorState.retreiveVariableValue((Variable) paramValue));
+				calculatedValuesOfParams.add(actorState.retrieveVariableValue((Variable) paramValue));
 			else
 				calculatedValuesOfParams.add(paramValue);
 		}

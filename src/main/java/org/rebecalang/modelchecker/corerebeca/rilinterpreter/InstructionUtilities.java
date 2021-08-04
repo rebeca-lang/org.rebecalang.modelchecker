@@ -10,7 +10,7 @@ public class InstructionUtilities {
 
 	public static Object getValue(Object operand, ActorState actorState) {
 		if (operand instanceof Variable)
-			return actorState.retreiveVariableValue(((Variable)operand).getVarName());
+			return actorState.retrieveVariableValue(((Variable)operand).getVarName());
 		if (operand instanceof NonDetValue) {
 			NonDetValue nonDetValue = (NonDetValue) operand;
 			Object value = nonDetValue.getValue();

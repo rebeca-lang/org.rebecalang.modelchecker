@@ -7,118 +7,112 @@ import java.util.NoSuchElementException;
 @SuppressWarnings("serial")
 public class ActorScopeStack implements Serializable {
 
-	LinkedList<ActivationRecord> activationRecords;
-	ExtendActorScopeStack parentScopeStack;
+    LinkedList<ActivationRecord> activationRecords;
+    ExtendActorScopeStack parentScopeStack;
 
-	public boolean variableIsDefined(String varName) {
-		try {
-			retreiveVariableValue(varName);
-			return true;
-		} catch (RebecaRuntimeInterpreterException e) {
-		}
-		return false;
+    public boolean variableIsDefined(String varName) {
+        try {
+            retrieveVariableValue(varName);
+            return true;
+        } catch (RebecaRuntimeInterpreterException e) {
+            e.printStackTrace();
+        }
+        return false;
 
-	}
+    }
 
-	public Object retreiveVariableValue(String varName) {
+    public Object retrieveVariableValue(String varName) {
 
-		ActivationRecord cursor = activationRecords.getLast();
-		while (cursor != null) {
-			Object variableValue = cursor.getVariableValue(varName);
-			if (variableValue != null)
-				return variableValue;
-			cursor = cursor.getPreviousScope();
-		}
-		throw new RebecaRuntimeInterpreterException("Failure in retreiving variable " + varName + " from scope");
+        ActivationRecord cursor = activationRecords.getLast();
+        while (cursor != null) {
+            Object variableValue = cursor.getVariableValue(varName);
+            if (variableValue != null)
+                return variableValue;
+            cursor = cursor.getPreviousScope();
+        }
+        throw new RebecaRuntimeInterpreterException("Failure in retrieving variable " + varName + " from scope");
 
-	}
+    }
 
-	public void setVariableValue(String varName, Object valueObject) {
+    public void setVariableValue(String varName, Object valueObject) {
 
-		ActivationRecord cursor = activationRecords.getLast();
-		do {
-			if (cursor.hasVariable(varName)) {
-				cursor.setVariableValue(varName, valueObject);
-				return;
-			}
-		} while ((cursor = cursor.getPreviousScope()) != null);
-		throw new RebecaRuntimeInterpreterException("Failure in retreiving variable " + varName + " from scope");
+        ActivationRecord cursor = activationRecords.getLast();
+        do {
+            if (cursor.hasVariable(varName)) {
+                cursor.setVariableValue(varName, valueObject);
+                return;
+            }
+        } while ((cursor = cursor.getPreviousScope()) != null);
+        throw new RebecaRuntimeInterpreterException("Failure in retrieving variable " + varName + " from scope");
 
-	}
+    }
 
-	public void addVariable(String name, Object valueObject) {
-		ActivationRecord cursor = activationRecords.getLast();
-		cursor.addVariable(name, valueObject);
-	}
+    public void addVariable(String name, Object valueObject) {
+        ActivationRecord cursor = activationRecords.getLast();
+        cursor.addVariable(name, valueObject);
+    }
 
-	public void pushInScopeStack() {
-		ActivationRecord newRecord = new ActivationRecord();
-		newRecord.initialize();
-		ActivationRecord last = null;
-		try {
-			last = activationRecords.getLast();
-		} catch (NoSuchElementException e) {
+    public void pushInScopeStack() {
+        ActivationRecord newRecord = new ActivationRecord();
+        newRecord.initialize();
+        ActivationRecord last = null;
+        try {
+            last = activationRecords.getLast();
+        } catch (NoSuchElementException e) {
+            e.printStackTrace();
+        }
+        newRecord.setPreviousScope(last);
+        activationRecords.addLast(newRecord);
+    }
 
-		}
-		newRecord.setPreviousScope(last);
-		activationRecords.addLast(newRecord);
-	}
+    public void popFromScopeStack() {
+        activationRecords.removeLast();
+    }
 
-	public void popFromScopeStack() {
-		activationRecords.removeLast();
-	}
+    public void initialize() {
+        activationRecords = new LinkedList<>();
+    }
 
-	public void initialize() {
-		activationRecords = new LinkedList<ActivationRecord>();
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((activationRecords == null) ? 0 : activationRecords.hashCode());
+        return result;
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((activationRecords == null) ? 0 : activationRecords.hashCode());
-		return result;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ActorScopeStack other = (ActorScopeStack) obj;
+        if (activationRecords == null) {
+            return other.activationRecords == null;
+        } else return activationRecords.equals(other.activationRecords);
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		ActorScopeStack other = (ActorScopeStack) obj;
-		if (activationRecords == null) {
-			if (other.activationRecords != null)
-				return false;
-		} else if (!activationRecords.equals(other.activationRecords))
-			return false;
-		return true;
-	}
+    public void removeVariable(String varName) {
+        ActivationRecord cursor = activationRecords.getLast();
+        do {
+            if (cursor.hasVariable(varName)) {
+                cursor.remove(varName);
+                return;
+            }
+        } while ((cursor = cursor.getPreviousScope()) != null);
+        throw new RebecaRuntimeInterpreterException("Failure in retrieving variable " + varName + " from scope");
 
-	public void removeVariable(String varName) {
-		ActivationRecord cursor = activationRecords.getLast();
-		do {
-			if (cursor.hasVariable(varName)) {
-				cursor.remove(varName);
-				return;
-			}
-		} while ((cursor = cursor.getPreviousScope()) != null);
-		throw new RebecaRuntimeInterpreterException("Failure in retreiving variable " + varName + " from scope");
+    }
 
-	}
+    public void adjustLinkToPreviousScopeForMethodCall() {
 
-	public void adjustLinkToPreviousScopeForMethodCall() {
+        activationRecords.getLast().setPreviousScope(activationRecords.getFirst());
+    }
 
-		activationRecords.getLast().setPreviousScope(activationRecords.getFirst());
-	}
-
-	public void addParentScopeStack(ExtendActorScopeStack parentScopeStack) {
-		this.parentScopeStack = parentScopeStack;
-	}
-
-	public ActorScopeStack getParentScopeStack() {
-		return parentScopeStack;
-	}
+    public void addParentScopeStack(ExtendActorScopeStack parentScopeStack) {
+        this.parentScopeStack = parentScopeStack;
+    }
 }

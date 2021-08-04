@@ -15,7 +15,7 @@ public class CallTimedMsgSrvInstructionInterpreter extends InstructionInterprete
 	public void interpret(InstructionBean ib, ActorState actorState, State globalState) {
 		CallMsgSrvInstructionBean cmib = (CallMsgSrvInstructionBean) ib;
 		MessageSpecification msgSpec = new MessageSpecification(cmib.getMsgsrvName(), new ArrayList<Object>(), actorState);
-		ActorState receiverState = (ActorState) actorState.retreiveVariableValue(cmib.getReceiver());
+		ActorState receiverState = (ActorState) actorState.retrieveVariableValue(cmib.getReceiver());
 		receiverState.addToQueue(msgSpec);
 		actorState.increasePC();
 	}

@@ -62,7 +62,7 @@ public class IndependentMethodExecutor implements ExternalMethodExecutor {
 		Method method;
 		try {
 			if(object instanceof Variable) {
-				object = actorState.retreiveVariableValue((Variable) object);
+				object = actorState.retrieveVariableValue((Variable) object);
 			}
 			method = object.getClass().getMethod(methodName);
 			return method.invoke(object);
