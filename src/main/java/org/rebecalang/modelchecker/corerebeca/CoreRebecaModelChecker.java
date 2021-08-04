@@ -59,16 +59,16 @@ import com.rits.cloning.Cloner;
 
 @Component
 public class CoreRebecaModelChecker {
-	
+
 	@Autowired
 	protected RebecaModelCompiler rebecaModelCompiler;
-	
+
 	@Autowired
 	protected ExceptionContainer exceptionContainer;
 
 	@Autowired
 	protected Rebeca2RILModelTransformer rebeca2RILModelTransformer;
-	
+
 	@Autowired
 	protected CoreRebecaTypeSystem coreRebecaTypeSystem;
 
@@ -78,25 +78,25 @@ public class CoreRebecaModelChecker {
 
 	public final static String FINE_GRAINED_POLICY = "fine";
 	public final static String COARSE_GRAINED_POLICY = "coarse";
-	
+
 	private Cloner cloner;
 
 	public CoreRebecaModelChecker() {
 		this.cloner = new Cloner();
 	}
-	
+
 	public StateSpace getStatespace() {
 		return statespace;
 	}
 
-	
+
 	protected Pair<RebecaModel, SymbolTable> compileModel(File model, Set<CompilerExtension> extension, CoreVersion coreVersion) {
 		return rebecaModelCompiler.compileRebecaFile(model, extension, coreVersion);
 	}
 
-	public void modelCheck(File model, 
-			Set<CompilerExtension> extension, 
-			CoreVersion coreVersion) throws ModelCheckingException {
+	public void modelCheck(File model,
+						   Set<CompilerExtension> extension,
+						   CoreVersion coreVersion) throws ModelCheckingException {
 		modelCheck(compileModel(model, extension, coreVersion),
 				extension, coreVersion);
 	}
@@ -107,13 +107,13 @@ public class CoreRebecaModelChecker {
 		if(!exceptionContainer.exceptionsIsEmpty())
 			return;
 
-		RILModel transformedRILModel = 
+		RILModel transformedRILModel =
 				rebeca2RILModelTransformer.transformModel(model, extension, coreVersion);
 
 		initializeStatementInterpreterContainer();
-		
+
 		generateFirstState(transformedRILModel, model.getFirst());
-		
+
 		doFineGrainedModelChecking(transformedRILModel);
 	}
 
@@ -127,8 +127,9 @@ public class CoreRebecaModelChecker {
 		setInitialKnownRebecsOfActors(initialState, mainRebecDefinitions);
 
 		callConstructorsOfActors(transformedRILModel, initialState, mainRebecDefinitions);
-		
+
 		statespace.addInitialState(initialState);
+
 	}
 
 	protected State createFreshState() {
@@ -137,7 +138,7 @@ public class CoreRebecaModelChecker {
 
 	private void callConstructorsOfActors(
 			RILModel transformedRILModel,
-			State initialState, 
+			State initialState,
 			List<MainRebecDefinition> mainRebecDefinitions) {
 		for (MainRebecDefinition definition : mainRebecDefinitions) {
 			ReactiveClassDeclaration metaData;
@@ -207,8 +208,45 @@ public class CoreRebecaModelChecker {
 			actorState.setQueue(new LinkedList<MessageSpecification>());
 			actorState.setName(definition.getName());
 			initialState.putActorState(definition.getName(), actorState);
+
+			setParentScopes(actorState, metaData);
 		}
 	}
+
+	private void setParentScopes(ActorState actorState, ReactiveClassDeclaration metaData) {
+		try {
+			if (metaData.getExtends() != null) {
+				ReactiveClassDeclaration parentMetaData = (ReactiveClassDeclaration) metaData.getExtends().getTypeSystem().getMetaData(metaData.getExtends());
+
+				ExtendActorScopeStack parentScope = new ExtendActorScopeStack(parentMetaData.getName());
+				parentScope.initialize();
+				parentScope.pushInScopeStack();
+
+				ActorScopeStack currentScope = actorState.getActorScopeStack();
+
+				while (parentMetaData != null) {
+					currentScope.addParentScopeStack(parentScope);
+					for (FieldDeclaration fieldDeclaration : parentMetaData.getStatevars()) {
+						for (VariableDeclarator variableDeclator : fieldDeclaration.getVariableDeclarators()) {
+							parentScope.addVariable(variableDeclator.getVariableName(), 0);
+						}
+					}
+					if (parentMetaData.getExtends() != null) {
+						parentMetaData = (ReactiveClassDeclaration) parentMetaData.getExtends().getTypeSystem().getMetaData(parentMetaData.getExtends());
+
+						currentScope = parentScope;
+
+						parentScope = new ExtendActorScopeStack(parentMetaData.getName());
+						parentScope.initialize();
+						parentScope.pushInScopeStack();
+					}
+					else break;
+				}
+			}
+		}
+		catch (CodeCompilationException e) {}
+	}
+
 
 	protected ActorState createFreshActorState() {
 		return new ActorState();
@@ -255,7 +293,7 @@ public class CoreRebecaModelChecker {
 	protected void doFineGrainedModelChecking(
 			RILModel transformedRILModel) throws ModelCheckingException {
 		int stateCounter = 1;
-		
+
 		State initialState = statespace.getInitialState();
 		LinkedList<State> nextStatesQueue = new LinkedList<State>();
 		nextStatesQueue.add(initialState);
@@ -268,12 +306,12 @@ public class CoreRebecaModelChecker {
 				do {
 					StatementInterpreterContainer.getInstance().clearNondeterminism();
 					State newState = cloneState(currentState);
-	
+
 					ActorState newActorState = newState.getActorState(actorState.getName());
 					newActorState.execute(newState, transformedRILModel, modelCheckingPolicy);
 					String transitionLabel = calculateTransitionLabel(actorState, newActorState);
 					Long stateKey = Long.valueOf(newState.hashCode());
-	
+
 					if (!statespace.hasStateWithKey(stateKey)) {
 						newState.setId(stateCounter++);
 						nextStatesQueue.add(newState);

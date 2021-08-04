@@ -3,6 +3,8 @@ package org.rebecalang.modelchecker.corerebeca;
 import java.io.Serializable;
 import java.util.LinkedList;
 
+import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.ReactiveClassDeclaration;
+import org.rebecalang.compiler.utils.CodeCompilationException;
 import org.rebecalang.modelchecker.corerebeca.policy.AbstractPolicy;
 import org.rebecalang.modelchecker.corerebeca.rilinterpreter.InstructionInterpreter;
 import org.rebecalang.modelchecker.corerebeca.rilinterpreter.InstructionUtilities;
@@ -184,4 +186,7 @@ public class ActorState implements Serializable {
 		actorScopeStack.adjustLinkToPreviousScopeForMethodCall();
 	}
 
+	public ActorScopeStack getActorScopeStack() {
+		return actorScopeStack;
+	}
 }

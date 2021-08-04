@@ -8,6 +8,7 @@ import java.util.NoSuchElementException;
 public class ActorScopeStack implements Serializable {
 
 	LinkedList<ActivationRecord> activationRecords;
+	ExtendActorScopeStack parentScopeStack;
 
 	public boolean variableIsDefined(String varName) {
 		try {
@@ -113,4 +114,11 @@ public class ActorScopeStack implements Serializable {
 		activationRecords.getLast().setPreviousScope(activationRecords.getFirst());
 	}
 
+	public void addParentScopeStack(ExtendActorScopeStack parentScopeStack) {
+		this.parentScopeStack = parentScopeStack;
+	}
+
+	public ActorScopeStack getParentScopeStack() {
+		return parentScopeStack;
+	}
 }

@@ -44,4 +44,20 @@ public class CoreRebecaModelCheckerTest {
 		
 		RebecaModelChecker.printStateSpace(coreRebecaModelChecker.getStatespace().getInitialState());
 	}
+
+	@Test
+	public void simpleTest() throws ModelCheckingException {
+		File model = new File(MODEL_FILES_BASE + "simpleTest.rebeca");
+		Set<CompilerExtension> extension = new HashSet<CompilerExtension>();
+		coreRebecaModelChecker.configPolicy(CoreRebecaModelChecker.COARSE_GRAINED_POLICY);
+		coreRebecaModelChecker.modelCheck(model, extension, CoreVersion.CORE_2_3);
+
+		System.out.println(exceptionContainer);
+
+		Assertions.assertTrue(exceptionContainer.exceptionsIsEmpty());
+
+		Assertions.assertEquals(coreRebecaModelChecker.getStatespace().size(), 4);
+
+		RebecaModelChecker.printStateSpace(coreRebecaModelChecker.getStatespace().getInitialState());
+	}
 }
