@@ -8,21 +8,19 @@ import java.util.NoSuchElementException;
 public class ActorScopeStack implements Serializable {
 
     LinkedList<ActivationRecord> activationRecords;
-    ExtendActorScopeStack parentScopeStack;
 
     public boolean variableIsDefined(String varName) {
         try {
             retrieveVariableValue(varName);
             return true;
         } catch (RebecaRuntimeInterpreterException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
         return false;
 
     }
 
     public Object retrieveVariableValue(String varName) {
-
         ActivationRecord cursor = activationRecords.getLast();
         while (cursor != null) {
             Object variableValue = cursor.getVariableValue(varName);
@@ -31,7 +29,6 @@ public class ActorScopeStack implements Serializable {
             cursor = cursor.getPreviousScope();
         }
         throw new RebecaRuntimeInterpreterException("Failure in retrieving variable " + varName + " from scope");
-
     }
 
     public void setVariableValue(String varName, Object valueObject) {
@@ -43,13 +40,26 @@ public class ActorScopeStack implements Serializable {
                 return;
             }
         } while ((cursor = cursor.getPreviousScope()) != null);
-        throw new RebecaRuntimeInterpreterException("Failure in retrieving variable " + varName + " from scope");
 
+        throw new RebecaRuntimeInterpreterException("Failure in retrieving variable " + varName + " from scope");
     }
 
     public void addVariable(String name, Object valueObject) {
         ActivationRecord cursor = activationRecords.getLast();
         cursor.addVariable(name, valueObject);
+    }
+
+    public void pushInParentsScopeStack() {
+        ActivationRecord parentsRecord = new ActivationRecord();
+        parentsRecord.initialize();
+        ActivationRecord last = null;
+        try {
+            last = activationRecords.getLast();
+        } catch (NoSuchElementException e) {
+//            e.printStackTrace();
+        }
+        parentsRecord.setPreviousScope(last);
+        activationRecords.addLast(parentsRecord);
     }
 
     public void pushInScopeStack() {
@@ -59,7 +69,7 @@ public class ActorScopeStack implements Serializable {
         try {
             last = activationRecords.getLast();
         } catch (NoSuchElementException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
         newRecord.setPreviousScope(last);
         activationRecords.addLast(newRecord);
@@ -110,9 +120,5 @@ public class ActorScopeStack implements Serializable {
     public void adjustLinkToPreviousScopeForMethodCall() {
 
         activationRecords.getLast().setPreviousScope(activationRecords.getFirst());
-    }
-
-    public void addParentScopeStack(ExtendActorScopeStack parentScopeStack) {
-        this.parentScopeStack = parentScopeStack;
     }
 }

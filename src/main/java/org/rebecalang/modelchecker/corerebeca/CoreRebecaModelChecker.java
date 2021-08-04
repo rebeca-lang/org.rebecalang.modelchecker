@@ -76,13 +76,12 @@ public class CoreRebecaModelChecker {
 
         RILModel transformedRILModel =
                 rebeca2RILModelTransformer.transformModel(model, extension, coreVersion);
-
         initializeStatementInterpreterContainer();
 
         generateFirstState(transformedRILModel, model.getFirst());
 
-		doFineGrainedModelChecking(transformedRILModel);
-	}
+        doFineGrainedModelChecking(transformedRILModel);
+    }
 
     protected void generateFirstState(RILModel transformedRILModel, RebecaModel model) {
 
@@ -153,9 +152,6 @@ public class CoreRebecaModelChecker {
 
     private void generateInitialActorStates(State initialState, List<MainRebecDefinition> mainRebecDefinitions) {
         for (MainRebecDefinition definition : mainRebecDefinitions) {
-            ActorState actorState = createFreshActorState();
-            actorState.initializeScopeStack();
-            actorState.pushInActorScope();
             ReactiveClassDeclaration metaData;
             try {
                 metaData = (ReactiveClassDeclaration) coreRebecaTypeSystem.getMetaData(definition.getType());
@@ -164,6 +160,12 @@ public class CoreRebecaModelChecker {
                 e.printStackTrace();
                 return;
             }
+            ActorState actorState = createFreshActorState();
+            actorState.initializeScopeStack();
+            actorState.pushInParentsScopeStack();
+            addVariableToParentsScope(actorState, metaData);
+            actorState.pushInActorScope();
+
             for (FieldDeclaration fieldDeclaration : metaData.getStatevars()) {
                 for (VariableDeclarator variableDeclarator : fieldDeclaration.getVariableDeclarators()) {
                     actorState.addVariableToRecentScope(variableDeclarator.getVariableName(), 0);
@@ -176,42 +178,29 @@ public class CoreRebecaModelChecker {
             actorState.setName(definition.getName());
             initialState.putActorState(definition.getName(), actorState);
 
-			setParentScopes(actorState, metaData);
-		}
-	}
+        }
+    }
 
-    private void setParentScopes(ActorState actorState, ReactiveClassDeclaration metaData) {
+    private void addVariableToParentsScope(ActorState actorState, ReactiveClassDeclaration metaData) {
         try {
             if (metaData.getExtends() != null) {
                 ReactiveClassDeclaration parentMetaData = (ReactiveClassDeclaration) metaData.getExtends().getTypeSystem().getMetaData(metaData.getExtends());
 
-                ExtendActorScopeStack parentScope = new ExtendActorScopeStack(parentMetaData.getName());
-                parentScope.initialize();
-                parentScope.pushInScopeStack();
-
-                ActorScopeStack currentScope = actorState.getActorScopeStack();
-
                 while (true) {
-                    currentScope.addParentScopeStack(parentScope);
                     for (FieldDeclaration fieldDeclaration : parentMetaData.getStatevars()) {
                         for (VariableDeclarator variableDeclarator : fieldDeclaration.getVariableDeclarators()) {
-                            parentScope.addVariable(variableDeclarator.getVariableName(), 0);
+                            actorState.addVariableToRecentScope(variableDeclarator.getVariableName(), 0);
                         }
                     }
                     if (parentMetaData.getExtends() != null) {
                         parentMetaData = (ReactiveClassDeclaration) parentMetaData.getExtends().getTypeSystem().getMetaData(parentMetaData.getExtends());
-
-                        currentScope = parentScope;
-
-                        parentScope = new ExtendActorScopeStack(parentMetaData.getName());
-                        parentScope.initialize();
-                        parentScope.pushInScopeStack();
                     } else break;
                 }
             }
         } catch (CodeCompilationException e) {
             e.printStackTrace();
         }
+
     }
 
 
