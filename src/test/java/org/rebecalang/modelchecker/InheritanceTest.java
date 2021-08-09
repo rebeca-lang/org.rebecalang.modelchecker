@@ -37,4 +37,14 @@ public class InheritanceTest {
 
         Assertions.assertTrue(exceptionContainer.exceptionsIsEmpty());
     }
+
+    @Test
+    public void useParentsKnownActorInChildTest() throws ModelCheckingException {
+        File model = new File(MODEL_FILES_BASE + "use_parents_known_actors_in_child.rebeca");
+        Set<CompilerExtension> extension = new HashSet<>();
+        coreRebecaModelChecker.configPolicy(CoreRebecaModelChecker.COARSE_GRAINED_POLICY);
+        coreRebecaModelChecker.modelCheck(model, extension, CoreVersion.CORE_2_3);
+
+        Assertions.assertTrue(exceptionContainer.exceptionsIsEmpty());
+    }
 }

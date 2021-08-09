@@ -1,0 +1,34 @@
+reactiveclass C (5)  {
+    statevars {
+        int var_c;
+    }
+}
+
+reactiveclass A (2)  {
+    knownrebecs {
+    	C known_c;
+    }
+    statevars {
+		int var_a;
+	}
+    A () {
+    }
+}
+
+reactiveclass B extends A (3){
+    knownrebecs {
+    	A known_a;
+    }
+    statevars {
+		int var_b;
+	}
+
+    B () {
+    }
+}
+
+main {
+    C c():();
+    A a(c):();
+    B b(a, c):();
+}

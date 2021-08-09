@@ -78,7 +78,7 @@ public class CoreRebecaModelChecker {
 
         generateFirstState(transformedRILModel, model.getFirst());
 
-        doFineGrainedModelChecking (transformedRILModel);
+        doFineGrainedModelChecking(transformedRILModel);
     }
 
     protected void generateFirstState(RILModel transformedRILModel, RebecaModel model) {
@@ -135,15 +135,26 @@ public class CoreRebecaModelChecker {
                 e.printStackTrace();
                 return;
             }
-            List<FieldDeclaration> knownRebecs = metaData.getKnownRebecs();
-            for (int i = 0; i < definition.getBindings().size(); i++) {
-                Expression knownRebecDefExp = definition.getBindings().get(i);
-                if (!(knownRebecDefExp instanceof TermPrimary))
+            addKnownRebecsToRelatedScope(metaData, definition, initialState);
+        }
+    }
+
+    private void addKnownRebecsToRelatedScope(ReactiveClassDeclaration actorMetaData,
+                                              MainRebecDefinition mainRebecDefinition, State initialState) {
+        ActorState actorState = initialState.getActorState(mainRebecDefinition.getName());
+        ArrayList<ReactiveClassDeclaration> actorSeries = getActorSeries(actorMetaData);
+        int startIndex = 0;
+        for (int j = actorSeries.size() - 1; j > -1; j--) {
+            ReactiveClassDeclaration curActor = actorSeries.get(j);
+            for (int i = 0; i < curActor.getKnownRebecs().size(); i++) {
+                Expression relatedBinding = mainRebecDefinition.getBindings().get(startIndex);
+                startIndex += i;
+                if (!(relatedBinding instanceof TermPrimary))
                     throw new RebecaRuntimeInterpreterException("not handled yet!");
-                String name = ((TermPrimary) knownRebecDefExp).getName();
-                String knownRebecName = getKnownRebecName(knownRebecs, i);
-                ActorState actState = initialState.getActorState(name);
-                initialState.getActorState(definition.getName()).addVariableToRecentScope(knownRebecName, actState);
+                String instanceName = ((TermPrimary) relatedBinding).getName();
+                String knownRebecName = getKnownRebecName(curActor.getKnownRebecs(), i);
+                ActorState knownActorState = initialState.getActorState(instanceName);
+                actorState.addVariableToExactScope(knownRebecName, knownActorState, j);
             }
         }
     }
@@ -160,13 +171,12 @@ public class CoreRebecaModelChecker {
             }
             ArrayList<ReactiveClassDeclaration> actorSeries = getActorSeries(metaData);
             ActorState actorState = createFreshActorState();
-            actorState.initializeScopeStack();
-            addRequiredScopeToScopeStack(actorState, actorSeries);
             actorState.setTypeName(definition.getType().getTypeName());
             actorState.setQueue(new LinkedList<>());
             actorState.setName(definition.getName());
+            actorState.initializeScopeStack();
+            addRequiredScopeToScopeStack(actorState, actorSeries);
             initialState.putActorState(definition.getName(), actorState);
-
         }
     }
 

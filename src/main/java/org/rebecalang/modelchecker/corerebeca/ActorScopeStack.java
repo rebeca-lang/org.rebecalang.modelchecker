@@ -49,6 +49,11 @@ public class ActorScopeStack implements Serializable {
         cursor.addVariable(name, valueObject);
     }
 
+    public void addVariable(String name, Object valueObject, int index) {
+        ActivationRecord cursor = activationRecords.get(index);
+        cursor.addVariable(name, valueObject);
+    }
+
     public void pushInScopeStack() {
         ActivationRecord newRecord = new ActivationRecord();
         newRecord.initialize();

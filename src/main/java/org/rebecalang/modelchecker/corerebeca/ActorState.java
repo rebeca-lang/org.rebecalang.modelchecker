@@ -121,6 +121,10 @@ public class ActorState implements Serializable {
         actorScopeStack.addVariable(varName, valueObject);
     }
 
+    public void addVariableToExactScope(String varName, Object valueObject, int scopeIndex) {
+        actorScopeStack.addVariable(varName, valueObject, scopeIndex);
+    }
+
     public String getTypeName() {
         return typeName;
     }
