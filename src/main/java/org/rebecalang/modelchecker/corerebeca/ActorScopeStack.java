@@ -49,19 +49,6 @@ public class ActorScopeStack implements Serializable {
         cursor.addVariable(name, valueObject);
     }
 
-    public void pushInParentsScopeStack() {
-        ActivationRecord parentsRecord = new ActivationRecord();
-        parentsRecord.initialize();
-        ActivationRecord last = null;
-        try {
-            last = activationRecords.getLast();
-        } catch (NoSuchElementException e) {
-//            e.printStackTrace();
-        }
-        parentsRecord.setPreviousScope(last);
-        activationRecords.addLast(parentsRecord);
-    }
-
     public void pushInScopeStack() {
         ActivationRecord newRecord = new ActivationRecord();
         newRecord.initialize();

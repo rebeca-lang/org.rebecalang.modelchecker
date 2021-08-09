@@ -113,10 +113,6 @@ public class ActorState implements Serializable {
         actorScopeStack.pushInScopeStack();
     }
 
-    public void pushInParentsScopeStack() {
-        actorScopeStack.pushInParentsScopeStack();
-    }
-
     public void popFromActorScope() {
         actorScopeStack.popFromScopeStack();
     }

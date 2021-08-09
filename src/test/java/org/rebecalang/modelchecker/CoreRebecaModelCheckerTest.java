@@ -32,7 +32,7 @@ public class CoreRebecaModelCheckerTest {
 	@Test
 	public void GIVEN_CorrectCoreRebecaModelWithInitialMethod_WHEN_CoreIs2_0_THEN_1Error() throws ModelCheckingException {
 		File model = new File(MODEL_FILES_BASE + "DiningPhilosophers.rebeca");
-		Set<CompilerExtension> extension = new HashSet<CompilerExtension>();
+		Set<CompilerExtension> extension = new HashSet<>();
 		coreRebecaModelChecker.configPolicy(CoreRebecaModelChecker.COARSE_GRAINED_POLICY);
 		coreRebecaModelChecker.modelCheck(model, extension, CoreVersion.CORE_2_1);
 		
@@ -40,15 +40,15 @@ public class CoreRebecaModelCheckerTest {
 		
 		Assertions.assertTrue(exceptionContainer.exceptionsIsEmpty());
 
-		Assertions.assertEquals(coreRebecaModelChecker.getStatespace().size(), 105);
+		Assertions.assertEquals(coreRebecaModelChecker.getStateSpace().size(), 105);
 		
-		RebecaModelChecker.printStateSpace(coreRebecaModelChecker.getStatespace().getInitialState());
+		RebecaModelChecker.printStateSpace(coreRebecaModelChecker.getStateSpace().getInitialState());
 	}
 
 	@Test
 	public void simpleTest() throws ModelCheckingException {
 		File model = new File(MODEL_FILES_BASE + "simpleTest.rebeca");
-		Set<CompilerExtension> extension = new HashSet<CompilerExtension>();
+		Set<CompilerExtension> extension = new HashSet<>();
 		coreRebecaModelChecker.configPolicy(CoreRebecaModelChecker.COARSE_GRAINED_POLICY);
 		coreRebecaModelChecker.modelCheck(model, extension, CoreVersion.CORE_2_3);
 
@@ -56,8 +56,8 @@ public class CoreRebecaModelCheckerTest {
 
 		Assertions.assertTrue(exceptionContainer.exceptionsIsEmpty());
 
-		Assertions.assertEquals(coreRebecaModelChecker.getStatespace().size(), 4);
+		Assertions.assertEquals(coreRebecaModelChecker.getStateSpace().size(), 4);
 
-		RebecaModelChecker.printStateSpace(coreRebecaModelChecker.getStatespace().getInitialState());
+		RebecaModelChecker.printStateSpace(coreRebecaModelChecker.getStateSpace().getInitialState());
 	}
 }

@@ -20,9 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Component
 public class CoreRebecaModelChecker {
@@ -80,7 +78,7 @@ public class CoreRebecaModelChecker {
 
         generateFirstState(transformedRILModel, model.getFirst());
 
-        doFineGrainedModelChecking(transformedRILModel);
+        doFineGrainedModelChecking (transformedRILModel);
     }
 
     protected void generateFirstState(RILModel transformedRILModel, RebecaModel model) {
@@ -160,19 +158,10 @@ public class CoreRebecaModelChecker {
                 e.printStackTrace();
                 return;
             }
+            ArrayList<ReactiveClassDeclaration> actorSeries = getActorSeries(metaData);
             ActorState actorState = createFreshActorState();
             actorState.initializeScopeStack();
-            actorState.pushInParentsScopeStack();
-            addVariableToParentsScope(actorState, metaData);
-            actorState.pushInActorScope();
-
-            for (FieldDeclaration fieldDeclaration : metaData.getStatevars()) {
-                for (VariableDeclarator variableDeclarator : fieldDeclaration.getVariableDeclarators()) {
-                    actorState.addVariableToRecentScope(variableDeclarator.getVariableName(), 0);
-                }
-            }
-            actorState.addVariableToRecentScope("self", actorState);
-
+            addRequiredScopeToScopeStack(actorState, actorSeries);
             actorState.setTypeName(definition.getType().getTypeName());
             actorState.setQueue(new LinkedList<>());
             actorState.setName(definition.getName());
@@ -181,28 +170,37 @@ public class CoreRebecaModelChecker {
         }
     }
 
-    private void addVariableToParentsScope(ActorState actorState, ReactiveClassDeclaration metaData) {
-        try {
-            if (metaData.getExtends() != null) {
-                ReactiveClassDeclaration parentMetaData = (ReactiveClassDeclaration) metaData.getExtends().getTypeSystem().getMetaData(metaData.getExtends());
-
-                while (true) {
-                    for (FieldDeclaration fieldDeclaration : parentMetaData.getStatevars()) {
-                        for (VariableDeclarator variableDeclarator : fieldDeclaration.getVariableDeclarators()) {
-                            actorState.addVariableToRecentScope(variableDeclarator.getVariableName(), 0);
-                        }
-                    }
-                    if (parentMetaData.getExtends() != null) {
-                        parentMetaData = (ReactiveClassDeclaration) parentMetaData.getExtends().getTypeSystem().getMetaData(parentMetaData.getExtends());
-                    } else break;
-                }
+    private void addStateVarsToRelatedScope(ActorState actorState, ReactiveClassDeclaration actorMetaData) {
+        for (FieldDeclaration fieldDeclaration : actorMetaData.getStatevars()) {
+            for (VariableDeclarator variableDeclarator : fieldDeclaration.getVariableDeclarators()) {
+                actorState.addVariableToRecentScope(variableDeclarator.getVariableName(), 0);
             }
-        } catch (CodeCompilationException e) {
-            e.printStackTrace();
         }
-
     }
 
+    private void addRequiredScopeToScopeStack(ActorState actorState, ArrayList<ReactiveClassDeclaration> actorSeries) {
+        for (ReactiveClassDeclaration actor : actorSeries) {
+            actorState.pushInActorScope();
+            addStateVarsToRelatedScope(actorState, actor);
+        }
+        actorState.addVariableToRecentScope("self", actorState);
+    }
+
+    private ArrayList<ReactiveClassDeclaration> getActorSeries(ReactiveClassDeclaration lastActor) {
+        ReactiveClassDeclaration curActor = lastActor;
+        ArrayList<ReactiveClassDeclaration> actorSeries = new ArrayList<>();
+        while (curActor.getExtends() != null) {
+            actorSeries.add(curActor);
+            try {
+                curActor = (ReactiveClassDeclaration) curActor.getExtends().getTypeSystem().getMetaData(curActor.getExtends());
+            } catch (CodeCompilationException e) {
+                e.printStackTrace();
+            }
+        }
+        actorSeries.add(curActor);
+        Collections.reverse(actorSeries);
+        return actorSeries;
+    }
 
     protected ActorState createFreshActorState() {
         return new ActorState();
