@@ -47,4 +47,14 @@ public class InheritanceTest {
 
         Assertions.assertTrue(exceptionContainer.exceptionsIsEmpty());
     }
+
+    @Test
+    public void useParentsMsgSrvInChildTest() throws ModelCheckingException {
+        File model = new File(MODEL_FILES_BASE + "use_parents_msgsrv_in_child.rebeca");
+        Set<CompilerExtension> extension = new HashSet<>();
+        coreRebecaModelChecker.configPolicy(CoreRebecaModelChecker.COARSE_GRAINED_POLICY);
+        coreRebecaModelChecker.modelCheck(model, extension, CoreVersion.CORE_2_3);
+
+        Assertions.assertTrue(exceptionContainer.exceptionsIsEmpty());
+    }
 }
