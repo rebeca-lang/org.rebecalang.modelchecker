@@ -14,6 +14,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -34,7 +35,7 @@ public class InheritanceTest {
         Set<CompilerExtension> extension = new HashSet<>();
         coreRebecaModelChecker.configPolicy(CoreRebecaModelChecker.COARSE_GRAINED_POLICY);
         coreRebecaModelChecker.modelCheck(model, extension, CoreVersion.CORE_2_3);
-
+        printExceptions();
         Assertions.assertTrue(exceptionContainer.exceptionsIsEmpty());
     }
 
@@ -56,5 +57,16 @@ public class InheritanceTest {
         coreRebecaModelChecker.modelCheck(model, extension, CoreVersion.CORE_2_3);
 
         Assertions.assertTrue(exceptionContainer.exceptionsIsEmpty());
+    }
+
+    private void printExceptions() {
+        Collection<Set<Exception>> exceptions = exceptionContainer.getExceptions().values();
+        for (Set<Exception> exceptionCollection: exceptions) {
+            for (Exception exception: exceptionCollection) {
+                System.out.println(exception);
+            }
+
+        }
+
     }
 }

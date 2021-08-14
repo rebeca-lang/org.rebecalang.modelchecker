@@ -22,6 +22,8 @@ reactiveclass B extends A (3){
         var_c = 0;
         var_a = var_c;
         var_b = 2;
+        self.var_b = 2;
+        self.var_a = 3;
     }
 }
 
