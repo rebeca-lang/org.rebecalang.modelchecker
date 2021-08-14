@@ -45,7 +45,7 @@ public class InheritanceTest {
         Set<CompilerExtension> extension = new HashSet<>();
         coreRebecaModelChecker.configPolicy(CoreRebecaModelChecker.COARSE_GRAINED_POLICY);
         coreRebecaModelChecker.modelCheck(model, extension, CoreVersion.CORE_2_3);
-
+        printExceptions();
         Assertions.assertTrue(exceptionContainer.exceptionsIsEmpty());
     }
 
@@ -55,7 +55,17 @@ public class InheritanceTest {
         Set<CompilerExtension> extension = new HashSet<>();
         coreRebecaModelChecker.configPolicy(CoreRebecaModelChecker.COARSE_GRAINED_POLICY);
         coreRebecaModelChecker.modelCheck(model, extension, CoreVersion.CORE_2_3);
+        printExceptions();
+        Assertions.assertTrue(exceptionContainer.exceptionsIsEmpty());
+    }
 
+    @Test
+    public void HandleShadowedVarsTest() throws ModelCheckingException {
+        File model = new File(MODEL_FILES_BASE + "handle_shadowed_vars.rebeca");
+        Set<CompilerExtension> extension = new HashSet<>();
+        coreRebecaModelChecker.configPolicy(CoreRebecaModelChecker.COARSE_GRAINED_POLICY);
+        coreRebecaModelChecker.modelCheck(model, extension, CoreVersion.CORE_2_3);
+        printExceptions();
         Assertions.assertTrue(exceptionContainer.exceptionsIsEmpty());
     }
 

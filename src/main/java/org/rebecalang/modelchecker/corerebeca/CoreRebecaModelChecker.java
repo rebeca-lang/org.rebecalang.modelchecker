@@ -2,6 +2,7 @@ package org.rebecalang.modelchecker.corerebeca;
 
 import com.rits.cloning.Cloner;
 import org.rebecalang.compiler.modelcompiler.RebecaModelCompiler;
+import org.rebecalang.compiler.modelcompiler.ScopeException;
 import org.rebecalang.compiler.modelcompiler.SymbolTable;
 import org.rebecalang.compiler.modelcompiler.corerebeca.CoreRebecaTypeSystem;
 import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.*;
@@ -69,8 +70,14 @@ public class CoreRebecaModelChecker {
     public void modelCheck(Pair<RebecaModel, SymbolTable> model, Set<CompilerExtension> extension, CoreVersion coreVersion) throws ModelCheckingException {
         this.statespace = new StateSpace();
 
-        if (!exceptionContainer.exceptionsIsEmpty())
-            return;
+        // To ignore redeclaration of variable
+        if (!exceptionContainer.exceptionsIsEmpty()) {
+            for (Set<Exception> exceptionContainer: exceptionContainer.getExceptions().values()) {
+                for (Exception exception: exceptionContainer)
+                    if (!(exception instanceof ScopeException)) return;
+            }
+        }
+
 
         RILModel transformedRILModel =
                 rebeca2RILModelTransformer.transformModel(model, extension, coreVersion);
@@ -126,6 +133,7 @@ public class CoreRebecaModelChecker {
     }
 
     private void setInitialKnownRebecsOfActors(State initialState, List<MainRebecDefinition> mainRebecDefinitions) {
+        System.out.println(10);
         for (MainRebecDefinition definition : mainRebecDefinitions) {
             ReactiveClassDeclaration metaData;
             try {
