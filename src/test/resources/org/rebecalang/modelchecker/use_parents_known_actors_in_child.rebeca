@@ -30,5 +30,5 @@ reactiveclass B extends A (3){
 main {
     C c():();
     A a(c):();
-    B b(a, c):();
+    B b(c, a):();
 }

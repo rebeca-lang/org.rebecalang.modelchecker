@@ -152,7 +152,7 @@ public class CoreRebecaModelChecker {
         ActorState actorState = initialState.getActorState(mainRebecDefinition.getName());
         ArrayList<ReactiveClassDeclaration> actorSeries = getActorSeries(actorMetaData);
         int startIndex = 0;
-        for (int j = actorSeries.size() - 1; j > -1; j--) {
+        for (int j = 0; j < actorSeries.size(); j++) {
             ReactiveClassDeclaration curActor = actorSeries.get(j);
             for (int i = 0; i < curActor.getKnownRebecs().size(); i++) {
                 Expression relatedBinding = mainRebecDefinition.getBindings().get(startIndex);
