@@ -1,0 +1,33 @@
+reactiveclass C (5)  {
+    statevars {
+        int var_c;
+    }
+}
+
+reactiveclass A extends C (2)  {
+    statevars {
+		int var_a;
+	}
+    A () {
+        var_c = 1;
+    }
+}
+
+reactiveclass B extends A (3){
+    statevars {
+		int var_b;
+	}
+
+    B () {
+        var_c = 0;
+        var_a = var_c;
+        var_b = 2;
+        self.var_b = 2;
+        self.var_a = 3;
+    }
+}
+
+main {
+    A a():();
+    B b():();
+}

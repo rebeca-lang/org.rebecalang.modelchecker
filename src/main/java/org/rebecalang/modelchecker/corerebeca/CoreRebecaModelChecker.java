@@ -133,7 +133,6 @@ public class CoreRebecaModelChecker {
     }
 
     private void setInitialKnownRebecsOfActors(State initialState, List<MainRebecDefinition> mainRebecDefinitions) {
-        System.out.println(10);
         for (MainRebecDefinition definition : mainRebecDefinitions) {
             ReactiveClassDeclaration metaData;
             try {
