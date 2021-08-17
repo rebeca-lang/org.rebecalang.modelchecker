@@ -123,9 +123,4 @@ public class ActorScopeStack implements Serializable {
         throw new RebecaRuntimeInterpreterException("Failure in retrieving variable " + varName + " from scope");
 
     }
-
-    public void adjustLinkToPreviousScopeForMethodCall() {
-
-        activationRecords.getLast().setPreviousScope(activationRecords.getFirst());
-    }
 }

@@ -187,11 +187,6 @@ public class ActorState implements Serializable {
         } while (!policy.isBreakable());
     }
 
-    public void adjustLinkToPreviousScopeForMethodCall() {
-
-        actorScopeStack.adjustLinkToPreviousScopeForMethodCall();
-    }
-
     public ActorScopeStack getActorScopeStack() {
         return actorScopeStack;
     }
