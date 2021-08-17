@@ -8,7 +8,7 @@ public class PushARInstructionInterpreter extends InstructionInterpreter {
 
 	@Override
 	public void interpret(InstructionBean ib, ActorState actorState, State globalState) {
-		actorState.pushInActorScope();
+		actorState.pushInActorScope(actorState.getTypeName());
 		actorState.increasePC();
 	}
 

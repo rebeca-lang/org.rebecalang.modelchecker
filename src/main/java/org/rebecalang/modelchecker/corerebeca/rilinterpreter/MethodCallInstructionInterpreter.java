@@ -24,7 +24,7 @@ public class MethodCallInstructionInterpreter extends InstructionInterpreter {
 			else
 				calculatedValuesOfParams.add(paramValue);
 		}
-		actorState.pushInActorScope();
+		actorState.pushInActorScope(actorState.getTypeName());
 		for(int cnt = 0; cnt < mcib.getParameters().size(); cnt++) {
 			Object paramValue = calculatedValuesOfParams.get(cnt);
 			String paramName = mcib.getParametersNames().get(cnt);

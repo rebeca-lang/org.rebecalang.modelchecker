@@ -8,6 +8,7 @@ public class ActivationRecord implements Serializable {
 
     private Hashtable<String, Object> definedVariables;
     private ActivationRecord previousScope;
+    private String relatedRebecType;
 
     public void setVariableValue(String name, Object value) {
         definedVariables.put(name, value);
@@ -63,4 +64,11 @@ public class ActivationRecord implements Serializable {
         return definedVariables.containsKey(varName);
     }
 
+    public String getRelatedRebecType() {
+        return relatedRebecType;
+    }
+
+    public void setRelatedRebecType(String relatedRebecType) {
+        this.relatedRebecType = relatedRebecType;
+    }
 }

@@ -9,8 +9,13 @@ reactiveclass A extends C (2)  {
 		int var_a;
 		int var_ab;
 	}
+
     A () {
         var_c = 1;
+    }
+
+    msgsrv msg_a() {
+        var_ab = 1;
     }
 }
 
@@ -19,9 +24,8 @@ reactiveclass B extends A (3){
 		int var_b;
 		int var_ab;
 	}
-
     B () {
-
+        msg_a();
     }
 }
 

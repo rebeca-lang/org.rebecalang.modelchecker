@@ -54,7 +54,7 @@ public class ActorScopeStack implements Serializable {
         cursor.addVariable(name, valueObject);
     }
 
-    public void pushInScopeStack() {
+    public void pushInScopeStack(String relatedRebecType) {
         ActivationRecord newRecord = new ActivationRecord();
         newRecord.initialize();
         ActivationRecord last = null;
@@ -64,6 +64,21 @@ public class ActorScopeStack implements Serializable {
 //            e.printStackTrace();
         }
         newRecord.setPreviousScope(last);
+        newRecord.setRelatedRebecType(relatedRebecType);
+        activationRecords.addLast(newRecord);
+    }
+
+    public void pushInScopeStack(String relatedRebecType, String previousRebecType) {
+        ActivationRecord newRecord = new ActivationRecord();
+        newRecord.initialize();
+        ActivationRecord prev = null;
+        for (ActivationRecord record: activationRecords) {
+            if (record.getRelatedRebecType().equals(previousRebecType)) {
+                prev = record;
+            }
+        }
+        newRecord.setPreviousScope(prev);
+        newRecord.setRelatedRebecType(relatedRebecType);
         activationRecords.addLast(newRecord);
     }
 

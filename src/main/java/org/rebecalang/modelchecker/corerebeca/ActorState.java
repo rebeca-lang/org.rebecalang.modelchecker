@@ -1,5 +1,6 @@
 package org.rebecalang.modelchecker.corerebeca;
 
+import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.Type;
 import org.rebecalang.modelchecker.corerebeca.policy.AbstractPolicy;
 import org.rebecalang.modelchecker.corerebeca.rilinterpreter.InstructionInterpreter;
 import org.rebecalang.modelchecker.corerebeca.rilinterpreter.InstructionUtilities;
@@ -109,8 +110,12 @@ public class ActorState implements Serializable {
         return queue.isEmpty();
     }
 
-    public void pushInActorScope() {
-        actorScopeStack.pushInScopeStack();
+    public void pushInActorScope(String relatedRebecType) {
+        actorScopeStack.pushInScopeStack(relatedRebecType);
+    }
+
+    public void pushInActorScope(String relatedRebecType, String prevRebecType) {
+        actorScopeStack.pushInScopeStack(relatedRebecType, prevRebecType);
     }
 
     public void popFromActorScope() {
@@ -171,7 +176,10 @@ public class ActorState implements Serializable {
             } else if (!queue.isEmpty()) {
                 MessageSpecification executableMessage = queue.poll();
                 policy.pick(executableMessage);
-                actorScopeStack.pushInScopeStack();
+                // toDo check this
+                String relatedRebecType = executableMessage.getMessageName().split("\\.")[0];
+                actorScopeStack.pushInScopeStack(getTypeName(), relatedRebecType);
+//                actorScopeStack.pushInScopeStack("");
                 addVariableToRecentScope("sender", executableMessage.getSenderActorState());
                 initializePC(executableMessage.getMessageName(), 0);
             } else

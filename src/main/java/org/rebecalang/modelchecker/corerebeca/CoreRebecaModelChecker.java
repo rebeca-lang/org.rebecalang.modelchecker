@@ -118,7 +118,7 @@ public class CoreRebecaModelChecker {
                 ConstructorDeclaration constructorDeclaration = metaData.getConstructors().get(0);
                 String computedConstructorName = RILUtilities.computeMethodName(metaData, constructorDeclaration);
                 ActorState actorState = initialState.getActorState(definition.getName());
-                actorState.pushInActorScope();
+                actorState.pushInActorScope(actorState.getTypeName());
                 actorState.initializePC(computedConstructorName, 0);
                 while (actorState.variableIsDefined(InstructionUtilities.PC_STRING)) {
                     ProgramCounter pc = actorState.getPC();
@@ -133,7 +133,6 @@ public class CoreRebecaModelChecker {
     }
 
     private void setInitialKnownRebecsOfActors(State initialState, List<MainRebecDefinition> mainRebecDefinitions) {
-        System.out.println(10);
         for (MainRebecDefinition definition : mainRebecDefinitions) {
             ReactiveClassDeclaration metaData;
             try {
@@ -198,7 +197,7 @@ public class CoreRebecaModelChecker {
 
     private void addRequiredScopeToScopeStack(ActorState actorState, ArrayList<ReactiveClassDeclaration> actorSeries) {
         for (ReactiveClassDeclaration actor : actorSeries) {
-            actorState.pushInActorScope();
+            actorState.pushInActorScope(actor.getName());
             addStateVarsToRelatedScope(actorState, actor);
         }
         actorState.addVariableToRecentScope("self", actorState);
