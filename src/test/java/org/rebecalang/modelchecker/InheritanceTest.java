@@ -60,7 +60,7 @@ public class InheritanceTest {
     }
 
     @Test
-    public void HandleShadowedVarsTest() throws ModelCheckingException {
+    public void handleShadowedVarsTest() throws ModelCheckingException {
         File model = new File(MODEL_FILES_BASE + "handle_shadowed_vars.rebeca");
         Set<CompilerExtension> extension = new HashSet<>();
         coreRebecaModelChecker.configPolicy(CoreRebecaModelChecker.COARSE_GRAINED_POLICY);
@@ -71,6 +71,16 @@ public class InheritanceTest {
 
     @Test void HandleInterfaceTest() throws ModelCheckingException {
         File model = new File(MODEL_FILES_BASE + "handle_interface.rebeca");
+        Set<CompilerExtension> extension = new HashSet<>();
+        coreRebecaModelChecker.configPolicy(CoreRebecaModelChecker.COARSE_GRAINED_POLICY);
+        coreRebecaModelChecker.modelCheck(model, extension, CoreVersion.CORE_2_3);
+        printExceptions();
+        Assertions.assertTrue(exceptionContainer.exceptionsIsEmpty());
+    }
+    
+    @Test
+    public void useParentsMethodsInChild() throws ModelCheckingException {
+        File model = new File(MODEL_FILES_BASE + "use_parents_methods_in_child.rebeca");
         Set<CompilerExtension> extension = new HashSet<>();
         coreRebecaModelChecker.configPolicy(CoreRebecaModelChecker.COARSE_GRAINED_POLICY);
         coreRebecaModelChecker.modelCheck(model, extension, CoreVersion.CORE_2_3);
