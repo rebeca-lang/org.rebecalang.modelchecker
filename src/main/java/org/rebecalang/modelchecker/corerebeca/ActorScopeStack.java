@@ -1,6 +1,7 @@
 package org.rebecalang.modelchecker.corerebeca;
 
 import java.io.Serializable;
+import java.util.Deque;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 
@@ -122,5 +123,9 @@ public class ActorScopeStack implements Serializable {
         } while ((cursor = cursor.getPreviousScope()) != null);
         throw new RebecaRuntimeInterpreterException("Failure in retrieving variable " + varName + " from scope");
 
+    }
+
+    public LinkedList<ActivationRecord> getActivationRecords() {
+        return activationRecords;
     }
 }

@@ -1,9 +1,7 @@
 package org.rebecalang.modelchecker.corerebeca.rilinterpreter;
 
 import org.rebecalang.compiler.modelcompiler.SemanticCheckerUtils;
-import org.rebecalang.modelchecker.corerebeca.ActorState;
-import org.rebecalang.modelchecker.corerebeca.RebecaRuntimeInterpreterException;
-import org.rebecalang.modelchecker.corerebeca.State;
+import org.rebecalang.modelchecker.corerebeca.*;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.AssignmentInstructionBean;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.InstructionBean;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.Variable;
@@ -24,13 +22,27 @@ public class AssignmentInstructionInterpreter extends InstructionInterpreter {
 				else if (operator.equals("!="))
 					result = !(((ActorState) valueFirst).getName().
 							equals(((ActorState) valueSecond).getName()));
+				else if (operator.equals("instanceof")) //ToDo: polymorphism remaining
+					result = checkSecondIsAncestor(((ActorState) valueFirst).getActorScopeStack(), valueSecond.toString());
 				else
 					throw new RebecaRuntimeInterpreterException(
 							"this case should not happen!! should've been reported as an error by compiler!");
 			} else
 				result = SemanticCheckerUtils.evaluateConstantTerm(operator, null, valueFirst, valueSecond);
 		}
+
 		actorState.setVariableValue(((Variable) aib.getLeftVarName()).getVarName(), result);
 		actorState.increasePC();
+	}
+
+	private boolean checkSecondIsAncestor(ActorScopeStack currentScope, String actorType) {
+		ActivationRecord cursor = currentScope.getActivationRecords().getLast();
+		boolean answer = false;
+		while (cursor != null) {
+			if (cursor.getRelatedRebecType().equals(actorType))
+				answer = true;
+			cursor = cursor.getPreviousScope();
+		}
+		return answer;
 	}
 }
