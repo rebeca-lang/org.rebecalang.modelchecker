@@ -79,8 +79,17 @@ public class InheritanceTest {
         Assertions.assertTrue(exceptionContainer.exceptionsIsEmpty());
     }
 
-    @Test void HandleInterfaceTest() throws ModelCheckingException {
+    @Test void handleInterfaceTest() throws ModelCheckingException {
         File model = new File(MODEL_FILES_BASE + "handle_interface.rebeca");
+        Set<CompilerExtension> extension = new HashSet<>();
+        coreRebecaModelChecker.configPolicy(CoreRebecaModelChecker.COARSE_GRAINED_POLICY);
+        coreRebecaModelChecker.modelCheck(model, extension, CoreVersion.CORE_2_3);
+        printExceptions();
+        Assertions.assertTrue(exceptionContainer.exceptionsIsEmpty());
+    }
+
+    @Test void dynamicPolymorphismTest() throws ModelCheckingException {
+        File model = new File(MODEL_FILES_BASE + "dynamic_polymorphism.rebeca");
         Set<CompilerExtension> extension = new HashSet<>();
         coreRebecaModelChecker.configPolicy(CoreRebecaModelChecker.COARSE_GRAINED_POLICY);
         coreRebecaModelChecker.modelCheck(model, extension, CoreVersion.CORE_2_3);
