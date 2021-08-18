@@ -176,10 +176,8 @@ public class ActorState implements Serializable {
             } else if (!queue.isEmpty()) {
                 MessageSpecification executableMessage = queue.poll();
                 policy.pick(executableMessage);
-                // toDo check this
                 String relatedRebecType = executableMessage.getMessageName().split("\\.")[0];
                 actorScopeStack.pushInScopeStack(getTypeName(), relatedRebecType);
-//                actorScopeStack.pushInScopeStack("");
                 addVariableToRecentScope("sender", executableMessage.getSenderActorState());
                 initializePC(executableMessage.getMessageName(), 0);
             } else
