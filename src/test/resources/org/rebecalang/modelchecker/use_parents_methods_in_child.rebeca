@@ -2,6 +2,7 @@ reactiveclass C (5)  {
     statevars {
         int var_c;
     }
+
 }
 
 reactiveclass A extends C (2)  {
@@ -10,13 +11,9 @@ reactiveclass A extends C (2)  {
 		int var_ab;
 	}
 
-    A () {
-        var_c = 1;
-    }
-
-    msgsrv msg_a() {
-        var_ab = 1;
-    }
+	void method_a() {
+	    var_ab = 4;
+	}
 }
 
 reactiveclass B extends A (3){
@@ -24,9 +21,12 @@ reactiveclass B extends A (3){
 		int var_b;
 		int var_ab;
 	}
-    B () {
-        msg_a();
-    }
+
+	void method_b() {}
+
+	B () {
+	    method_a();
+	}
 }
 
 main {

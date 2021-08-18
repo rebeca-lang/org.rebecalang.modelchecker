@@ -24,13 +24,12 @@ public class MethodCallInstructionInterpreter extends InstructionInterpreter {
 			else
 				calculatedValuesOfParams.add(paramValue);
 		}
-		actorState.pushInActorScope();
+		actorState.pushInActorScope(actorState.getTypeName(), ((MethodCallInstructionBean) ib).getMethodName().split("\\.")[0]);
 		for(int cnt = 0; cnt < mcib.getParameters().size(); cnt++) {
 			Object paramValue = calculatedValuesOfParams.get(cnt);
 			String paramName = mcib.getParametersNames().get(cnt);
 			actorState.addVariableToRecentScope(paramName, paramValue);
 		}
-		actorState.adjustLinkToPreviousScopeForMethodCall();
 		actorState.initializePC(mcib.getMethodName(), 0);
 		return;
 	}
