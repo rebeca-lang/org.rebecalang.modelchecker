@@ -19,16 +19,14 @@ reactiveclass B extends A (3){
 }
 
 reactiveclass C (1)  {
+    knownrebecs {
+        A inst_a;
+    }
     statevars {
-		int var_c;
-		A inst_a;
-		B inst_b;
+
 	}
 
     msgsrv msg_c() {
-         inst_a = new A():();
-         //B inst_b;
-         inst_a = inst_b;
          inst_a.msg_ab();
     }
 
@@ -38,5 +36,6 @@ reactiveclass C (1)  {
 }
 
 main {
-    C c():();
+    B b():();
+    C c(b):();
 }
