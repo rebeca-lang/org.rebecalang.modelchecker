@@ -72,8 +72,8 @@ public class CoreRebecaModelChecker {
 
         // To ignore redeclaration of variable
         if (!exceptionContainer.exceptionsIsEmpty()) {
-            for (Set<Exception> exceptionContainer: exceptionContainer.getExceptions().values()) {
-                for (Exception exception: exceptionContainer)
+            for (Set<Exception> exceptionContainer : exceptionContainer.getExceptions().values()) {
+                for (Exception exception : exceptionContainer)
                     if (!(exception instanceof ScopeException)) return;
             }
         }
@@ -155,7 +155,7 @@ public class CoreRebecaModelChecker {
             ReactiveClassDeclaration curActor = actorSeries.get(j);
             for (int i = 0; i < curActor.getKnownRebecs().size(); i++) {
                 Expression relatedBinding = mainRebecDefinition.getBindings().get(startIndex);
-                startIndex += i;
+                startIndex += (i + 1);
                 if (!(relatedBinding instanceof TermPrimary))
                     throw new RebecaRuntimeInterpreterException("not handled yet!");
                 String instanceName = ((TermPrimary) relatedBinding).getName();
