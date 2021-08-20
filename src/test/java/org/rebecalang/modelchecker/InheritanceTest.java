@@ -97,6 +97,15 @@ public class InheritanceTest {
         printExceptions();
         Assertions.assertTrue(exceptionContainer.exceptionsIsEmpty());
     }
+    
+    @Test void HandleInterfaceTest() throws ModelCheckingException {
+        File model = new File(MODEL_FILES_BASE + "handle_interface.rebeca");
+        Set<CompilerExtension> extension = new HashSet<>();
+        coreRebecaModelChecker.configPolicy(CoreRebecaModelChecker.COARSE_GRAINED_POLICY);
+        coreRebecaModelChecker.modelCheck(model, extension, CoreVersion.CORE_2_3);
+        printExceptions();
+        Assertions.assertTrue(exceptionContainer.exceptionsIsEmpty());
+    }
 
     private void printExceptions() {
         Collection<Set<Exception>> exceptions = exceptionContainer.getExceptions().values();
