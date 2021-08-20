@@ -37,12 +37,11 @@ public class AssignmentInstructionInterpreter extends InstructionInterpreter {
 
 	private boolean checkSecondIsAncestor(ActorScopeStack currentScope, String actorType) {
 		ActivationRecord cursor = currentScope.getActivationRecords().getLast();
-		boolean answer = false;
 		while (cursor != null) {
 			if (cursor.getRelatedRebecType().equals(actorType))
-				answer = true;
+				return true;
 			cursor = cursor.getPreviousScope();
 		}
-		return answer;
+		return false;
 	}
 }
