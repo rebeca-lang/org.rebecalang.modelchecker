@@ -1,0 +1,41 @@
+reactiveclass A (2)  {
+    statevars {
+		int var_a;
+	}
+
+    msgsrv msg_ab() {
+        var_a=3;
+    }
+}
+
+reactiveclass B extends A (3){
+    statevars {
+		int var_b;
+	}
+
+	 msgsrv msg_ab() {
+	   var_b=4;
+	 }
+}
+
+reactiveclass C (1)  {
+    knownrebecs {
+        A inst_a;
+    }
+    statevars {
+
+	}
+
+    msgsrv msg_c() {
+         inst_a.msg_ab();
+    }
+
+    C () {
+        msg_c();
+    }
+}
+
+main {
+    B b():();
+    C c(b):();
+}
