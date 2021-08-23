@@ -200,7 +200,7 @@ public class CoreRebecaModelChecker {
             actorState.pushInActorScope(actor.getName());
             addStateVarsToRelatedScope(actorState, actor);
         }
-        actorState.addVariableToRecentScope("self", actorState);
+        actorState.addVariableToExactScope("self", actorState, 0);
     }
 
     private ArrayList<ReactiveClassDeclaration> getActorSeries(ReactiveClassDeclaration lastActor) {

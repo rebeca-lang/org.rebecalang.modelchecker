@@ -57,6 +57,7 @@ public class InheritanceTest {
         coreRebecaModelChecker.modelCheck(model, extension, CoreVersion.CORE_2_3);
         printExceptions();
         Assertions.assertTrue(exceptionContainer.exceptionsIsEmpty());
+        RebecaModelChecker.printStateSpace(coreRebecaModelChecker.getStateSpace().getInitialState());
     }
 
     @Test
@@ -69,7 +70,8 @@ public class InheritanceTest {
         Assertions.assertTrue(exceptionContainer.exceptionsIsEmpty());
     }
 
-    @Test void HandleInterfaceTest() throws ModelCheckingException {
+    @Test
+    void HandleInterfaceTest() throws ModelCheckingException {
         File model = new File(MODEL_FILES_BASE + "handle_interface.rebeca");
         Set<CompilerExtension> extension = new HashSet<>();
         coreRebecaModelChecker.configPolicy(CoreRebecaModelChecker.COARSE_GRAINED_POLICY);
@@ -77,7 +79,7 @@ public class InheritanceTest {
         printExceptions();
         Assertions.assertTrue(exceptionContainer.exceptionsIsEmpty());
     }
-    
+
     @Test
     public void useParentsMethodsInChild() throws ModelCheckingException {
         File model = new File(MODEL_FILES_BASE + "use_parents_methods_in_child.rebeca");
@@ -97,8 +99,9 @@ public class InheritanceTest {
         printExceptions();
         Assertions.assertTrue(exceptionContainer.exceptionsIsEmpty());
     }
-    
-    @Test void handleInterfaceTest() throws ModelCheckingException {
+
+    @Test
+    void handleInterfaceTest() throws ModelCheckingException {
         File model = new File(MODEL_FILES_BASE + "handle_interface.rebeca");
         Set<CompilerExtension> extension = new HashSet<>();
         coreRebecaModelChecker.configPolicy(CoreRebecaModelChecker.COARSE_GRAINED_POLICY);
@@ -107,7 +110,8 @@ public class InheritanceTest {
         Assertions.assertTrue(exceptionContainer.exceptionsIsEmpty());
     }
 
-    @Test void dynamicPolymorphismTest() throws ModelCheckingException {
+    @Test
+    void dynamicPolymorphismTest() throws ModelCheckingException {
         File model = new File(MODEL_FILES_BASE + "dynamic_polymorphism.rebeca");
         Set<CompilerExtension> extension = new HashSet<>();
         coreRebecaModelChecker.configPolicy(CoreRebecaModelChecker.COARSE_GRAINED_POLICY);
@@ -116,10 +120,23 @@ public class InheritanceTest {
         Assertions.assertTrue(exceptionContainer.exceptionsIsEmpty());
     }
 
+    @Test
+    void generalTest1() throws ModelCheckingException {
+        File model = new File(MODEL_FILES_BASE + "general_inheritance_test_1.rebeca");
+        Set<CompilerExtension> extension = new HashSet<>();
+        coreRebecaModelChecker.configPolicy(CoreRebecaModelChecker.COARSE_GRAINED_POLICY);
+        try {
+            coreRebecaModelChecker.modelCheck(model, extension, CoreVersion.CORE_2_3);
+        } catch (ModelCheckingException e) {
+            e.printStackTrace();
+        }
+        printExceptions();
+    }
+
     private void printExceptions() {
         Collection<Set<Exception>> exceptions = exceptionContainer.getExceptions().values();
-        for (Set<Exception> exceptionCollection: exceptions) {
-            for (Exception exception: exceptionCollection) {
+        for (Set<Exception> exceptionCollection : exceptions) {
+            for (Exception exception : exceptionCollection) {
                 System.out.println(exception);
             }
 
