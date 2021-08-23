@@ -1,6 +1,5 @@
 package org.rebecalang.modelchecker.corerebeca;
 
-import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.Type;
 import org.rebecalang.modelchecker.corerebeca.policy.AbstractPolicy;
 import org.rebecalang.modelchecker.corerebeca.rilinterpreter.InstructionInterpreter;
 import org.rebecalang.modelchecker.corerebeca.rilinterpreter.InstructionUtilities;
@@ -176,10 +175,14 @@ public class ActorState implements Serializable {
             } else if (!queue.isEmpty()) {
                 MessageSpecification executableMessage = queue.poll();
                 policy.pick(executableMessage);
-                String relatedRebecType = executableMessage.getMessageName().split("\\.")[0];
+                String msgName = getTypeName() + "." + executableMessage.getMessageName().split("\\.")[1];
+                if (!transformedRILModel.getMethodNames().contains(msgName)) {
+                    msgName = executableMessage.getMessageName();
+                }
+                String relatedRebecType = msgName.split("\\.")[0];
                 actorScopeStack.pushInScopeStack(getTypeName(), relatedRebecType);
                 addVariableToRecentScope("sender", executableMessage.getSenderActorState());
-                initializePC(executableMessage.getMessageName(), 0);
+                initializePC(msgName, 0);
             } else
                 throw new RebecaRuntimeInterpreterException("this case should not happen!");
         } while (!policy.isBreakable());
