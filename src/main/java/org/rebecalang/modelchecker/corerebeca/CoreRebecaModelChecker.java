@@ -17,7 +17,6 @@ import org.rebecalang.modeltransformer.ril.RILModel;
 import org.rebecalang.modeltransformer.ril.RILUtilities;
 import org.rebecalang.modeltransformer.ril.Rebeca2RILModelTransformer;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -26,20 +25,11 @@ import java.util.*;
 @Component
 public class CoreRebecaModelChecker {
 
-    @Autowired
     protected RebecaModelCompiler rebecaModelCompiler;
-
-    @Autowired
     protected ExceptionContainer exceptionContainer;
-
-    @Autowired
     protected Rebeca2RILModelTransformer rebeca2RILModelTransformer;
-
-    @Autowired
     protected CoreRebecaTypeSystem coreRebecaTypeSystem;
-
     protected StateSpace statespace;
-
     protected AbstractPolicy modelCheckingPolicy;
 
     public final static String FINE_GRAINED_POLICY = "fine";
@@ -47,27 +37,40 @@ public class CoreRebecaModelChecker {
 
     private Cloner cloner;
 
-    public CoreRebecaModelChecker() {
+    public CoreRebecaModelChecker(
+            CoreRebecaTypeSystem coreRebecaTypeSystem,
+            RebecaModelCompiler rebecaModelCompiler,
+            ExceptionContainer exceptionContainer,
+            Rebeca2RILModelTransformer rebeca2RILModelTransformer) {
         this.cloner = new Cloner();
+        this.coreRebecaTypeSystem = coreRebecaTypeSystem;
+        this.rebecaModelCompiler = rebecaModelCompiler;
+        this.exceptionContainer = exceptionContainer;
+        this.rebeca2RILModelTransformer = rebeca2RILModelTransformer;
     }
 
     public StateSpace getStateSpace() {
         return statespace;
     }
 
-
-    protected Pair<RebecaModel, SymbolTable> compileModel(File model, Set<CompilerExtension> extension, CoreVersion coreVersion) {
+    protected Pair<RebecaModel, SymbolTable> compileModel(
+            File model,
+            Set<CompilerExtension> extension,
+            CoreVersion coreVersion) {
         return rebecaModelCompiler.compileRebecaFile(model, extension, coreVersion);
     }
 
-    public void modelCheck(File model,
-                           Set<CompilerExtension> extension,
-                           CoreVersion coreVersion) throws ModelCheckingException {
-        modelCheck(compileModel(model, extension, coreVersion),
-                extension, coreVersion);
+    public void modelCheck(
+            File model,
+            Set<CompilerExtension> extension,
+            CoreVersion coreVersion) throws ModelCheckingException {
+        modelCheck(compileModel(model, extension, coreVersion), extension, coreVersion);
     }
 
-    public void modelCheck(Pair<RebecaModel, SymbolTable> model, Set<CompilerExtension> extension, CoreVersion coreVersion) throws ModelCheckingException {
+    public void modelCheck(
+            Pair<RebecaModel, SymbolTable> model,
+            Set<CompilerExtension> extension,
+            CoreVersion coreVersion) throws ModelCheckingException {
         this.statespace = new StateSpace();
 
         // To ignore redeclaration of variable
@@ -78,18 +81,13 @@ public class CoreRebecaModelChecker {
             }
         }
 
-
-        RILModel transformedRILModel =
-                rebeca2RILModelTransformer.transformModel(model, extension, coreVersion);
+        RILModel transformedRILModel = rebeca2RILModelTransformer.transformModel(model, extension, coreVersion);
         initializeStatementInterpreterContainer();
-
         generateFirstState(transformedRILModel, model.getFirst());
-
         doFineGrainedModelChecking(transformedRILModel);
     }
 
     protected void generateFirstState(RILModel transformedRILModel, RebecaModel model) {
-
         State initialState = createFreshState();
         List<MainRebecDefinition> mainRebecDefinitions = model.getRebecaCode().getMainDeclaration()
                 .getMainRebecDefinition();
@@ -100,7 +98,6 @@ public class CoreRebecaModelChecker {
         callConstructorsOfActors(transformedRILModel, initialState, mainRebecDefinitions);
 
         statespace.addInitialState(initialState);
-
     }
 
     protected State createFreshState() {
