@@ -158,7 +158,7 @@ public class CoreRebecaModelChecker {
                 String instanceName = ((TermPrimary) relatedBinding).getName();
                 String knownRebecName = getKnownRebecName(curActor.getKnownRebecs(), i);
                 ActorState knownActorState = initialState.getActorState(instanceName);
-                actorState.addVariableToExactScope(knownRebecName, knownActorState, j);
+                actorState.addVariableToExactScope(knownRebecName, knownActorState, j+1);
             }
         }
     }
@@ -184,7 +184,7 @@ public class CoreRebecaModelChecker {
         }
     }
 
-    private void addStateVarsToRelatedScope(ActorState actorState, ReactiveClassDeclaration actorMetaData) {
+    protected void addStateVarsToRelatedScope(ActorState actorState, ReactiveClassDeclaration actorMetaData) {
         for (FieldDeclaration fieldDeclaration : actorMetaData.getStatevars()) {
             for (VariableDeclarator variableDeclarator : fieldDeclaration.getVariableDeclarators()) {
                 actorState.addVariableToRecentScope(variableDeclarator.getVariableName(), 0);
@@ -192,7 +192,7 @@ public class CoreRebecaModelChecker {
         }
     }
 
-    private void addRequiredScopeToScopeStack(ActorState actorState, ArrayList<ReactiveClassDeclaration> actorSeries) {
+    protected void addRequiredScopeToScopeStack(ActorState actorState, ArrayList<ReactiveClassDeclaration> actorSeries) {
         for (ReactiveClassDeclaration actor : actorSeries) {
             actorState.pushInActorScope(actor.getName());
             addStateVarsToRelatedScope(actorState, actor);

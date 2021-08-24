@@ -1,6 +1,7 @@
 package org.rebecalang.modelchecker.timedrebeca;
 
 import org.rebecalang.compiler.modelcompiler.RebecaModelCompiler;
+import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.ReactiveClassDeclaration;
 import org.rebecalang.compiler.modelcompiler.timedrebeca.TimedRebecaTypeSystem;
 import org.rebecalang.compiler.utils.ExceptionContainer;
 import org.rebecalang.modelchecker.RebecaModelChecker;
@@ -11,11 +12,15 @@ import org.rebecalang.modeltransformer.ril.Rebeca2RILModelTransformer;
 import org.rebecalang.modeltransformer.ril.timedrebeca.rilinstruction.CallTimedMsgSrvInstructionBean;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
 
 @Component
 public class TimedRebecaModelChecker extends CoreRebecaModelChecker {
+
+    public final static String CURRENT_TIME = "current_time";
+    public final static String RESUMING_TIME = "resuming_time";
 
     public TimedRebecaModelChecker(
             TimedRebecaTypeSystem timedRebecaTypeSystem,
@@ -24,6 +29,22 @@ public class TimedRebecaModelChecker extends CoreRebecaModelChecker {
             Rebeca2RILModelTransformer rebeca2RILModelTransformer
     ) {
         super(timedRebecaTypeSystem, rebecaModelCompiler, exceptionContainer, rebeca2RILModelTransformer);
+    }
+
+    @Override
+    protected void addRequiredScopeToScopeStack(ActorState actorState, ArrayList<ReactiveClassDeclaration> actorSeries) {
+        addTimedScopeToScopeStack(actorState);
+        for (ReactiveClassDeclaration actor : actorSeries) {
+            actorState.pushInActorScope(actor.getName());
+            addStateVarsToRelatedScope(actorState, actor);
+        }
+    }
+
+    private void addTimedScopeToScopeStack(ActorState actorState) {
+        actorState.pushInActorScope("TimedRebec");
+        actorState.addVariableToRecentScope(CURRENT_TIME, 0);
+        actorState.addVariableToRecentScope(RESUMING_TIME, 0);
+        actorState.addVariableToRecentScope("self", actorState);
     }
 
     @Override
