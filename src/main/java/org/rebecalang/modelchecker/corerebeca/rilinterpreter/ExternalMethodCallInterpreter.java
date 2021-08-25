@@ -8,11 +8,11 @@ import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.Instruction
 
 public class ExternalMethodCallInterpreter extends InstructionInterpreter {
 
-	@Override
-	public void interpret(InstructionBean ib, ActorState actorState, State globalState) {
-		ExternalMethodCallInstructionBean bimcib = (ExternalMethodCallInstructionBean) ib;
-		ExternalMethodRepository.getInstance().execute(bimcib, actorState, globalState);
-		
-		actorState.increasePC();
-	}
+    @Override
+    public void interpret(InstructionBean ib, ActorState actorState, State globalState) {
+        ExternalMethodCallInstructionBean bimcib = (ExternalMethodCallInstructionBean) ib;
+        ExternalMethodRepository.getInstance().execute(bimcib, actorState, globalState);
+
+        actorState.increasePC();
+    }
 }

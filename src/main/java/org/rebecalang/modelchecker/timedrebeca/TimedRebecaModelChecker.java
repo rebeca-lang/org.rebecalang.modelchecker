@@ -51,14 +51,14 @@ public class TimedRebecaModelChecker extends CoreRebecaModelChecker {
     protected void doFineGrainedModelChecking(RILModel transformedRILModel) throws ModelCheckingException {
         int stateCounter = 1;
         TimedState initialState = (TimedState) statespace.getInitialState();
-        PriorityQueue<OpenBorderQueueItem> nextStatesQueue = new PriorityQueue<OpenBorderQueueItem>();
+        PriorityQueue<TimePriorityQueueItem> nextStatesQueue = new PriorityQueue<>();
         int enablingTime = initialState.getEnablingTime();
         if (enablingTime == Integer.MAX_VALUE)
             throw new ModelCheckingException("Deadlock");
-        nextStatesQueue.add(new OpenBorderQueueItem(enablingTime, initialState));
+        nextStatesQueue.add(new TimePriorityQueueItem(enablingTime, initialState));
         while (!nextStatesQueue.isEmpty()) {
-            OpenBorderQueueItem openBorderQueueItem = nextStatesQueue.poll();
-            TimedState currentState = openBorderQueueItem.getTimedState();
+            TimePriorityQueueItem timePriorityQueueItem = nextStatesQueue.poll();
+            TimedState currentState = (TimedState) timePriorityQueueItem.getItem();
 
             List<ActorState> enabledActors = currentState.getEnabledActors();
             if (enabledActors.isEmpty())
@@ -74,7 +74,7 @@ public class TimedRebecaModelChecker extends CoreRebecaModelChecker {
 
                     if (!statespace.hasStateWithKey(stateKey)) {
                         newState.setId(stateCounter++);
-                        nextStatesQueue.add(new OpenBorderQueueItem(newState.getEnablingTime(), newState));
+                        nextStatesQueue.add(new TimePriorityQueueItem(newState.getEnablingTime(), newState));
                         statespace.addState(stateKey, newState);
                         newState.clearLinks();
                         currentState.addChildState(transitionLabel, newState);
@@ -111,40 +111,5 @@ public class TimedRebecaModelChecker extends CoreRebecaModelChecker {
 
     public void configPolicy(String policyName) throws ModelCheckingException {
 
-    }
-
-    private class OpenBorderQueueItem implements Comparable<OpenBorderQueueItem> {
-        private int time;
-        private TimedState timedState;
-
-        public OpenBorderQueueItem(int time, TimedState timedState) {
-            super();
-            this.time = time;
-            this.timedState = timedState;
-        }
-
-//		public int getTime() {
-//			return time;
-//		}
-//
-//		public void setTime(int time) {
-//			this.time = time;
-//		}
-
-        public TimedState getTimedState() {
-            return timedState;
-        }
-
-//		public void setTimedState(TimedState timedState) {
-//			this.timedState = timedState;
-//		}
-
-        public int compareTo(OpenBorderQueueItem openBorderQueueItem) {
-            if (this.time > openBorderQueueItem.time)
-                return -1;
-            if (this.time < openBorderQueueItem.time)
-                return 1;
-            return 0;
-        }
     }
 }

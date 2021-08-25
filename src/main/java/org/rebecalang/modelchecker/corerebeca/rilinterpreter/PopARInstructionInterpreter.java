@@ -7,13 +7,13 @@ import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.PopARInstru
 
 public class PopARInstructionInterpreter extends InstructionInterpreter {
 
-	@Override
-	public void interpret(InstructionBean ib, ActorState actorState, State globalState) {
+    @Override
+    public void interpret(InstructionBean ib, ActorState actorState, State globalState) {
 
-		PopARInstructionBean paib = (PopARInstructionBean) ib;
-		for (int i = 0; i < paib.getNumberOfPops(); i++)
-			actorState.popFromActorScope();
-		actorState.increasePC();
-	}
+        PopARInstructionBean paib = (PopARInstructionBean) ib;
+        for (int i = 0; i < paib.getNumberOfPops(); i++)
+            actorState.popFromActorScope();
+        actorState.increasePC();
+    }
 
 }

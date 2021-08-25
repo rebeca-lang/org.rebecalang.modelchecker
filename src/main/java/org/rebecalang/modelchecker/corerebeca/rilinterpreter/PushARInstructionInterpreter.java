@@ -6,15 +6,15 @@ import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.Instruction
 
 public class PushARInstructionInterpreter extends InstructionInterpreter {
 
-	@Override
-	public void interpret(InstructionBean ib, ActorState actorState, State globalState) {
-		actorState.pushInActorScope(actorState.getTypeName());
-		actorState.increasePC();
-	}
+    @Override
+    public void interpret(InstructionBean ib, ActorState actorState, State globalState) {
+        actorState.pushInActorScope(actorState.getTypeName());
+        actorState.increasePC();
+    }
 
-	@Override
-	public String toString() {
-		return "PUSH AR";
-	}
+    @Override
+    public String toString() {
+        return "PUSH AR";
+    }
 
 }

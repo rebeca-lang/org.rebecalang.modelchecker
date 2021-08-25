@@ -7,15 +7,15 @@ import org.rebecalang.modeltransformer.ril.corerebeca.translator.expresiontransl
 
 public class EndMethodInstructionInterpreter extends InstructionInterpreter {
 
-	@Override
-	public void interpret(InstructionBean ib, ActorState actorState, State globalState) {
-		Object retreivedReturnVariableValue = actorState.retrieveVariableValue(AbstractExpressionTranslator.RETURN_VALUE);
-		actorState.popFromActorScope();
-		actorState.setVariableValue(AbstractExpressionTranslator.RETURN_VALUE, retreivedReturnVariableValue);
-	}
+    @Override
+    public void interpret(InstructionBean ib, ActorState actorState, State globalState) {
+        Object retreivedReturnVariableValue = actorState.retrieveVariableValue(AbstractExpressionTranslator.RETURN_VALUE);
+        actorState.popFromActorScope();
+        actorState.setVariableValue(AbstractExpressionTranslator.RETURN_VALUE, retreivedReturnVariableValue);
+    }
 
-	@Override
-	public String toString() {
-		return "endMethod";
-	}
+    @Override
+    public String toString() {
+        return "endMethod";
+    }
 }
