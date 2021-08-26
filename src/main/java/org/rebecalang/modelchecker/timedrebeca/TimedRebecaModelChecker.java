@@ -32,19 +32,19 @@ public class TimedRebecaModelChecker extends CoreRebecaModelChecker {
     }
 
     @Override
-    protected void addRequiredScopeToScopeStack(ActorState actorState, ArrayList<ReactiveClassDeclaration> actorSeries) {
-        addTimedScopeToScopeStack(actorState);
+    protected void addRequiredScopeToScopeStack(BaseActorState baseActorState, ArrayList<ReactiveClassDeclaration> actorSeries) {
+        addTimedScopeToScopeStack(baseActorState);
         for (ReactiveClassDeclaration actor : actorSeries) {
-            actorState.pushInActorScope(actor.getName());
-            addStateVarsToRelatedScope(actorState, actor);
+            baseActorState.pushInActorScope(actor.getName());
+            addStateVarsToRelatedScope(baseActorState, actor);
         }
     }
 
-    private void addTimedScopeToScopeStack(ActorState actorState) {
-        actorState.pushInActorScope("TimedRebec");
-        actorState.addVariableToRecentScope(CURRENT_TIME, 0);
-        actorState.addVariableToRecentScope(RESUMING_TIME, 0);
-        actorState.addVariableToRecentScope("self", actorState);
+    private void addTimedScopeToScopeStack(BaseActorState baseActorState) {
+        baseActorState.pushInActorScope("TimedRebec");
+        baseActorState.addVariableToRecentScope(CURRENT_TIME, 0);
+        baseActorState.addVariableToRecentScope(RESUMING_TIME, 0);
+        baseActorState.addVariableToRecentScope("self", baseActorState);
     }
 
     @Override
@@ -60,16 +60,16 @@ public class TimedRebecaModelChecker extends CoreRebecaModelChecker {
             TimePriorityQueueItem timePriorityQueueItem = nextStatesQueue.poll();
             TimedState currentState = (TimedState) timePriorityQueueItem.getItem();
 
-            List<ActorState> enabledActors = currentState.getEnabledActors();
+            List<BaseActorState> enabledActors = currentState.getEnabledActors();
             if (enabledActors.isEmpty())
                 throw new ModelCheckingException("Deadlock");
-            for (ActorState actorState : enabledActors) {
+            for (BaseActorState baseActorState : enabledActors) {
                 do {
                     TimedState newState = (TimedState) cloneState(currentState);
 
-                    ActorState newActorState = newState.getActorState(actorState.getName());
-                    newActorState.execute(newState, transformedRILModel, modelCheckingPolicy);
-                    String transitionLabel = calculateTransitionLabel(actorState, newActorState);
+                    BaseActorState newBaseActorState = newState.getActorState(baseActorState.getName());
+                    newBaseActorState.execute(newState, transformedRILModel, modelCheckingPolicy);
+                    String transitionLabel = calculateTransitionLabel(baseActorState, newBaseActorState);
                     Long stateKey = (long) newState.hashCode();
 
                     if (!statespace.hasStateWithKey(stateKey)) {
@@ -105,7 +105,7 @@ public class TimedRebecaModelChecker extends CoreRebecaModelChecker {
                 new CallTimedMsgSrvInstructionInterpreter());
     }
 
-    protected String calculateTransitionLabel(ActorState actorState, ActorState newActorState) {
+    protected String calculateTransitionLabel(BaseActorState baseActorState, BaseActorState newBaseActorState) {
         return null;
     }
 

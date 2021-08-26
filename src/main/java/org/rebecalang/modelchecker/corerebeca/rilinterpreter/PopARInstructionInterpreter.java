@@ -1,6 +1,6 @@
 package org.rebecalang.modelchecker.corerebeca.rilinterpreter;
 
-import org.rebecalang.modelchecker.corerebeca.ActorState;
+import org.rebecalang.modelchecker.corerebeca.BaseActorState;
 import org.rebecalang.modelchecker.corerebeca.State;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.InstructionBean;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.PopARInstructionBean;
@@ -8,12 +8,12 @@ import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.PopARInstru
 public class PopARInstructionInterpreter extends InstructionInterpreter {
 
     @Override
-    public void interpret(InstructionBean ib, ActorState actorState, State globalState) {
+    public void interpret(InstructionBean ib, BaseActorState baseActorState, State globalState) {
 
         PopARInstructionBean paib = (PopARInstructionBean) ib;
         for (int i = 0; i < paib.getNumberOfPops(); i++)
-            actorState.popFromActorScope();
-        actorState.increasePC();
+            baseActorState.popFromActorScope();
+        baseActorState.increasePC();
     }
 
 }

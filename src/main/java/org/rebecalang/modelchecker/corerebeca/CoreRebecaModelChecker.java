@@ -114,13 +114,13 @@ public class CoreRebecaModelChecker {
                 metaData = (ReactiveClassDeclaration) coreRebecaTypeSystem.getMetaData(definition.getType());
                 ConstructorDeclaration constructorDeclaration = metaData.getConstructors().get(0);
                 String computedConstructorName = RILUtilities.computeMethodName(metaData, constructorDeclaration);
-                ActorState actorState = initialState.getActorState(definition.getName());
-                actorState.pushInActorScope(actorState.getTypeName());
-                actorState.initializePC(computedConstructorName, 0);
-                while (actorState.variableIsDefined(InstructionUtilities.PC_STRING)) {
-                    ProgramCounter pc = actorState.getPC();
+                BaseActorState baseActorState = initialState.getActorState(definition.getName());
+                baseActorState.pushInActorScope(baseActorState.getTypeName());
+                baseActorState.initializePC(computedConstructorName, 0);
+                while (baseActorState.variableIsDefined(InstructionUtilities.PC_STRING)) {
+                    ProgramCounter pc = baseActorState.getPC();
                     InstructionBean ib = transformedRILModel.getInstructionList(pc.getMethodName()).get(pc.getLineNumber());
-                    StatementInterpreterContainer.getInstance().retrieveInterpreter(ib).interpret(ib, actorState,
+                    StatementInterpreterContainer.getInstance().retrieveInterpreter(ib).interpret(ib, baseActorState,
                             initialState);
                 }
             } catch (CodeCompilationException e) {
@@ -145,7 +145,7 @@ public class CoreRebecaModelChecker {
 
     private void addKnownRebecsToRelatedScope(ReactiveClassDeclaration actorMetaData,
                                               MainRebecDefinition mainRebecDefinition, State initialState) {
-        ActorState actorState = initialState.getActorState(mainRebecDefinition.getName());
+        BaseActorState baseActorState = initialState.getActorState(mainRebecDefinition.getName());
         ArrayList<ReactiveClassDeclaration> actorSeries = getActorSeries(actorMetaData);
         int startIndex = 0;
         for (int j = 0; j < actorSeries.size(); j++) {
@@ -157,8 +157,8 @@ public class CoreRebecaModelChecker {
                     throw new RebecaRuntimeInterpreterException("not handled yet!");
                 String instanceName = ((TermPrimary) relatedBinding).getName();
                 String knownRebecName = getKnownRebecName(curActor.getKnownRebecs(), i);
-                ActorState knownActorState = initialState.getActorState(instanceName);
-                actorState.addVariableToExactScope(knownRebecName, knownActorState, j+1);
+                BaseActorState knownActorState = initialState.getActorState(instanceName);
+                baseActorState.addVariableToExactScope(knownRebecName, knownActorState, j+1);
             }
         }
     }
@@ -174,30 +174,30 @@ public class CoreRebecaModelChecker {
                 return;
             }
             ArrayList<ReactiveClassDeclaration> actorSeries = getActorSeries(metaData);
-            ActorState actorState = createFreshActorState();
-            actorState.setTypeName(definition.getType().getTypeName());
-            actorState.setQueue(new LinkedList<>());
-            actorState.setName(definition.getName());
-            actorState.initializeScopeStack();
-            addRequiredScopeToScopeStack(actorState, actorSeries);
-            initialState.putActorState(definition.getName(), actorState);
+            BaseActorState baseActorState = createFreshActorState();
+            baseActorState.setTypeName(definition.getType().getTypeName());
+//            baseActorState.setQueue(new LinkedList<>());
+            baseActorState.setName(definition.getName());
+            baseActorState.initializeScopeStack();
+            addRequiredScopeToScopeStack(baseActorState, actorSeries);
+            initialState.putActorState(definition.getName(), baseActorState);
         }
     }
 
-    protected void addStateVarsToRelatedScope(ActorState actorState, ReactiveClassDeclaration actorMetaData) {
+    protected void addStateVarsToRelatedScope(BaseActorState baseActorState, ReactiveClassDeclaration actorMetaData) {
         for (FieldDeclaration fieldDeclaration : actorMetaData.getStatevars()) {
             for (VariableDeclarator variableDeclarator : fieldDeclaration.getVariableDeclarators()) {
-                actorState.addVariableToRecentScope(variableDeclarator.getVariableName(), 0);
+                baseActorState.addVariableToRecentScope(variableDeclarator.getVariableName(), 0);
             }
         }
     }
 
-    protected void addRequiredScopeToScopeStack(ActorState actorState, ArrayList<ReactiveClassDeclaration> actorSeries) {
+    protected void addRequiredScopeToScopeStack(BaseActorState baseActorState, ArrayList<ReactiveClassDeclaration> actorSeries) {
         for (ReactiveClassDeclaration actor : actorSeries) {
-            actorState.pushInActorScope(actor.getName());
-            addStateVarsToRelatedScope(actorState, actor);
+            baseActorState.pushInActorScope(actor.getName());
+            addStateVarsToRelatedScope(baseActorState, actor);
         }
-        actorState.addVariableToExactScope("self", actorState, 0);
+        baseActorState.addVariableToExactScope("self", baseActorState, 0);
     }
 
     private ArrayList<ReactiveClassDeclaration> getActorSeries(ReactiveClassDeclaration lastActor) {
@@ -216,8 +216,8 @@ public class CoreRebecaModelChecker {
         return actorSeries;
     }
 
-    protected ActorState createFreshActorState() {
-        return new ActorState();
+    protected BaseActorState createFreshActorState() {
+        return new ActorSate();
     }
 
     protected void initializeStatementInterpreterContainer() {
@@ -267,17 +267,17 @@ public class CoreRebecaModelChecker {
         nextStatesQueue.add(initialState);
         while (!nextStatesQueue.isEmpty()) {
             State currentState = nextStatesQueue.pollFirst();
-            List<ActorState> enabledActors = currentState.getEnabledActors();
+            List<BaseActorState> enabledActors = currentState.getEnabledActors();
             if (enabledActors.isEmpty())
                 throw new ModelCheckingException("Deadlock");
-            for (ActorState actorState : enabledActors) {
+            for (BaseActorState baseActorState : enabledActors) {
                 do {
                     StatementInterpreterContainer.getInstance().clearNondeterminism();
                     State newState = cloneState(currentState);
 
-                    ActorState newActorState = newState.getActorState(actorState.getName());
-                    newActorState.execute(newState, transformedRILModel, modelCheckingPolicy);
-                    String transitionLabel = calculateTransitionLabel(actorState, newActorState);
+                    BaseActorState newBaseActorState = newState.getActorState(baseActorState.getName());
+                    newBaseActorState.execute(newState, transformedRILModel, modelCheckingPolicy);
+                    String transitionLabel = calculateTransitionLabel(baseActorState, newBaseActorState);
                     Long stateKey = (long) newState.hashCode();
 
                     if (!statespace.hasStateWithKey(stateKey)) {
@@ -297,28 +297,28 @@ public class CoreRebecaModelChecker {
         }
     }
 
-    protected String calculateTransitionLabel(ActorState actorState, ActorState newActorState) {
+    protected String calculateTransitionLabel(BaseActorState baseActorState, BaseActorState newBaseActorState) {
 
         String executingMessageName;
 
-        if (actorState.variableIsDefined(InstructionUtilities.PC_STRING)) {
-            ProgramCounter pc = actorState.getPC();
+        if (baseActorState.variableIsDefined(InstructionUtilities.PC_STRING)) {
+            ProgramCounter pc = baseActorState.getPC();
             executingMessageName = pc.getMethodName();
             executingMessageName += " [" + pc.getLineNumber() + ",";
         } else {
-            executingMessageName = actorState.getQueue().peek().getMessageName();
+            executingMessageName = baseActorState.getMessage().messageName;
             executingMessageName += " [START,";
 
         }
 
-        if (newActorState.variableIsDefined(InstructionUtilities.PC_STRING)) {
-            ProgramCounter pc = newActorState.getPC();
+        if (newBaseActorState.variableIsDefined(InstructionUtilities.PC_STRING)) {
+            ProgramCounter pc = newBaseActorState.getPC();
             executingMessageName += pc.getLineNumber() + "]";
         } else {
             executingMessageName += "END]";
 
         }
-        return actorState.getName() + "." + executingMessageName;
+        return baseActorState.getName() + "." + executingMessageName;
     }
 
     protected State cloneState(State currentState) {

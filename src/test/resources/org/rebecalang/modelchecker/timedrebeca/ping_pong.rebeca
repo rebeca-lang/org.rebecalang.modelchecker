@@ -6,7 +6,7 @@ reactiveclass PingActor(3) {
     }
 
     PingActor() {
-        self.ping();
+        self.ping() after(1);
     }
     msgsrv ping() {
         po.pong();

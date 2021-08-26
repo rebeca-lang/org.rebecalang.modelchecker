@@ -1,6 +1,6 @@
 package org.rebecalang.modelchecker.timedrebeca.rilinterpreter;
 
-import org.rebecalang.modelchecker.corerebeca.ActorState;
+import org.rebecalang.modelchecker.corerebeca.BaseActorState;
 import org.rebecalang.modelchecker.corerebeca.MessageSpecification;
 import org.rebecalang.modelchecker.corerebeca.State;
 import org.rebecalang.modelchecker.corerebeca.rilinterpreter.InstructionInterpreter;
@@ -14,12 +14,12 @@ import java.util.ArrayList;
 public class CallTimedMsgSrvInstructionInterpreter extends InstructionInterpreter {
 
     @Override
-    public void interpret(InstructionBean ib, ActorState actorState, State globalState) {
+    public void interpret(InstructionBean ib, BaseActorState baseActorState, State globalState) {
         CallTimedMsgSrvInstructionBean ctmib = (CallTimedMsgSrvInstructionBean) ib;
         MessageSpecification msgSpec = new TimedMessageSpecification(ctmib.getMsgsrvName(), new ArrayList<Object>(),
-                actorState, (int)ctmib.getAfter(), (int)ctmib.getDeadline());
-        TimedActorState receiverState = (TimedActorState) actorState.retrieveVariableValue(ctmib.getReceiver());
+                baseActorState, (int)ctmib.getAfter(), (int)ctmib.getDeadline());
+        TimedActorState receiverState = (TimedActorState) baseActorState.retrieveVariableValue(ctmib.getReceiver());
         receiverState.addToQueue(msgSpec);
-        actorState.increasePC();
+        baseActorState.increasePC();
     }
 }

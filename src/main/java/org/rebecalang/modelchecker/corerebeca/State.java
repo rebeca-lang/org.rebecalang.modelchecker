@@ -12,29 +12,29 @@ import java.util.List;
 @SuppressWarnings("serial")
 public class State implements Serializable {
 
-    protected Hashtable<String, ActorState> stateInfo;
+    protected Hashtable<String, BaseActorState> stateInfo;
     protected List<Pair<String, State>> childStates;
     protected List<Pair<String, State>> parentStates;
     private int id;
 
     public State() {
         super();
-        stateInfo = new Hashtable<String, ActorState>();
+        stateInfo = new Hashtable<String, BaseActorState>();
         childStates = new LinkedList<Pair<String, State>>();
         parentStates = new LinkedList<Pair<String, State>>();
     }
 
-    public void putActorState(String name, ActorState actorState) {
+    public void putActorState(String name, BaseActorState baseActorState) {
 
-        stateInfo.put(name, actorState);
+        stateInfo.put(name, baseActorState);
     }
 
-    public ActorState getActorState(String name) {
+    public BaseActorState getActorState(String name) {
         return stateInfo.get(name);
     }
 
-    public List<ActorState> getAllActorStates() {
-        LinkedList<ActorState> allActorsState = new LinkedList<ActorState>();
+    public List<BaseActorState> getAllActorStates() {
+        LinkedList<BaseActorState> allActorsState = new LinkedList<BaseActorState>();
         Iterator<String> iterator = stateInfo.keySet().iterator();
         while (iterator.hasNext()) {
             allActorsState.add(stateInfo.get(iterator.next()));
@@ -42,13 +42,13 @@ public class State implements Serializable {
         return allActorsState;
     }
 
-    public List<ActorState> getEnabledActors() throws ModelCheckingException {
-        LinkedList<ActorState> enabledActors = new LinkedList<ActorState>();
-        for (ActorState actorState : getAllActorStates()) {
-            if (!actorState.actorQueueIsEmpty())
-                enabledActors.add(actorState);
-            else if (actorState.variableIsDefined(InstructionUtilities.PC_STRING))
-                enabledActors.add(actorState);
+    public List<BaseActorState> getEnabledActors() throws ModelCheckingException {
+        LinkedList<BaseActorState> enabledActors = new LinkedList<BaseActorState>();
+        for (BaseActorState baseActorState : getAllActorStates()) {
+            if (!baseActorState.actorQueueIsEmpty())
+                enabledActors.add(baseActorState);
+            else if (baseActorState.variableIsDefined(InstructionUtilities.PC_STRING))
+                enabledActors.add(baseActorState);
         }
         return enabledActors;
     }

@@ -8,22 +8,22 @@ import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.Variable;
 
 public class AssignmentInstructionInterpreter extends InstructionInterpreter {
 
-    public void interpret(InstructionBean ib, ActorState actorState, State globalState) {
+    public void interpret(InstructionBean ib, BaseActorState baseActorState, State globalState) {
         AssignmentInstructionBean aib = (AssignmentInstructionBean) ib;
-        Object valueFirst = InstructionUtilities.getValue(aib.getFirstOperand(), actorState);
-        Object valueSecond = InstructionUtilities.getValue(aib.getSecondOperand(), actorState);
+        Object valueFirst = InstructionUtilities.getValue(aib.getFirstOperand(), baseActorState);
+        Object valueSecond = InstructionUtilities.getValue(aib.getSecondOperand(), baseActorState);
         Object result = valueFirst;
         String operator = aib.getOperator();
         if (operator != null) {
-            if (valueFirst instanceof ActorState) {
+            if (valueFirst instanceof BaseActorState) {
                 if (operator.equals("=="))
-                    result = (((ActorState) valueFirst).getName().
-                            equals(((ActorState) valueSecond).getName()));
+                    result = (((BaseActorState) valueFirst).getName().
+                            equals(((BaseActorState) valueSecond).getName()));
                 else if (operator.equals("!="))
-                    result = !(((ActorState) valueFirst).getName().
-                            equals(((ActorState) valueSecond).getName()));
+                    result = !(((BaseActorState) valueFirst).getName().
+                            equals(((BaseActorState) valueSecond).getName()));
                 else if (operator.equals("instanceof")) //ToDo: polymorphism remaining
-                    result = checkSecondIsAncestor(((ActorState) valueFirst).getActorScopeStack(), valueSecond.toString());
+                    result = checkSecondIsAncestor(((BaseActorState) valueFirst).getActorScopeStack(), valueSecond.toString());
                 else
                     throw new RebecaRuntimeInterpreterException(
                             "this case should not happen!! should've been reported as an error by compiler!");
@@ -31,8 +31,8 @@ public class AssignmentInstructionInterpreter extends InstructionInterpreter {
                 result = SemanticCheckerUtils.evaluateConstantTerm(operator, null, valueFirst, valueSecond);
         }
 
-        actorState.setVariableValue(((Variable) aib.getLeftVarName()).getVarName(), result);
-        actorState.increasePC();
+        baseActorState.setVariableValue(((Variable) aib.getLeftVarName()).getVarName(), result);
+        baseActorState.increasePC();
     }
 
     private boolean checkSecondIsAncestor(ActorScopeStack currentScope, String actorType) {

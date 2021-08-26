@@ -41,13 +41,13 @@ public class MessageSpecification {
         } else return senderActorState.equals(other.senderActorState);
 	}
 
-    ActorState senderActorState;
+    BaseActorState senderActorState;
 
-    public MessageSpecification(String messageName, ArrayList<Object> parameters, ActorState actorState) {
+    public MessageSpecification(String messageName, ArrayList<Object> parameters, BaseActorState baseActorState) {
         super();
         this.messageName = messageName;
         this.parameters = parameters;
-        this.senderActorState = actorState;
+        this.senderActorState = baseActorState;
     }
 
     public String getMessageName() {
@@ -66,11 +66,11 @@ public class MessageSpecification {
         this.parameters = parameters;
     }
 
-    public ActorState getSenderActorState() {
+    public BaseActorState getSenderActorState() {
         return senderActorState;
     }
 
-    public void setSenderActorState(ActorState senderActorState) {
+    public void setSenderActorState(BaseActorState senderActorState) {
         this.senderActorState = senderActorState;
     }
 
