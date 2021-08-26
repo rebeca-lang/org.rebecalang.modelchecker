@@ -59,7 +59,7 @@ public class TimedRebecaModelChecker extends CoreRebecaModelChecker {
         while (!nextStatesQueue.isEmpty()) {
             TimePriorityQueueItem timePriorityQueueItem = nextStatesQueue.poll();
             TimedState currentState = (TimedState) timePriorityQueueItem.getItem();
-
+//Until here
             List<BaseActorState> enabledActors = currentState.getEnabledActors();
             if (enabledActors.isEmpty())
                 throw new ModelCheckingException("Deadlock");

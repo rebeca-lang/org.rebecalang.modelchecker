@@ -15,7 +15,7 @@ import static org.rebecalang.modelchecker.timedrebeca.TimedRebecaModelChecker.RE
 
 @SuppressWarnings("serial")
 public class TimedActorState extends BaseActorState {
-    private PriorityQueue<TimePriorityQueueItem> queue;
+    private PriorityQueue<TimePriorityQueueItem<TimedMessageSpecification>> queue;
 
     public int getCurrentTime() {
         return (int) this.retrieveVariableValue(CURRENT_TIME);
@@ -33,8 +33,12 @@ public class TimedActorState extends BaseActorState {
         this.setVariableValue(RESUMING_TIME, currentTime);
     }
 
+    public void increaseResumingTime(int delay) {
+        this.setVariableValue(RESUMING_TIME, getResumingTime()+delay);
+    }
+
     public TimedActorState() {
-        setQueue(new PriorityQueue<>());
+        setQueue(new PriorityQueue<TimePriorityQueueItem<TimedMessageSpecification>>());
     }
 
     @Override
@@ -77,11 +81,11 @@ public class TimedActorState extends BaseActorState {
         } else return typeName.equals(other.typeName);
     }
 
-    public PriorityQueue<TimePriorityQueueItem> getQueue() {
+    public PriorityQueue<TimePriorityQueueItem<TimedMessageSpecification>> getQueue() {
         return queue;
     }
 
-    public void setQueue(PriorityQueue<TimePriorityQueueItem> queue) {
+    public void setQueue(PriorityQueue<TimePriorityQueueItem<TimedMessageSpecification>> queue) {
         this.queue = queue;
     }
 
@@ -127,6 +131,19 @@ public class TimedActorState extends BaseActorState {
 
     @Override
     public MessageSpecification getMessage() {
-        return (TimedMessageSpecification) queue.peek().getItem();
+        return queue.peek() != null ? queue.peek().getItem() : null;
+    }
+
+    public int firstTimeActorCanPeekNewMessage() {
+        if (this.variableIsDefined(InstructionUtilities.PC_STRING)) {
+            throw new RuntimeException("This version supports coarse grained execution.");
+        } else {
+            if (!this.actorQueueIsEmpty()) {
+                int resumingTime = getResumingTime();
+                int firstMsgTime =  queue.peek().getItem().minStartTime;
+                return Math.max(resumingTime, firstMsgTime);
+            }
+        }
+        return Integer.MAX_VALUE;
     }
 }

@@ -1,16 +1,16 @@
 package org.rebecalang.modelchecker.timedrebeca;
 
-public class TimePriorityQueueItem implements Comparable<TimePriorityQueueItem> {
+public class TimePriorityQueueItem<T> implements Comparable<TimePriorityQueueItem> {
     private int time;
-    private Object item;
+    private T item;
 
-    public TimePriorityQueueItem(int time, Object item) {
+    public TimePriorityQueueItem(int time, T item) {
         super();
         this.time = time;
         this.item = item;
     }
 
-    public Object getItem() {
+    public T getItem() {
         return item;
     }
 

@@ -19,7 +19,7 @@ public class TimedState extends State {
 	public int getEnablingTime() throws ModelCheckingException {
 		int minExecutionTime = Integer.MAX_VALUE;
 		for (BaseActorState baseActorState : getAllActorStates()) {
-			int firstTimeActorCanPeekNewMsg = firstTimeActorCanPeekNewMessage(baseActorState);
+			int firstTimeActorCanPeekNewMsg = ((TimedActorState)baseActorState).firstTimeActorCanPeekNewMessage();
 			minExecutionTime = Math.min(minExecutionTime, firstTimeActorCanPeekNewMsg);
 		}
 		return minExecutionTime;

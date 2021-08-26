@@ -16,7 +16,7 @@ public class CallTimedMsgSrvInstructionInterpreter extends InstructionInterprete
     @Override
     public void interpret(InstructionBean ib, BaseActorState baseActorState, State globalState) {
         CallTimedMsgSrvInstructionBean ctmib = (CallTimedMsgSrvInstructionBean) ib;
-        MessageSpecification msgSpec = new TimedMessageSpecification(ctmib.getMsgsrvName(), new ArrayList<Object>(),
+        MessageSpecification msgSpec = new TimedMessageSpecification(ctmib.getMsgsrvName(), new ArrayList<>(),
                 baseActorState, (int)ctmib.getAfter(), (int)ctmib.getDeadline());
         TimedActorState receiverState = (TimedActorState) baseActorState.retrieveVariableValue(ctmib.getReceiver());
         receiverState.addToQueue(msgSpec);
