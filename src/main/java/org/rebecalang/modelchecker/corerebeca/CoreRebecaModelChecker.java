@@ -275,9 +275,9 @@ public class CoreRebecaModelChecker {
                     StatementInterpreterContainer.getInstance().clearNondeterminism();
                     State newState = cloneState(currentState);
 
-                    BaseActorState newBaseActorState = newState.getActorState(baseActorState.getName());
-                    newBaseActorState.execute(newState, transformedRILModel, modelCheckingPolicy);
-                    String transitionLabel = calculateTransitionLabel(baseActorState, newBaseActorState);
+                    ActorSate newActorState = (ActorSate)newState.getActorState(baseActorState.getName());
+                    newActorState.execute(newState, transformedRILModel, modelCheckingPolicy);
+                    String transitionLabel = calculateTransitionLabel(baseActorState, newActorState);
                     Long stateKey = (long) newState.hashCode();
 
                     if (!statespace.hasStateWithKey(stateKey)) {

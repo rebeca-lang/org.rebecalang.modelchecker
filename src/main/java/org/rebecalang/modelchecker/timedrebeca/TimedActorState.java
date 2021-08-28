@@ -8,6 +8,7 @@ import org.rebecalang.modelchecker.corerebeca.rilinterpreter.ProgramCounter;
 import org.rebecalang.modeltransformer.ril.RILModel;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.InstructionBean;
 
+import java.util.ArrayList;
 import java.util.PriorityQueue;
 
 import static org.rebecalang.modelchecker.timedrebeca.TimedRebecaModelChecker.CURRENT_TIME;
@@ -34,7 +35,7 @@ public class TimedActorState extends BaseActorState {
     }
 
     public void increaseResumingTime(int delay) {
-        this.setVariableValue(RESUMING_TIME, getResumingTime()+delay);
+        this.setVariableValue(RESUMING_TIME, getResumingTime() + delay);
     }
 
     public TimedActorState() {
@@ -100,33 +101,29 @@ public class TimedActorState extends BaseActorState {
         return queue.isEmpty();
     }
 
-    @Override
-    public void execute(State state, RILModel transformedRILModel, AbstractPolicy policy) {
+    public void resumeExecution(State state, RILModel transformedRILModel, AbstractPolicy policy) {
         do {
-            if (variableIsDefined(InstructionUtilities.PC_STRING)) {
-                ProgramCounter pc = getPC();
-                String methodName = pc.getMethodName();
-                int lineNumber = pc.getLineNumber();
-                InstructionBean instruction = transformedRILModel.getInstructionList(methodName).get(lineNumber);
-                InstructionInterpreter interpreter = StatementInterpreterContainer.getInstance()
-                        .retrieveInterpreter(instruction);
-                policy.executedInstruction(instruction);
-                interpreter.interpret(instruction, this, state);
-
-            } else if (!queue.isEmpty()) {
-                TimedMessageSpecification executableMessage = (TimedMessageSpecification) queue.poll().getItem();
-                policy.pick(executableMessage);
-                String msgName = getTypeName() + "." + executableMessage.getMessageName().split("\\.")[1];
-                if (!transformedRILModel.getMethodNames().contains(msgName)) {
-                    msgName = executableMessage.getMessageName();
-                }
-                String relatedRebecType = msgName.split("\\.")[0];
-                actorScopeStack.pushInScopeStack(getTypeName(), relatedRebecType);
-                addVariableToRecentScope("sender", executableMessage.getSenderActorState());
-                initializePC(msgName, 0);
-            } else
-                throw new RebecaRuntimeInterpreterException("this case should not happen!");
+            ProgramCounter pc = getPC();
+            String methodName = pc.getMethodName();
+            int lineNumber = pc.getLineNumber();
+            InstructionBean instruction = transformedRILModel.getInstructionList(methodName).get(lineNumber);
+            InstructionInterpreter interpreter = StatementInterpreterContainer.getInstance().retrieveInterpreter(instruction);
+            policy.executedInstruction(instruction);
+            interpreter.interpret(instruction, this, state);
         } while (!policy.isBreakable());
+    }
+
+    public void execute(State state, RILModel transformedRILModel, AbstractPolicy policy, TimedMessageSpecification executableMessage) {
+        policy.pick(executableMessage);
+        String msgName = getTypeName() + "." + executableMessage.getMessageName().split("\\.")[1];
+        if (!transformedRILModel.getMethodNames().contains(msgName)) {
+            msgName = executableMessage.getMessageName();
+        }
+        String relatedRebecType = msgName.split("\\.")[0];
+        actorScopeStack.pushInScopeStack(getTypeName(), relatedRebecType);
+        addVariableToRecentScope("sender", executableMessage.getSenderActorState());
+        initializePC(msgName, 0);
+        resumeExecution(state, transformedRILModel, policy);
     }
 
     @Override
@@ -140,10 +137,20 @@ public class TimedActorState extends BaseActorState {
         } else {
             if (!this.actorQueueIsEmpty()) {
                 int resumingTime = getResumingTime();
-                int firstMsgTime =  queue.peek().getItem().minStartTime;
+                int firstMsgTime = queue.peek().getItem().minStartTime;
                 return Math.max(resumingTime, firstMsgTime);
             }
         }
         return Integer.MAX_VALUE;
+    }
+
+    public ArrayList<TimedMessageSpecification> getEnabledMsgs(int enablingTime) throws ModelCheckingException {
+        ArrayList<TimedMessageSpecification> enabledMsgs = new ArrayList<>();
+        while (this.queue.peek() != null && this.queue.peek().getTime() == enablingTime) {
+            TimedMessageSpecification curMsg = this.queue.poll().getItem();
+            if (curMsg.maxStartTime < getCurrentTime()) throw new ModelCheckingException("Deadlock");
+            enabledMsgs.add(curMsg);
+        }
+        return enabledMsgs;
     }
 }

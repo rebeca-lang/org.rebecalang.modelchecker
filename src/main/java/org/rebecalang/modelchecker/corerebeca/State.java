@@ -42,7 +42,7 @@ public class State implements Serializable {
         return allActorsState;
     }
 
-    public List<BaseActorState> getEnabledActors() throws ModelCheckingException {
+    public List<BaseActorState> getEnabledActors()  {
         LinkedList<BaseActorState> enabledActors = new LinkedList<BaseActorState>();
         for (BaseActorState baseActorState : getAllActorStates()) {
             if (!baseActorState.actorQueueIsEmpty())

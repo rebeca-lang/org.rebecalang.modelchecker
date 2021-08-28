@@ -14,6 +14,10 @@ public class TimePriorityQueueItem<T> implements Comparable<TimePriorityQueueIte
         return item;
     }
 
+    public int getTime() {
+        return time;
+    }
+
     public int compareTo(TimePriorityQueueItem timePriorityQueueItem) {
         return -Integer.compare(timePriorityQueueItem.time, this.time);
     }

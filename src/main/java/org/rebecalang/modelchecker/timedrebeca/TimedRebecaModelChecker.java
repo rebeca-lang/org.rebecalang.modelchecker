@@ -6,6 +6,7 @@ import org.rebecalang.compiler.modelcompiler.timedrebeca.TimedRebecaTypeSystem;
 import org.rebecalang.compiler.utils.ExceptionContainer;
 import org.rebecalang.modelchecker.RebecaModelChecker;
 import org.rebecalang.modelchecker.corerebeca.*;
+import org.rebecalang.modelchecker.corerebeca.rilinterpreter.InstructionUtilities;
 import org.rebecalang.modelchecker.timedrebeca.rilinterpreter.CallTimedMsgSrvInstructionInterpreter;
 import org.rebecalang.modeltransformer.ril.RILModel;
 import org.rebecalang.modeltransformer.ril.Rebeca2RILModelTransformer;
@@ -47,42 +48,62 @@ public class TimedRebecaModelChecker extends CoreRebecaModelChecker {
         baseActorState.addVariableToRecentScope("self", baseActorState);
     }
 
+    private TimedState executeNewState(
+            TimedState currentState,
+            TimedActorState actorState,
+            RILModel transformedRILModel,
+            int stateCounter,
+            boolean resume,
+            TimedMessageSpecification msg) {
+
+        TimedState newState = (TimedState) cloneState(currentState);
+        TimedActorState newActorState = (TimedActorState) newState.getActorState(actorState.getName());
+        if (resume) newActorState.resumeExecution(newState, transformedRILModel, modelCheckingPolicy);
+        else newActorState.execute(newState, transformedRILModel, modelCheckingPolicy, msg);
+        String transitionLabel = calculateTransitionLabel(actorState, newActorState);
+        Long stateKey = (long) newState.hashCode();
+        if (!statespace.hasStateWithKey(stateKey)) {
+            newState.setId(stateCounter++);
+            statespace.addState(stateKey, newState);
+            newState.clearLinks();
+            currentState.addChildState(transitionLabel, newState);
+            newState.addParentState(transitionLabel, currentState);
+        } else {
+            State repeatedState = statespace.getState(stateKey);
+            currentState.addChildState(transitionLabel, repeatedState);
+            repeatedState.addParentState(transitionLabel, currentState);
+        }
+        return newState;
+    }
+
+
     @Override
     protected void doFineGrainedModelChecking(RILModel transformedRILModel) throws ModelCheckingException {
         int stateCounter = 1;
+        PriorityQueue<TimePriorityQueueItem<TimedState>> nextStatesQueue = new PriorityQueue<>();
+
         TimedState initialState = (TimedState) statespace.getInitialState();
-        PriorityQueue<TimePriorityQueueItem> nextStatesQueue = new PriorityQueue<>();
-        int enablingTime = initialState.getEnablingTime();
-        if (enablingTime == Integer.MAX_VALUE)
-            throw new ModelCheckingException("Deadlock");
-        nextStatesQueue.add(new TimePriorityQueueItem(enablingTime, initialState));
+        nextStatesQueue.add(new TimePriorityQueueItem(initialState.getEnablingTime(), initialState));
+
         while (!nextStatesQueue.isEmpty()) {
             TimePriorityQueueItem timePriorityQueueItem = nextStatesQueue.poll();
             TimedState currentState = (TimedState) timePriorityQueueItem.getItem();
-//Until here
-            List<BaseActorState> enabledActors = currentState.getEnabledActors();
-            if (enabledActors.isEmpty())
-                throw new ModelCheckingException("Deadlock");
-            for (BaseActorState baseActorState : enabledActors) {
+            int enablingTime = currentState.getEnablingTime();
+            currentState.checkForTimeStep(enablingTime);
+            List<TimedActorState> enabledActors = currentState.getEnabledActors(enablingTime);
+
+            for (TimedActorState currentActorState : enabledActors) {
                 do {
-                    TimedState newState = (TimedState) cloneState(currentState);
-
-                    BaseActorState newBaseActorState = newState.getActorState(baseActorState.getName());
-                    newBaseActorState.execute(newState, transformedRILModel, modelCheckingPolicy);
-                    String transitionLabel = calculateTransitionLabel(baseActorState, newBaseActorState);
-                    Long stateKey = (long) newState.hashCode();
-
-                    if (!statespace.hasStateWithKey(stateKey)) {
-                        newState.setId(stateCounter++);
+                    if (currentActorState.variableIsDefined(InstructionUtilities.PC_STRING)) {
+                        TimedState newState = executeNewState(currentState, currentActorState, transformedRILModel,
+                                stateCounter, true, null);
                         nextStatesQueue.add(new TimePriorityQueueItem(newState.getEnablingTime(), newState));
-                        statespace.addState(stateKey, newState);
-                        newState.clearLinks();
-                        currentState.addChildState(transitionLabel, newState);
-                        newState.addParentState(transitionLabel, currentState);
                     } else {
-                        State repeatedState = statespace.getState(stateKey);
-                        currentState.addChildState(transitionLabel, repeatedState);
-                        repeatedState.addParentState(transitionLabel, currentState);
+                        for (TimedMessageSpecification msg: currentActorState.getEnabledMsgs(enablingTime)) {
+                            TimedState newState = executeNewState(currentState, currentActorState, transformedRILModel,
+                                    stateCounter, false, msg);
+                            nextStatesQueue.add(new TimePriorityQueueItem(newState.getEnablingTime(), newState));
+                        }
                     }
                 } while (StatementInterpreterContainer.getInstance().hasNondeterminism());
             }
@@ -107,9 +128,5 @@ public class TimedRebecaModelChecker extends CoreRebecaModelChecker {
 
     protected String calculateTransitionLabel(BaseActorState baseActorState, BaseActorState newBaseActorState) {
         return null;
-    }
-
-    public void configPolicy(String policyName) throws ModelCheckingException {
-
     }
 }

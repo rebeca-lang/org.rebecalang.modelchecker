@@ -1,61 +1,61 @@
 package org.rebecalang.modelchecker.timedrebeca;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-
-import org.rebecalang.compiler.utils.Pair;
 import org.rebecalang.modelchecker.corerebeca.BaseActorState;
 import org.rebecalang.modelchecker.corerebeca.ModelCheckingException;
 import org.rebecalang.modelchecker.corerebeca.State;
 import org.rebecalang.modelchecker.corerebeca.rilinterpreter.InstructionUtilities;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
 @SuppressWarnings("serial")
 public class TimedState extends State {
 
-	private LinkedList<TimeBundle> timeBundles;
-	private TimeBundle currentTimeBundle;
+    private LinkedList<TimeBundle> timeBundles;
+    private TimeBundle currentTimeBundle;
 
-	public int getEnablingTime() throws ModelCheckingException {
-		int minExecutionTime = Integer.MAX_VALUE;
-		for (BaseActorState baseActorState : getAllActorStates()) {
-			int firstTimeActorCanPeekNewMsg = ((TimedActorState)baseActorState).firstTimeActorCanPeekNewMessage();
-			minExecutionTime = Math.min(minExecutionTime, firstTimeActorCanPeekNewMsg);
-		}
-		return minExecutionTime;
-	}
+    public void checkForTimeStep(int enablingTime) {
+        List<BaseActorState> allActorStates = getAllActorStates();
+        if (!allActorStates.isEmpty()) {
+            int currentTime = ((TimedActorState) allActorStates.get(0)).getCurrentTime();
+            if (enablingTime > currentTime) {
+                for (BaseActorState actorState : allActorStates) {
+                    ((TimedActorState) actorState).setCurrentTime(enablingTime);
+                }
+            }
+        }
+    }
 
-	public List<BaseActorState> getEnabledActors() throws ModelCheckingException {
-		LinkedList<BaseActorState> enabledActors = new LinkedList<BaseActorState>();
-		ArrayList<Pair<Integer, BaseActorState>> actorsMinExecutionTimes = new ArrayList<Pair<Integer, BaseActorState>>();
-		int minExecutionTime = Integer.MAX_VALUE;
-		for (BaseActorState baseActorState : getAllActorStates()) {
-			int firstTimeActorCanPeekNewMsg = firstTimeActorCanPeekNewMessage(baseActorState);
-			minExecutionTime = Math.min(minExecutionTime, firstTimeActorCanPeekNewMsg);
-			Pair<Integer, BaseActorState> actorTimePair = new Pair<Integer, BaseActorState>(firstTimeActorCanPeekNewMsg,
-					baseActorState);
-			actorsMinExecutionTimes.add(actorTimePair);
-		}
-		if (minExecutionTime == Integer.MAX_VALUE)
-			throw new ModelCheckingException("Deadlock");
-		for (Pair<Integer, BaseActorState> actorTimePair : actorsMinExecutionTimes) {
-			if (actorTimePair.getFirst() == minExecutionTime)
-				enabledActors.add(actorTimePair.getSecond());
-		}
-		return enabledActors;
-	}
-
-	private int firstTimeActorCanPeekNewMessage(BaseActorState baseActorState) {
-		if (baseActorState.variableIsDefined(InstructionUtilities.PC_STRING)) {
-			throw new RuntimeException("This version supports coarse grained execution.");
-		} else {
-			if (!baseActorState.actorQueueIsEmpty()) {
-				ActorTimeBundle actorTimeBundle = currentTimeBundle.getActorTimeBundle(baseActorState.getName());
-				int actorNow = actorTimeBundle.getNow();
-				TimeBundleElement firstMsgTime = actorTimeBundle.getQueueBundles().getFirst();
-				return Math.max(actorNow, firstMsgTime.getMessageArrivalTime());
+    public int getEnablingTime() throws ModelCheckingException {
+        int minExecutionTime = Integer.MAX_VALUE;
+        for (BaseActorState baseActorState : getAllActorStates()) {
+            if (baseActorState.variableIsDefined(InstructionUtilities.PC_STRING))
+			{
+				minExecutionTime = Math.min(minExecutionTime, ((TimedActorState) baseActorState).getResumingTime());
+			} else {
+				int firstTimeActorCanPeekNewMsg = ((TimedActorState) baseActorState).firstTimeActorCanPeekNewMessage();
+				minExecutionTime = Math.min(minExecutionTime, firstTimeActorCanPeekNewMsg);
 			}
-		}
-		return Integer.MAX_VALUE;
-	}
+        }
+        if (minExecutionTime == Integer.MAX_VALUE)
+            throw new ModelCheckingException("Deadlock");
+        int currentTime = ((TimedActorState) getAllActorStates().get(0)).getCurrentTime();
+        if (minExecutionTime < currentTime) minExecutionTime = currentTime;
+        return minExecutionTime;
+    }
+
+    public List<TimedActorState> getEnabledActors(int enablingTime) {
+        List<TimedActorState> enabledActors = new ArrayList<>();
+        for (BaseActorState baseActorState : getAllActorStates()) {
+            if ((baseActorState.variableIsDefined(InstructionUtilities.PC_STRING))) {
+                if (((TimedActorState) baseActorState).getResumingTime() <= enablingTime) {
+                    enabledActors.add(((TimedActorState) baseActorState));
+                }
+            } else if (((TimedActorState) baseActorState).firstTimeActorCanPeekNewMessage() == enablingTime) {
+                enabledActors.add(((TimedActorState) baseActorState));
+            }
+        }
+        return enabledActors;
+    }
 }

@@ -25,8 +25,6 @@ public abstract class BaseActorState implements Serializable {
 
     public abstract boolean actorQueueIsEmpty();
 
-    public abstract void execute(State state, RILModel transformedRILModel, AbstractPolicy policy);
-
     public abstract MessageSpecification getMessage();
 
     public void initializePC(String methodName, int lineNum) {
