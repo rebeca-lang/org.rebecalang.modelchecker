@@ -1,29 +1,26 @@
 reactiveclass C (5)  {
-    statevars {
-        int var_c;
-    }
+    msgsrv testCMsg() {}
 }
 
 reactiveclass A (2)  {
     knownrebecs {
     	C known_c;
     }
-    statevars {
-		int var_a;
-	}
-    A () {
-    }
+
+    A () {}
 }
 
-reactiveclass B extends A (3){
+reactiveclass B extends A (3) {
     knownrebecs {
     	A known_a;
     }
-    statevars {
-		int var_b;
-	}
 
     B () {
+        self.testBMsg();
+    }
+
+    msgsrv testBMsg() {
+        known_c.testCMsg();
     }
 }
 

@@ -21,7 +21,7 @@ import java.util.Set;
 @ContextConfiguration(classes = {CompilerConfig.class, ModelCheckerConfig.class, ModelTransformerConfig.class})
 @SpringJUnitConfig
 public class InheritanceTest {
-    public static final String MODEL_FILES_BASE = "src/test/resources/org/rebecalang/modelchecker/";
+    public static final String MODEL_FILES_BASE = "src/test/resources/org/rebecalang/modelchecker/inheritance/";
 
     @Autowired
     public CoreRebecaModelChecker coreRebecaModelChecker;
@@ -30,8 +30,8 @@ public class InheritanceTest {
     public ExceptionContainer exceptionContainer;
 
     @Test
-    public void useParentsStateVarsInChildTest() throws ModelCheckingException {
-        File model = new File(MODEL_FILES_BASE + "use_parents_state_vars_in_child.rebeca");
+    public void useParentStateVarsInChildTest() throws ModelCheckingException {
+        File model = new File(MODEL_FILES_BASE + "use_parent_statevars_in_child.rebeca");
         Set<CompilerExtension> extension = new HashSet<>();
         coreRebecaModelChecker.configPolicy(CoreRebecaModelChecker.COARSE_GRAINED_POLICY);
         coreRebecaModelChecker.modelCheck(model, extension, CoreVersion.CORE_2_3);
@@ -61,6 +61,26 @@ public class InheritanceTest {
     }
 
     @Test
+    public void useParentsMethodsInChild() throws ModelCheckingException {
+        File model = new File(MODEL_FILES_BASE + "use_parents_methods_in_child.rebeca");
+        Set<CompilerExtension> extension = new HashSet<>();
+        coreRebecaModelChecker.configPolicy(CoreRebecaModelChecker.COARSE_GRAINED_POLICY);
+        coreRebecaModelChecker.modelCheck(model, extension, CoreVersion.CORE_2_3);
+        printExceptions();
+        Assertions.assertTrue(exceptionContainer.exceptionsIsEmpty());
+    }
+
+    @Test
+    public void CheckKnownRebecsSequence() throws ModelCheckingException {
+        File model = new File(MODEL_FILES_BASE + "known_rebecs_sequence.rebeca");
+        Set<CompilerExtension> extension = new HashSet<>();
+        coreRebecaModelChecker.configPolicy(CoreRebecaModelChecker.COARSE_GRAINED_POLICY);
+        coreRebecaModelChecker.modelCheck(model, extension, CoreVersion.CORE_2_3);
+        printExceptions();
+        Assertions.assertTrue(exceptionContainer.exceptionsIsEmpty());
+    }
+
+    @Test
     public void handleShadowedVarsTest() throws ModelCheckingException {
         File model = new File(MODEL_FILES_BASE + "handle_shadowed_vars.rebeca");
         Set<CompilerExtension> extension = new HashSet<>();
@@ -73,16 +93,6 @@ public class InheritanceTest {
     @Test
     void HandleInterfaceTest() throws ModelCheckingException {
         File model = new File(MODEL_FILES_BASE + "handle_interface.rebeca");
-        Set<CompilerExtension> extension = new HashSet<>();
-        coreRebecaModelChecker.configPolicy(CoreRebecaModelChecker.COARSE_GRAINED_POLICY);
-        coreRebecaModelChecker.modelCheck(model, extension, CoreVersion.CORE_2_3);
-        printExceptions();
-        Assertions.assertTrue(exceptionContainer.exceptionsIsEmpty());
-    }
-
-    @Test
-    public void useParentsMethodsInChild() throws ModelCheckingException {
-        File model = new File(MODEL_FILES_BASE + "use_parents_methods_in_child.rebeca");
         Set<CompilerExtension> extension = new HashSet<>();
         coreRebecaModelChecker.configPolicy(CoreRebecaModelChecker.COARSE_GRAINED_POLICY);
         coreRebecaModelChecker.modelCheck(model, extension, CoreVersion.CORE_2_3);

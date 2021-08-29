@@ -155,7 +155,7 @@ public class CoreRebecaModelChecker {
             ReactiveClassDeclaration curActor = actorSeries.get(j);
             for (int i = 0; i < curActor.getKnownRebecs().size(); i++) {
                 Expression relatedBinding = mainRebecDefinition.getBindings().get(startIndex);
-                startIndex += (i + 1);
+                startIndex += 1;
                 if (!(relatedBinding instanceof TermPrimary))
                     throw new RebecaRuntimeInterpreterException("not handled yet!");
                 String instanceName = ((TermPrimary) relatedBinding).getName();
@@ -164,6 +164,7 @@ public class CoreRebecaModelChecker {
                 actorState.addVariableToExactScope(knownRebecName, knownActorState, j);
             }
         }
+
     }
 
     private void generateInitialActorStates(State initialState, List<MainRebecDefinition> mainRebecDefinitions) {

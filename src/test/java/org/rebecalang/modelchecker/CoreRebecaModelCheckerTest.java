@@ -34,7 +34,7 @@ public class CoreRebecaModelCheckerTest {
 		File model = new File(MODEL_FILES_BASE + "DiningPhilosophers.rebeca");
 		Set<CompilerExtension> extension = new HashSet<>();
 		coreRebecaModelChecker.configPolicy(CoreRebecaModelChecker.COARSE_GRAINED_POLICY);
-		coreRebecaModelChecker.modelCheck(model, extension, CoreVersion.CORE_2_1);
+		coreRebecaModelChecker.modelCheck(model, extension, CoreVersion.CORE_2_3);
 		
 		System.out.println(exceptionContainer);
 		
