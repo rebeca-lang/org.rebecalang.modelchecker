@@ -9,8 +9,10 @@ reactiveclass PingActor(3) {
         self.ping() after(1);
     }
     msgsrv ping() {
+        int var=0;
         po.pong();
-        //delay(2);
+        delay(2);
+        var = var+1;
     }
 }
 
@@ -26,7 +28,7 @@ reactiveclass PongActor(3) {
 
     msgsrv pong() {
         pi.ping() after(1) deadline(2);
-        //delay(1);
+        delay(1);
     }
 }
 

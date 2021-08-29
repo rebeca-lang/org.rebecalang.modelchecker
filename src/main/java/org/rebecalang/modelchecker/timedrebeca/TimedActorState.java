@@ -35,7 +35,7 @@ public class TimedActorState extends BaseActorState {
     }
 
     public void increaseResumingTime(int delay) {
-        this.setVariableValue(RESUMING_TIME, getResumingTime() + delay);
+        this.setVariableValue(RESUMING_TIME, getCurrentTime() + delay);
     }
 
     public TimedActorState() {
@@ -146,7 +146,7 @@ public class TimedActorState extends BaseActorState {
 
     public ArrayList<TimedMessageSpecification> getEnabledMsgs(int enablingTime) throws ModelCheckingException {
         ArrayList<TimedMessageSpecification> enabledMsgs = new ArrayList<>();
-        while (this.queue.peek() != null && this.queue.peek().getTime() == enablingTime) {
+        while (this.queue.peek() != null && this.queue.peek().getTime() <= enablingTime) {
             TimedMessageSpecification curMsg = this.queue.poll().getItem();
             if (curMsg.maxStartTime < getCurrentTime()) throw new ModelCheckingException("Deadlock");
             enabledMsgs.add(curMsg);

@@ -52,7 +52,7 @@ public class TimedState extends State {
                 if (((TimedActorState) baseActorState).getResumingTime() <= enablingTime) {
                     enabledActors.add(((TimedActorState) baseActorState));
                 }
-            } else if (((TimedActorState) baseActorState).firstTimeActorCanPeekNewMessage() == enablingTime) {
+            } else if (((TimedActorState) baseActorState).firstTimeActorCanPeekNewMessage() <= enablingTime) {
                 enabledActors.add(((TimedActorState) baseActorState));
             }
         }

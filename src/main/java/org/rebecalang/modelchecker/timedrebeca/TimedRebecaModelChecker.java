@@ -108,7 +108,7 @@ public class TimedRebecaModelChecker extends CoreRebecaModelChecker {
                 } while (StatementInterpreterContainer.getInstance().hasNondeterminism());
             }
         }
-        RebecaModelChecker.printStateSpace(initialState);
+       // RebecaModelChecker.printStateSpace(initialState);
     }
 
     protected TimedState createFreshState() {
@@ -127,6 +127,6 @@ public class TimedRebecaModelChecker extends CoreRebecaModelChecker {
     }
 
     protected String calculateTransitionLabel(BaseActorState baseActorState, BaseActorState newBaseActorState) {
-        return null;
+        return "null";
     }
 }
