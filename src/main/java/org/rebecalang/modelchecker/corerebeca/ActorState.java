@@ -172,7 +172,6 @@ public class ActorState implements Serializable {
                 policy.executedInstruction(instruction);
                 interpreter.interpret(instruction, this, state);
 
-
             } else if (!queue.isEmpty()) {
                 MessageSpecification executableMessage = queue.poll();
                 policy.pick(executableMessage);
@@ -184,7 +183,6 @@ public class ActorState implements Serializable {
                 actorScopeStack.pushInScopeStack(getTypeName(), relatedRebecType);
                 addVariableToRecentScope("sender", executableMessage.getSenderActorState());
                 initializePC(msgName, 0);
-
 
             } else
                 throw new RebecaRuntimeInterpreterException("this case should not happen!");

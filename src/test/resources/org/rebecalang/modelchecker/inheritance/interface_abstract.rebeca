@@ -15,7 +15,7 @@ interface I3 extends I2, I1 {
     msgsrv i3test();
 }
 
-reactiveclass R1 implements I1, I1_2 (1) {
+abstract reactiveclass R1 implements I1, I1_2 (1) {
     statevars {
 		int var_1;
 	}
@@ -23,6 +23,11 @@ reactiveclass R1 implements I1, I1_2 (1) {
 	R1() {
 
 	}
+	msgsrv i1test(){}
+
+	abstract msgsrv i1abstract();
+	abstract int i1methodAbs();
+
 }
 
 reactiveclass R2 extends R1 implements I2 (2) {
@@ -34,16 +39,16 @@ reactiveclass R2 extends R1 implements I2 (2) {
 
     }
 
-    msgsrv i1test() {
-        int a = 2;
-    }
-
     msgsrv i1_2test(){
-
+        self.i1test();
     }
 
-    msgsrv i2test() {
+    msgsrv i2test() {}
 
+    msgsrv i1abstract() {}
+
+    int i1methodAbs() {
+        return 2;
     }
 }
 

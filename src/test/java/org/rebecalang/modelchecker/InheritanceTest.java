@@ -81,8 +81,8 @@ public class InheritanceTest {
     }
 
     @Test
-    public void handleShadowedVarsTest() throws ModelCheckingException {
-        File model = new File(MODEL_FILES_BASE + "handle_shadowed_vars.rebeca");
+    public void CheckSelfAndNormalCalls() throws ModelCheckingException {
+        File model = new File(MODEL_FILES_BASE + "self_and_normal_calls.rebeca");
         Set<CompilerExtension> extension = new HashSet<>();
         coreRebecaModelChecker.configPolicy(CoreRebecaModelChecker.COARSE_GRAINED_POLICY);
         coreRebecaModelChecker.modelCheck(model, extension, CoreVersion.CORE_2_3);
@@ -91,8 +91,8 @@ public class InheritanceTest {
     }
 
     @Test
-    void HandleInterfaceTest() throws ModelCheckingException {
-        File model = new File(MODEL_FILES_BASE + "handle_interface.rebeca");
+    public void CheckHomonymous() throws ModelCheckingException {
+        File model = new File(MODEL_FILES_BASE + "homonymous_attributes.rebeca");
         Set<CompilerExtension> extension = new HashSet<>();
         coreRebecaModelChecker.configPolicy(CoreRebecaModelChecker.COARSE_GRAINED_POLICY);
         coreRebecaModelChecker.modelCheck(model, extension, CoreVersion.CORE_2_3);
@@ -101,8 +101,18 @@ public class InheritanceTest {
     }
 
     @Test
-    public void handleInstanceof() throws ModelCheckingException {
-        File model = new File(MODEL_FILES_BASE + "handle_instanceof.rebeca");
+    void CheckInterfaceAndAbstract() throws ModelCheckingException {
+        File model = new File(MODEL_FILES_BASE + "interface_abstract.rebeca");
+        Set<CompilerExtension> extension = new HashSet<>();
+        coreRebecaModelChecker.configPolicy(CoreRebecaModelChecker.COARSE_GRAINED_POLICY);
+        coreRebecaModelChecker.modelCheck(model, extension, CoreVersion.CORE_2_3);
+        printExceptions();
+        Assertions.assertTrue(exceptionContainer.exceptionsIsEmpty());
+    }
+
+    @Test
+    public void checkInstanceof() throws ModelCheckingException {
+        File model = new File(MODEL_FILES_BASE + "instanceof_expression.rebeca");
         Set<CompilerExtension> extension = new HashSet<>();
         coreRebecaModelChecker.configPolicy(CoreRebecaModelChecker.COARSE_GRAINED_POLICY);
         coreRebecaModelChecker.modelCheck(model, extension, CoreVersion.CORE_2_3);
@@ -112,7 +122,7 @@ public class InheritanceTest {
 
     @Test
     void handleInterfaceTest() throws ModelCheckingException {
-        File model = new File(MODEL_FILES_BASE + "handle_interface.rebeca");
+        File model = new File(MODEL_FILES_BASE + "interface_abstract.rebeca");
         Set<CompilerExtension> extension = new HashSet<>();
         coreRebecaModelChecker.configPolicy(CoreRebecaModelChecker.COARSE_GRAINED_POLICY);
         coreRebecaModelChecker.modelCheck(model, extension, CoreVersion.CORE_2_3);
@@ -128,19 +138,6 @@ public class InheritanceTest {
         coreRebecaModelChecker.modelCheck(model, extension, CoreVersion.CORE_2_3);
         printExceptions();
         Assertions.assertTrue(exceptionContainer.exceptionsIsEmpty());
-    }
-
-    @Test
-    void generalTest1() throws ModelCheckingException {
-        File model = new File(MODEL_FILES_BASE + "general_inheritance_test_1.rebeca");
-        Set<CompilerExtension> extension = new HashSet<>();
-        coreRebecaModelChecker.configPolicy(CoreRebecaModelChecker.COARSE_GRAINED_POLICY);
-        try {
-            coreRebecaModelChecker.modelCheck(model, extension, CoreVersion.CORE_2_3);
-        } catch (ModelCheckingException e) {
-            e.printStackTrace();
-        }
-        printExceptions();
     }
 
     private void printExceptions() {
