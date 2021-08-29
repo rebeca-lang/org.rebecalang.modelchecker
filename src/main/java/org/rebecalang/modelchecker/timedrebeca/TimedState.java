@@ -11,10 +11,6 @@ import java.util.List;
 
 @SuppressWarnings("serial")
 public class TimedState extends State {
-
-    private LinkedList<TimeBundle> timeBundles;
-    private TimeBundle currentTimeBundle;
-
     public void checkForTimeStep(int enablingTime) {
         List<BaseActorState> allActorStates = getAllActorStates();
         if (!allActorStates.isEmpty()) {

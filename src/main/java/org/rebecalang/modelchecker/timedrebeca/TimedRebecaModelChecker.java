@@ -60,7 +60,7 @@ public class TimedRebecaModelChecker extends CoreRebecaModelChecker {
         TimedActorState newActorState = (TimedActorState) newState.getActorState(actorState.getName());
         if (resume) newActorState.resumeExecution(newState, transformedRILModel, modelCheckingPolicy);
         else newActorState.execute(newState, transformedRILModel, modelCheckingPolicy, msg);
-        String transitionLabel = calculateTransitionLabel(actorState, newActorState);
+        String transitionLabel = calculateTransitionLabel(actorState, newActorState, msg);
         Long stateKey = (long) newState.hashCode();
         if (!statespace.hasStateWithKey(stateKey)) {
             newState.setId(stateCounter++);
@@ -108,7 +108,7 @@ public class TimedRebecaModelChecker extends CoreRebecaModelChecker {
                 } while (StatementInterpreterContainer.getInstance().hasNondeterminism());
             }
         }
-       // RebecaModelChecker.printStateSpace(initialState);
+        RebecaModelChecker.printStateSpace(initialState);
     }
 
     protected TimedState createFreshState() {
@@ -124,9 +124,5 @@ public class TimedRebecaModelChecker extends CoreRebecaModelChecker {
 
         StatementInterpreterContainer.getInstance().registerInterpreter(CallTimedMsgSrvInstructionBean.class,
                 new CallTimedMsgSrvInstructionInterpreter());
-    }
-
-    protected String calculateTransitionLabel(BaseActorState baseActorState, BaseActorState newBaseActorState) {
-        return "null";
     }
 }

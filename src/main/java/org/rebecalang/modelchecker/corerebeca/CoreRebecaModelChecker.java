@@ -277,7 +277,7 @@ public class CoreRebecaModelChecker {
 
                     ActorSate newActorState = (ActorSate)newState.getActorState(baseActorState.getName());
                     newActorState.execute(newState, transformedRILModel, modelCheckingPolicy);
-                    String transitionLabel = calculateTransitionLabel(baseActorState, newActorState);
+                    String transitionLabel = calculateTransitionLabel(baseActorState, newActorState, baseActorState.getMessage());
                     Long stateKey = (long) newState.hashCode();
 
                     if (!statespace.hasStateWithKey(stateKey)) {
@@ -297,7 +297,7 @@ public class CoreRebecaModelChecker {
         }
     }
 
-    protected String calculateTransitionLabel(BaseActorState baseActorState, BaseActorState newBaseActorState) {
+    protected String calculateTransitionLabel(BaseActorState baseActorState, BaseActorState newBaseActorState, MessageSpecification msg) {
 
         String executingMessageName;
 
@@ -306,7 +306,7 @@ public class CoreRebecaModelChecker {
             executingMessageName = pc.getMethodName();
             executingMessageName += " [" + pc.getLineNumber() + ",";
         } else {
-            executingMessageName = baseActorState.getMessage().messageName;
+            executingMessageName = msg.messageName;
             executingMessageName += " [START,";
 
         }
