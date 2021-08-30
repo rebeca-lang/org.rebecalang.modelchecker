@@ -1,5 +1,9 @@
 package org.rebecalang.modelchecker.corerebeca;
 
+import org.rebecalang.compiler.modelcompiler.corerebeca.CoreRebecaTypeSystem;
+import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.ReactiveClassDeclaration;
+import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.Type;
+import org.rebecalang.compiler.utils.CodeCompilationException;
 import org.rebecalang.modelchecker.corerebeca.policy.AbstractPolicy;
 import org.rebecalang.modelchecker.corerebeca.rilinterpreter.InstructionInterpreter;
 import org.rebecalang.modelchecker.corerebeca.rilinterpreter.InstructionUtilities;
@@ -14,10 +18,12 @@ import java.util.LinkedList;
 
 @SuppressWarnings("serial")
 public class ActorState implements Serializable {
+
     private LinkedList<MessageSpecification> queue;
     protected ActorScopeStack actorScopeStack;
     private String name;
     private String typeName;
+    private CoreRebecaTypeSystem typeSystem;
 
     @Override
     public int hashCode() {
@@ -164,25 +170,66 @@ public class ActorState implements Serializable {
         do {
             if (variableIsDefined(InstructionUtilities.PC_STRING)) {
                 ProgramCounter pc = getPC();
+
                 String methodName = pc.getMethodName();
+                Type currentType = null;
+                try {
+                    currentType = typeSystem.getType(pc.getMethodName().split("\\.")[0]);
+                } catch (CodeCompilationException e) {
+                    e.printStackTrace();
+                }
+
+                while (transformedRILModel.getInstructionList(methodName) == null) {
+                    try {
+                        ReactiveClassDeclaration rcd = (ReactiveClassDeclaration)typeSystem.getMetaData(currentType);
+                        if (rcd.getExtends() == null)
+                            break;
+                        currentType = rcd.getExtends();
+                        methodName = currentType.getTypeName() + "." + pc.getMethodName().split("\\.")[1];
+                    } catch (CodeCompilationException e) {
+                        e.printStackTrace();
+                    }
+                }
+
                 int lineNumber = pc.getLineNumber();
+
                 InstructionBean instruction = transformedRILModel.getInstructionList(methodName).get(lineNumber);
                 InstructionInterpreter interpreter = StatementInterpreterContainer.getInstance()
                         .retrieveInterpreter(instruction);
                 policy.executedInstruction(instruction);
                 interpreter.interpret(instruction, this, state);
+                int a = 2;
 
             } else if (!queue.isEmpty()) {
                 MessageSpecification executableMessage = queue.poll();
                 policy.pick(executableMessage);
-                String msgName = getTypeName() + "." + executableMessage.getMessageName().split("\\.")[1];
-                if (!transformedRILModel.getMethodNames().contains(msgName)) {
-                    msgName = executableMessage.getMessageName();
+
+
+                String msgName = executableMessage.getMessageName();
+                Type currentType = null;
+                try {
+                    currentType = typeSystem.getType(executableMessage.getMessageName().split("\\.")[0]);
+                } catch (CodeCompilationException e) {
+                    e.printStackTrace();
                 }
+
+                while (!transformedRILModel.getMethodNames().contains(msgName)) {
+                    try {
+                        ReactiveClassDeclaration rcd = (ReactiveClassDeclaration)typeSystem.getMetaData(currentType);
+                        if (rcd.getExtends() == null)
+                            break;
+                        currentType = rcd.getExtends();
+                        msgName = currentType.getTypeName() + "." + executableMessage.getMessageName().split("\\.")[1];
+                    } catch (CodeCompilationException e) {
+                        e.printStackTrace();
+                    }
+                }
+
                 String relatedRebecType = msgName.split("\\.")[0];
                 actorScopeStack.pushInScopeStack(getTypeName(), relatedRebecType);
                 addVariableToRecentScope("sender", executableMessage.getSenderActorState());
                 initializePC(msgName, 0);
+                int a = 2;
 
             } else
                 throw new RebecaRuntimeInterpreterException("this case should not happen!");
@@ -191,5 +238,9 @@ public class ActorState implements Serializable {
 
     public ActorScopeStack getActorScopeStack() {
         return actorScopeStack;
+    }
+
+    public void setTypeSystem(CoreRebecaTypeSystem typeSystem) {
+        this.typeSystem = typeSystem;
     }
 }

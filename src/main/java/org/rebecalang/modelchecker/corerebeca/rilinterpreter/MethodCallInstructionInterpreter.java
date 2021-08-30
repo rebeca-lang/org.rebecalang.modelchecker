@@ -16,6 +16,9 @@ public class MethodCallInstructionInterpreter extends InstructionInterpreter {
 		actorState.increasePC();
 
 		MethodCallInstructionBean mcib = (MethodCallInstructionBean) ib;
+
+		ActorState receiverState = (ActorState) actorState.retrieveVariableValue(mcib.getBase());
+
 		List<Object> calculatedValuesOfParams = new LinkedList<Object>();
 		for(int cnt = 0; cnt < mcib.getParameters().size(); cnt++) {
 			Object paramValue = mcib.getParameters().get(cnt);
@@ -24,13 +27,14 @@ public class MethodCallInstructionInterpreter extends InstructionInterpreter {
 			else
 				calculatedValuesOfParams.add(paramValue);
 		}
-		actorState.pushInActorScope(actorState.getTypeName(), ((MethodCallInstructionBean) ib).getMethodName().split("\\.")[0]);
+		actorState.pushInActorScope(actorState.getTypeName(), receiverState.getTypeName());
 		for(int cnt = 0; cnt < mcib.getParameters().size(); cnt++) {
 			Object paramValue = calculatedValuesOfParams.get(cnt);
 			String paramName = mcib.getParametersNames().get(cnt);
 			actorState.addVariableToRecentScope(paramName, paramValue);
 		}
-		actorState.initializePC(mcib.getMethodName(), 0);
+		actorState.initializePC(receiverState.getTypeName() + "." + mcib.getMethodName().split("\\.")[1], 0);
+		int a = 2;
 		return;
 	}
 

@@ -14,9 +14,11 @@ public class CallMsgSrvInstructionInterpreter extends InstructionInterpreter {
     public void interpret(InstructionBean ib, ActorState actorState, State globalState) {
         CallMsgSrvInstructionBean cmib = (CallMsgSrvInstructionBean) ib;
         ActorState receiverState = (ActorState) actorState.retrieveVariableValue(cmib.getReceiver());
-        String msgSrvName = cmib.getMsgsrvName();
+        String msgSrvName = receiverState.getTypeName() + "." + cmib.getMsgsrvName().split("\\.")[1];
         MessageSpecification msgSpec = new MessageSpecification(msgSrvName, new ArrayList<Object>(), actorState);
         receiverState.addToQueue(msgSpec);
         actorState.increasePC();
+
+        int a = 2;
     }
 }

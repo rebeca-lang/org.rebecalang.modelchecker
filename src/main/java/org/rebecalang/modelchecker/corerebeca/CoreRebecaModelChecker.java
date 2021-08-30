@@ -182,6 +182,7 @@ public class CoreRebecaModelChecker {
             actorState.setTypeName(definition.getType().getTypeName());
             actorState.setQueue(new LinkedList<>());
             actorState.setName(definition.getName());
+            actorState.setTypeSystem(coreRebecaTypeSystem);
             actorState.initializeScopeStack();
             addRequiredScopeToScopeStack(actorState, actorSeries);
             initialState.putActorState(definition.getName(), actorState);
