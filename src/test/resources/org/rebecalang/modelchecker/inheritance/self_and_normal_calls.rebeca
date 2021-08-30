@@ -1,0 +1,86 @@
+reactiveclass X(2) {}
+reactiveclass Y(2) {}
+reactiveclass Z(2) {}
+
+reactiveclass A (6)  {
+    knownrebecs {
+    	X known_x;
+    }
+
+    statevars {
+        int s_a1;
+        int s_a2;
+    }
+
+    A () {}
+
+    msgsrv msga1(){}
+    msgsrv msga2(){}
+
+    int methoda1(int a, int b) {
+        return a+2+b;
+    }
+}
+
+reactiveclass B extends A (6) {
+    knownrebecs {
+        Y known_y1;
+        Y known_y2;
+    }
+
+    statevars {
+        int s_b1;
+        int s_b2;
+    }
+
+    B () {}
+
+    msgsrv msgb1(){}
+}
+
+reactiveclass C extends B (10)  {
+    knownrebecs {
+        Z known_z;
+    }
+
+    statevars {
+        int s_c1;
+    }
+
+    C () {
+        msgc1();
+        self.msgc1();
+    }
+
+    msgsrv msgc1(){
+        s_a1 = 2;
+        self.s_a2 = 2;
+        s_b1 = 3;
+        self.s_b2 = 3;
+        s_c1 = 4;
+        self.s_c1 = 4;
+        msga1();
+        self.msga2();
+        msgb1();
+        s_b1 = self.methoda1(s_b2, s_c1) + methodc1();
+        s_c1 = methoda1(s_a2, s_c1) + self.methodc1();
+
+    }
+
+    int methodc1(){
+        return 2;
+    }
+}
+
+main {
+    X x():();
+    Y y1():();
+    Y y2():();
+    Z z():();
+
+    A a(x):();
+    B b(x, y1, y2):();
+
+    C c(x, y1, y2, z):();
+
+}

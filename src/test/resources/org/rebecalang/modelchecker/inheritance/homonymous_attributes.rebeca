@@ -1,0 +1,62 @@
+reactiveclass X(2) {}
+reactiveclass Y(2) {}
+reactiveclass Z(2) {}
+
+reactiveclass A (6)  {
+    knownrebecs {
+    	X known_xy;
+    }
+    statevars {
+        int s_y;
+        int s_y;
+    }
+
+    A () {}
+
+    msgsrv testBMsg() {}
+    int methodB() {}
+}
+
+reactiveclass B extends A (6) {
+    knownrebecs {
+        X known_xy;
+        Y known_y;
+    }
+    statevars {
+        int s_y;
+        int s_y;
+    }
+    B () {
+        X tempY = known_xy;
+        s_y = 2;
+    }
+
+    msgsrv testBMsg() {}
+    int methodB() {}
+}
+
+reactiveclass C extends B (10)  {
+    knownrebecs {
+        Z known_z;
+    }
+
+    C () {}
+
+    int getInt(){
+        return 2;
+    }
+}
+
+main {
+    X x():();
+    X x2():();
+    Y y1():();
+    Y y2():();
+    Z z():();
+
+    A a(x):();
+    B b(x, x2, y2):();
+
+    C c(x, x2, y2, z):();
+
+}

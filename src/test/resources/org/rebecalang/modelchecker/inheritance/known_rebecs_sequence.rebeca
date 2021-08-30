@@ -1,0 +1,46 @@
+reactiveclass X(2) {}
+reactiveclass Y(2) {}
+reactiveclass Z(2) {}
+
+reactiveclass A (6)  {
+    knownrebecs {
+    	X known_x;
+    }
+
+    A () {}
+}
+
+reactiveclass B extends A (6) {
+    knownrebecs {
+        Y known_y1;
+        Y known_y2;
+    }
+    B () {}
+
+    msgsrv testBMsg() {}
+}
+
+reactiveclass C extends B (10)  {
+    knownrebecs {
+        Z known_z;
+    }
+
+    C () {}
+
+    int getInt(){
+        return 2;
+    }
+}
+
+main {
+    X x():();
+    Y y1():();
+    Y y2():();
+    Z z():();
+
+    A a(x):();
+    B b(x, y1, y2):();
+
+    C c(x, y1, y2, z):();
+
+}
