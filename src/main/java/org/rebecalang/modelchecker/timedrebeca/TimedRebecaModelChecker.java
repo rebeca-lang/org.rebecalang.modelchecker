@@ -1,124 +1,130 @@
 package org.rebecalang.modelchecker.timedrebeca;
 
-import java.util.List;
-import java.util.PriorityQueue;
-
+import org.rebecalang.compiler.modelcompiler.RebecaModelCompiler;
+import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.ReactiveClassDeclaration;
+import org.rebecalang.compiler.modelcompiler.timedrebeca.TimedRebecaTypeSystem;
+import org.rebecalang.compiler.utils.ExceptionContainer;
 import org.rebecalang.modelchecker.RebecaModelChecker;
-import org.rebecalang.modelchecker.corerebeca.ActorState;
-import org.rebecalang.modelchecker.corerebeca.CoreRebecaModelChecker;
-import org.rebecalang.modelchecker.corerebeca.ModelCheckingException;
-import org.rebecalang.modelchecker.corerebeca.State;
-import org.rebecalang.modelchecker.corerebeca.StatementInterpreterContainer;
+import org.rebecalang.modelchecker.corerebeca.*;
+import org.rebecalang.modelchecker.corerebeca.rilinterpreter.InstructionUtilities;
 import org.rebecalang.modelchecker.timedrebeca.rilinterpreter.CallTimedMsgSrvInstructionInterpreter;
 import org.rebecalang.modeltransformer.ril.RILModel;
+import org.rebecalang.modeltransformer.ril.Rebeca2RILModelTransformer;
 import org.rebecalang.modeltransformer.ril.timedrebeca.rilinstruction.CallTimedMsgSrvInstructionBean;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.PriorityQueue;
 
 @Component
 public class TimedRebecaModelChecker extends CoreRebecaModelChecker {
 
-	public TimedRebecaModelChecker() {
-		super();
-	}
+    public final static String CURRENT_TIME = "current_time";
+    public final static String RESUMING_TIME = "resuming_time";
 
-	@Override
-	protected void doFineGrainedModelChecking(RILModel transformedRILModel) throws ModelCheckingException {
-		int stateCounter = 1;
-		TimedState initialState = (TimedState) statespace.getInitialState();
-		PriorityQueue<OpenBorderQueueItem> nextStatesQueue = new PriorityQueue<OpenBorderQueueItem>();
-		int enablingTime = initialState.getEnablingTime();
-		if (enablingTime == Integer.MAX_VALUE)
-			throw new ModelCheckingException("Deadlock");
-		nextStatesQueue.add(new OpenBorderQueueItem(enablingTime, initialState));
-		while (!nextStatesQueue.isEmpty()) {
-			OpenBorderQueueItem openBorderQueueItem = nextStatesQueue.poll();
-			TimedState currentState = openBorderQueueItem.getTimedState();
+    public TimedRebecaModelChecker(
+            TimedRebecaTypeSystem timedRebecaTypeSystem,
+            RebecaModelCompiler rebecaModelCompiler,
+            ExceptionContainer exceptionContainer,
+            Rebeca2RILModelTransformer rebeca2RILModelTransformer
+    ) {
+        super(timedRebecaTypeSystem, rebecaModelCompiler, exceptionContainer, rebeca2RILModelTransformer);
+    }
 
-			List<ActorState> enabledActors = currentState.getEnabledActors();
-			if (enabledActors.isEmpty())
-				throw new ModelCheckingException("Deadlock");
-			for (ActorState actorState : enabledActors) {
-				do {
-					TimedState newState = (TimedState) cloneState(currentState);
+    @Override
+    protected void addRequiredScopeToScopeStack(BaseActorState baseActorState, ArrayList<ReactiveClassDeclaration> actorSeries) {
+        addTimedScopeToScopeStack(baseActorState);
+        for (ReactiveClassDeclaration actor : actorSeries) {
+            baseActorState.pushInActorScope(actor.getName());
+            addStateVarsToRelatedScope(baseActorState, actor);
+        }
+    }
 
-					ActorState newActorState = newState.getActorState(actorState.getName());
-					newActorState.execute(newState, transformedRILModel, modelCheckingPolicy);
-					String transitionLabel = calculateTransitionLabel(actorState, newActorState);
-					Long stateKey = (long) newState.hashCode();
+    private void addTimedScopeToScopeStack(BaseActorState baseActorState) {
+        baseActorState.pushInActorScope("TimedRebec");
+        baseActorState.addVariableToRecentScope(CURRENT_TIME, 0);
+        baseActorState.addVariableToRecentScope(RESUMING_TIME, 0);
+        baseActorState.addVariableToRecentScope("self", baseActorState);
+    }
 
-					if (!statespace.hasStateWithKey(stateKey)) {
-						newState.setId(stateCounter++);
-						nextStatesQueue.add(new OpenBorderQueueItem(newState.getEnablingTime(), newState));
-						statespace.addState(stateKey, newState);
-						newState.clearLinks();
-						currentState.addChildState(transitionLabel, newState);
-						newState.addParentState(transitionLabel, currentState);
-					} else {
-						State repeatedState = statespace.getState(stateKey);
-						currentState.addChildState(transitionLabel, repeatedState);
-						repeatedState.addParentState(transitionLabel, currentState);
-					}
-				} while (StatementInterpreterContainer.getInstance().hasNondeterminism());
-			}
-		}
-		RebecaModelChecker.printStateSpace(initialState);
-	}
+    private TimedState executeNewState(
+            TimedState currentState,
+            TimedActorState actorState,
+            RILModel transformedRILModel,
+            int stateCounter,
+            boolean resume,
+            TimedMessageSpecification msg) {
 
-	protected TimedState createFreshState() {
-		return new TimedState();
-	}
+        TimedState newState = (TimedState) cloneState(currentState);
+        TimedActorState newActorState = (TimedActorState) newState.getActorState(actorState.getName());
+        if (resume)
+            newActorState.resumeExecution(newState, transformedRILModel, modelCheckingPolicy);
+        else
+            newActorState.execute(newState, transformedRILModel, modelCheckingPolicy, msg);
+        String transitionLabel = calculateTransitionLabel(actorState, newActorState, msg);
+        Long stateKey = (long) newState.hashCode();
+        if (!statespace.hasStateWithKey(stateKey)) {
+            newState.setId(stateCounter++);
+            statespace.addState(stateKey, newState);
+            newState.clearLinks();
+            currentState.addChildState(transitionLabel, newState);
+            newState.addParentState(transitionLabel, currentState);
+        } else {
+            State repeatedState = statespace.getState(stateKey);
+            currentState.addChildState(transitionLabel, repeatedState);
+            repeatedState.addParentState(transitionLabel, currentState);
+        }
+        return newState;
+    }
 
-	protected TimedActorState createFreshActorState() {
-		return new TimedActorState();
-	}
 
-	protected void initializeStatementInterpreterContainer() {
-		super.initializeStatementInterpreterContainer();
+    @Override
+    protected void doFineGrainedModelChecking(RILModel transformedRILModel) throws ModelCheckingException {
+        int stateCounter = 1;
+            PriorityQueue<TimePriorityQueueItem<TimedState>> nextStatesQueue = new PriorityQueue<>();
 
-		StatementInterpreterContainer.getInstance().registerInterpreter(CallTimedMsgSrvInstructionBean.class,
-				new CallTimedMsgSrvInstructionInterpreter());
-	}
+            TimedState initialState = (TimedState) statespace.getInitialState();
+            nextStatesQueue.add(new TimePriorityQueueItem(initialState.getEnablingTime(), initialState));
 
-	protected String calculateTransitionLabel(ActorState actorState, ActorState newActorState) {
-		return null;
-	}
+            while (!nextStatesQueue.isEmpty()) {
+                TimePriorityQueueItem timePriorityQueueItem = nextStatesQueue.poll();
+                TimedState currentState = (TimedState) timePriorityQueueItem.getItem();
+                int enablingTime = currentState.getEnablingTime();
+                currentState.checkForTimeStep(enablingTime);
+                List<TimedActorState> enabledActors = currentState.getEnabledActors(enablingTime);
 
-	public void configPolicy(String policyName) throws ModelCheckingException {
+                for (TimedActorState currentActorState : enabledActors) {
+                    do {
+                        if (currentActorState.variableIsDefined(InstructionUtilities.PC_STRING)) {
+                            TimedState newState = executeNewState(currentState, currentActorState, transformedRILModel,
+                                    stateCounter, true, null);
+                            nextStatesQueue.add(new TimePriorityQueueItem(newState.getEnablingTime(), newState));
+                        } else {
+                            for (TimedMessageSpecification msg : currentActorState.getEnabledMsgs(enablingTime)) {
+                                TimedState newState = executeNewState(currentState, currentActorState, transformedRILModel,
+                                        stateCounter, false, msg);
+                                nextStatesQueue.add(new TimePriorityQueueItem(newState.getEnablingTime(), newState));
+                            }
+                        }
+                    } while (StatementInterpreterContainer.getInstance().hasNondeterminism());
+                }
+        }
+        RebecaModelChecker.printStateSpace(initialState);
+    }
 
-	}
+    protected TimedState createFreshState() {
+        return new TimedState();
+    }
 
-	private class OpenBorderQueueItem implements Comparable<OpenBorderQueueItem> {
-		private int time;
-		private TimedState timedState;
+    protected TimedActorState createFreshActorState() {
+        return new TimedActorState();
+    }
 
-		public OpenBorderQueueItem(int time, TimedState timedState) {
-			super();
-			this.time = time;
-			this.timedState = timedState;
-		}
+    protected void initializeStatementInterpreterContainer() {
+        super.initializeStatementInterpreterContainer();
 
-//		public int getTime() {
-//			return time;
-//		}
-//
-//		public void setTime(int time) {
-//			this.time = time;
-//		}
-
-		public TimedState getTimedState() {
-			return timedState;
-		}
-
-//		public void setTimedState(TimedState timedState) {
-//			this.timedState = timedState;
-//		}
-
-		public int compareTo(OpenBorderQueueItem openBorderQueueItem) {
-			if (this.time > openBorderQueueItem.time)
-				return -1;
-			if (this.time < openBorderQueueItem.time)
-				return 1;
-			return 0;
-		}
-	}
+        StatementInterpreterContainer.getInstance().registerInterpreter(CallTimedMsgSrvInstructionBean.class,
+                new CallTimedMsgSrvInstructionInterpreter());
+    }
 }

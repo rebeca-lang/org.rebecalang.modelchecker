@@ -10,20 +10,15 @@ import org.rebecalang.modelchecker.corerebeca.rilinterpreter.InstructionUtilitie
 import org.rebecalang.modelchecker.corerebeca.rilinterpreter.ProgramCounter;
 import org.rebecalang.modeltransformer.ril.RILModel;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.InstructionBean;
-import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.Variable;
-import org.rebecalang.modeltransformer.ril.corerebeca.translator.expresiontranslator.AbstractExpressionTranslator;
 
-import java.io.Serializable;
 import java.util.LinkedList;
 
-@SuppressWarnings("serial")
-public class ActorState implements Serializable {
-
+public class ActorSate extends BaseActorState {
     private LinkedList<MessageSpecification> queue;
-    protected ActorScopeStack actorScopeStack;
-    private String name;
-    private String typeName;
-    private CoreRebecaTypeSystem typeSystem;
+
+    public ActorSate() {
+        setQueue(new LinkedList<>());
+    }
 
     @Override
     public int hashCode() {
@@ -44,7 +39,7 @@ public class ActorState implements Serializable {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        ActorState other = (ActorState) obj;
+        ActorSate other = (ActorSate) obj;
         if (actorScopeStack == null) {
             if (other.actorScopeStack != null)
                 return false;
@@ -65,103 +60,26 @@ public class ActorState implements Serializable {
         } else return typeName.equals(other.typeName);
     }
 
+    public MessageSpecification getMessage() {
+        return queue.peek();
+    }
+
     public LinkedList<MessageSpecification> getQueue() {
         return queue;
-    }
-
-    public void initializePC(String methodName, int lineNum) {
-//		String location = getLocationName(methodName);
-        addVariableToRecentScope(InstructionUtilities.PC_STRING, new ProgramCounter(methodName, lineNum));
-        addVariableToRecentScope(AbstractExpressionTranslator.RETURN_VALUE, 0);
-
-    }
-
-    public void clearPC() {
-        actorScopeStack.removeVariable(InstructionUtilities.PC_STRING);
-    }
-
-    public void setPC(String methodName, int lineNum) {
-        ProgramCounter pc = (ProgramCounter) retrieveVariableValue(InstructionUtilities.PC_STRING);
-        pc.setLineNumber(lineNum);
-        pc.setMethodName(methodName);
-    }
-
-    public void increasePC() {
-        ProgramCounter pc = (ProgramCounter) retrieveVariableValue(InstructionUtilities.PC_STRING);
-        pc.setLineNumber(pc.getLineNumber() + 1);
-    }
-
-    public ProgramCounter getPC() {
-        return (ProgramCounter) retrieveVariableValue(InstructionUtilities.PC_STRING);
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public void setQueue(LinkedList<MessageSpecification> queue) {
         this.queue = queue;
     }
 
+    @Override
     public void addToQueue(MessageSpecification msgSpec) {
         queue.add(msgSpec);
     }
 
+    @Override
     public boolean actorQueueIsEmpty() {
         return queue.isEmpty();
-    }
-
-    public void pushInActorScope(String relatedRebecType) {
-        actorScopeStack.pushInScopeStack(relatedRebecType);
-    }
-
-    public void pushInActorScope(String relatedRebecType, String prevRebecType) {
-        actorScopeStack.pushInScopeStack(relatedRebecType, prevRebecType);
-    }
-
-    public void popFromActorScope() {
-        actorScopeStack.popFromScopeStack();
-    }
-
-    public void addVariableToRecentScope(String varName, Object valueObject) {
-        actorScopeStack.addVariable(varName, valueObject);
-    }
-
-    public void addVariableToExactScope(String varName, Object valueObject, int scopeIndex) {
-        actorScopeStack.addVariable(varName, valueObject, scopeIndex);
-    }
-
-    public String getTypeName() {
-        return typeName;
-    }
-
-    public void setTypeName(String typeName) {
-        this.typeName = typeName;
-    }
-
-    public void initializeScopeStack() {
-        actorScopeStack = new ActorScopeStack();
-        actorScopeStack.initialize();
-    }
-
-    public Object retrieveVariableValue(Variable variable) {
-        return retrieveVariableValue(variable.getVarName());
-    }
-
-    public Object retrieveVariableValue(String varName) {
-        return actorScopeStack.retrieveVariableValue(varName);
-    }
-
-    public void setVariableValue(String varName, Object valueObject) {
-        actorScopeStack.setVariableValue(varName, valueObject);
-    }
-
-    public boolean variableIsDefined(String varName) {
-        return actorScopeStack.variableIsDefined(varName);
     }
 
     public void execute(State state, RILModel transformedRILModel,
@@ -234,13 +152,5 @@ public class ActorState implements Serializable {
             } else
                 throw new RebecaRuntimeInterpreterException("this case should not happen!");
         } while (!policy.isBreakable());
-    }
-
-    public ActorScopeStack getActorScopeStack() {
-        return actorScopeStack;
-    }
-
-    public void setTypeSystem(CoreRebecaTypeSystem typeSystem) {
-        this.typeSystem = typeSystem;
     }
 }
