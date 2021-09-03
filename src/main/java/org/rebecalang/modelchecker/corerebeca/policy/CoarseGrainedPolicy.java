@@ -7,19 +7,19 @@ import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.MethodCallI
 
 public class CoarseGrainedPolicy extends AbstractPolicy {
 
-	public CoarseGrainedPolicy() {
-		breakable = false;
-	}
-	
-	@Override
-	public void executedInstruction(InstructionBean ib) {
-		breakable = ib instanceof EndMsgSrvInstructionBean ||
-				(ib instanceof MethodCallInstructionBean && ((MethodCallInstructionBean) ib).getMethodName().equals("delay$int"));
-	}
+    public CoarseGrainedPolicy() {
+        breakable = false;
+    }
 
-	@Override
-	public void pick(MessageSpecification executableMessage) {
-		breakable = false;
-	}
+    @Override
+    public void executedInstruction(InstructionBean ib) {
+        breakable = ib instanceof EndMsgSrvInstructionBean ||
+                (ib instanceof MethodCallInstructionBean && ((MethodCallInstructionBean) ib).getMethodName().equals("delay$int"));
+    }
+
+    @Override
+    public void pick(MessageSpecification executableMessage) {
+        breakable = false;
+    }
 
 }

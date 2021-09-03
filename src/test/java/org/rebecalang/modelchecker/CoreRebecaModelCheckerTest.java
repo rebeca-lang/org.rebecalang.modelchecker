@@ -1,9 +1,5 @@
 package org.rebecalang.modelchecker;
 
-import java.io.File;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.rebecalang.compiler.CompilerConfig;
@@ -16,6 +12,10 @@ import org.rebecalang.modeltransformer.ModelTransformerConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+
+import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
 
 @ContextConfiguration(classes = {CompilerConfig.class, ModelCheckerConfig.class, ModelTransformerConfig.class}) 
 @SpringJUnitConfig

@@ -58,8 +58,10 @@ public class TimedRebecaModelChecker extends CoreRebecaModelChecker {
 
         TimedState newState = (TimedState) cloneState(currentState);
         TimedActorState newActorState = (TimedActorState) newState.getActorState(actorState.getName());
-        if (resume) newActorState.resumeExecution(newState, transformedRILModel, modelCheckingPolicy);
-        else newActorState.execute(newState, transformedRILModel, modelCheckingPolicy, msg);
+        if (resume)
+            newActorState.resumeExecution(newState, transformedRILModel, modelCheckingPolicy);
+        else
+            newActorState.execute(newState, transformedRILModel, modelCheckingPolicy, msg);
         String transitionLabel = calculateTransitionLabel(actorState, newActorState, msg);
         Long stateKey = (long) newState.hashCode();
         if (!statespace.hasStateWithKey(stateKey)) {
@@ -80,33 +82,33 @@ public class TimedRebecaModelChecker extends CoreRebecaModelChecker {
     @Override
     protected void doFineGrainedModelChecking(RILModel transformedRILModel) throws ModelCheckingException {
         int stateCounter = 1;
-        PriorityQueue<TimePriorityQueueItem<TimedState>> nextStatesQueue = new PriorityQueue<>();
+            PriorityQueue<TimePriorityQueueItem<TimedState>> nextStatesQueue = new PriorityQueue<>();
 
-        TimedState initialState = (TimedState) statespace.getInitialState();
-        nextStatesQueue.add(new TimePriorityQueueItem(initialState.getEnablingTime(), initialState));
+            TimedState initialState = (TimedState) statespace.getInitialState();
+            nextStatesQueue.add(new TimePriorityQueueItem(initialState.getEnablingTime(), initialState));
 
-        while (!nextStatesQueue.isEmpty()) {
-            TimePriorityQueueItem timePriorityQueueItem = nextStatesQueue.poll();
-            TimedState currentState = (TimedState) timePriorityQueueItem.getItem();
-            int enablingTime = currentState.getEnablingTime();
-            currentState.checkForTimeStep(enablingTime);
-            List<TimedActorState> enabledActors = currentState.getEnabledActors(enablingTime);
+            while (!nextStatesQueue.isEmpty()) {
+                TimePriorityQueueItem timePriorityQueueItem = nextStatesQueue.poll();
+                TimedState currentState = (TimedState) timePriorityQueueItem.getItem();
+                int enablingTime = currentState.getEnablingTime();
+                currentState.checkForTimeStep(enablingTime);
+                List<TimedActorState> enabledActors = currentState.getEnabledActors(enablingTime);
 
-            for (TimedActorState currentActorState : enabledActors) {
-                do {
-                    if (currentActorState.variableIsDefined(InstructionUtilities.PC_STRING)) {
-                        TimedState newState = executeNewState(currentState, currentActorState, transformedRILModel,
-                                stateCounter, true, null);
-                        nextStatesQueue.add(new TimePriorityQueueItem(newState.getEnablingTime(), newState));
-                    } else {
-                        for (TimedMessageSpecification msg: currentActorState.getEnabledMsgs(enablingTime)) {
+                for (TimedActorState currentActorState : enabledActors) {
+                    do {
+                        if (currentActorState.variableIsDefined(InstructionUtilities.PC_STRING)) {
                             TimedState newState = executeNewState(currentState, currentActorState, transformedRILModel,
-                                    stateCounter, false, msg);
+                                    stateCounter, true, null);
                             nextStatesQueue.add(new TimePriorityQueueItem(newState.getEnablingTime(), newState));
+                        } else {
+                            for (TimedMessageSpecification msg : currentActorState.getEnabledMsgs(enablingTime)) {
+                                TimedState newState = executeNewState(currentState, currentActorState, transformedRILModel,
+                                        stateCounter, false, msg);
+                                nextStatesQueue.add(new TimePriorityQueueItem(newState.getEnablingTime(), newState));
+                            }
                         }
-                    }
-                } while (StatementInterpreterContainer.getInstance().hasNondeterminism());
-            }
+                    } while (StatementInterpreterContainer.getInstance().hasNondeterminism());
+                }
         }
         RebecaModelChecker.printStateSpace(initialState);
     }
