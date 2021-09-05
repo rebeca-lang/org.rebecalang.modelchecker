@@ -1,0 +1,62 @@
+reactiveclass X (2) {
+    knownrebecs {
+        C c;
+    }
+    statevars {
+        int var_x;
+    }
+    msgsrv testSender() {
+        if (sender == c){
+            self.var_x = 2;
+            self.var_x = 3;
+        }
+
+    }
+}
+
+reactiveclass A (5)  {
+    statevars {
+        int var_a;
+    }
+}
+
+reactiveclass B extends A (2)  {
+    statevars {
+		int var_b;
+	}
+    B () {
+        var_b = 0;
+        self.var_a = 2;
+        self.var_b = self.var_a;
+    }
+}
+
+reactiveclass C extends B (3){
+    knownrebecs{
+        B b;
+        X x;
+    }
+    statevars {
+		int var_c;
+	}
+
+    C () {
+        var_a = 0;
+        var_b = 2;
+        var_c = self.var_a;
+        self.var_a = 2;
+        self.var_b = 0;
+        self.var_c = self.var_a;
+        self.testC();
+    }
+    msgsrv testC() {
+        x.testSender();
+    }
+}
+
+main {
+    A a():();
+    B b():();
+    C c(b, x):();
+    X x(c):();
+}

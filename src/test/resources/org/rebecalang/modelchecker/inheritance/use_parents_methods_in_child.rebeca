@@ -1,0 +1,29 @@
+reactiveclass C (5)  {
+    int getInt(){
+        return 2;
+    }
+}
+
+reactiveclass A (2)  {
+    knownrebecs {
+    	C known_c;
+    }
+
+    A () {}
+}
+
+reactiveclass B extends A (3) {
+    B () {
+        self.testBMsg();
+    }
+
+    msgsrv testBMsg() {
+        int a = 4 + known_c.getInt();
+    }
+}
+
+main {
+    C c():();
+    A a(c):();
+    B b(c):();
+}

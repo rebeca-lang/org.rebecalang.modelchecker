@@ -1,9 +1,5 @@
 package org.rebecalang.modelchecker;
 
-import java.io.File;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.rebecalang.compiler.CompilerConfig;
@@ -16,6 +12,10 @@ import org.rebecalang.modeltransformer.ModelTransformerConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+
+import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
 
 @ContextConfiguration(classes = {CompilerConfig.class, ModelCheckerConfig.class, ModelTransformerConfig.class}) 
 @SpringJUnitConfig
@@ -32,16 +32,16 @@ public class CoreRebecaModelCheckerTest {
 	@Test
 	public void GIVEN_CorrectCoreRebecaModelWithInitialMethod_WHEN_CoreIs2_0_THEN_1Error() throws ModelCheckingException {
 		File model = new File(MODEL_FILES_BASE + "DiningPhilosophers.rebeca");
-		Set<CompilerExtension> extension = new HashSet<CompilerExtension>();
+		Set<CompilerExtension> extension = new HashSet<>();
 		coreRebecaModelChecker.configPolicy(CoreRebecaModelChecker.COARSE_GRAINED_POLICY);
-		coreRebecaModelChecker.modelCheck(model, extension, CoreVersion.CORE_2_1);
+		coreRebecaModelChecker.modelCheck(model, extension, CoreVersion.CORE_2_3);
 		
 		System.out.println(exceptionContainer);
 		
 		Assertions.assertTrue(exceptionContainer.exceptionsIsEmpty());
 
-		Assertions.assertEquals(coreRebecaModelChecker.getStatespace().size(), 105);
+		Assertions.assertEquals(coreRebecaModelChecker.getStateSpace().size(), 105);
 		
-		RebecaModelChecker.printStateSpace(coreRebecaModelChecker.getStatespace().getInitialState());
+		RebecaModelChecker.printStateSpace(coreRebecaModelChecker.getStateSpace().getInitialState());
 	}
 }

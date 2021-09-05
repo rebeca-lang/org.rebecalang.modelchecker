@@ -28,9 +28,9 @@ public class StatementContainer {
 
 	}
 
-	public Object interpret(Statement statement, ActorState actorState) {
+	public Object interpret(Statement statement, BaseActorState baseActorState) {
 
-		return statementsInterpretersContainer.get(statement.getClass()).interpret(statement, actorState);
+		return statementsInterpretersContainer.get(statement.getClass()).interpret(statement, baseActorState);
 
 	}
 

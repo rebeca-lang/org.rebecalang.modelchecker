@@ -1,0 +1,31 @@
+reactiveclass C (5)  {
+    msgsrv testCMsg() {}
+}
+
+reactiveclass A (2)  {
+    knownrebecs {
+    	C known_c;
+    }
+
+    A () {}
+}
+
+reactiveclass B extends A (3) {
+    knownrebecs {
+    	A known_a;
+    }
+
+    B () {
+        self.testBMsg();
+    }
+
+    msgsrv testBMsg() {
+        known_c.testCMsg();
+    }
+}
+
+main {
+    C c():();
+    A a(c):();
+    B b(c, a):();
+}

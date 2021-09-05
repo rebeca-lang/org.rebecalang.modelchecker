@@ -2,7 +2,7 @@ package org.rebecalang.modelchecker.corerebeca.builtinmethod;
 
 import java.util.Hashtable;
 
-import org.rebecalang.modelchecker.corerebeca.ActorState;
+import org.rebecalang.modelchecker.corerebeca.BaseActorState;
 import org.rebecalang.modelchecker.corerebeca.State;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.ExternalMethodCallInstructionBean;
 
@@ -19,15 +19,15 @@ public class ExternalMethodRepository {
 		return builtInMethodRepository;
 	}
 
-	public Object execute(ExternalMethodCallInstructionBean methodCallInstructionBean, ActorState actorState,
+	public Object execute(ExternalMethodCallInstructionBean methodCallInstructionBean, BaseActorState baseActorState,
 			State globalState) {
 		ExternalMethodExecutor externalMethodExecutor;
 		if (methodCallInstructionBean.getBase() != null)
 			throw new RuntimeException("This version does not support none-independent built-in method calls");
 		externalMethodExecutor = executors.get(IndependentMethodExecutor.KEY);
-		Object returnValue = externalMethodExecutor.execute(methodCallInstructionBean, actorState, globalState);
+		Object returnValue = externalMethodExecutor.execute(methodCallInstructionBean, baseActorState, globalState);
 		if(methodCallInstructionBean.getFunctionCallResult() != null)
-			actorState.setVariableValue(methodCallInstructionBean.getFunctionCallResult().toString(), returnValue);
+			baseActorState.setVariableValue(methodCallInstructionBean.getFunctionCallResult().toString(), returnValue);
 		return null;
 	}
 

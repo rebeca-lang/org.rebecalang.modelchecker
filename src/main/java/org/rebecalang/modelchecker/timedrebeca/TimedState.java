@@ -1,61 +1,57 @@
 package org.rebecalang.modelchecker.timedrebeca;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-
-import org.rebecalang.compiler.utils.Pair;
-import org.rebecalang.modelchecker.corerebeca.ActorState;
+import org.rebecalang.modelchecker.corerebeca.BaseActorState;
 import org.rebecalang.modelchecker.corerebeca.ModelCheckingException;
 import org.rebecalang.modelchecker.corerebeca.State;
 import org.rebecalang.modelchecker.corerebeca.rilinterpreter.InstructionUtilities;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
 @SuppressWarnings("serial")
 public class TimedState extends State {
+    public void checkForTimeStep(int enablingTime) {
+        List<BaseActorState> allActorStates = getAllActorStates();
+        if (!allActorStates.isEmpty()) {
+            int currentTime = ((TimedActorState) allActorStates.get(0)).getCurrentTime();
+            if (enablingTime > currentTime) {
+                for (BaseActorState actorState : allActorStates) {
+                    ((TimedActorState) actorState).setCurrentTime(enablingTime);
+                }
+            }
+        }
+    }
 
-	private LinkedList<TimeBundle> timeBundles;
-	private TimeBundle currentTimeBundle;
-
-	public int getEnablingTime() throws ModelCheckingException {
-		int minExecutionTime = Integer.MAX_VALUE;
-		for (ActorState actorState : getAllActorStates()) {
-			int firstTimeActorCanPeekNewMsg = firstTimeActorCanPeekNewMessage(actorState);
-			minExecutionTime = Math.min(minExecutionTime, firstTimeActorCanPeekNewMsg);
-		}
-		return minExecutionTime;
-	}
-
-	public List<ActorState> getEnabledActors() throws ModelCheckingException {
-		LinkedList<ActorState> enabledActors = new LinkedList<ActorState>();
-		ArrayList<Pair<Integer, ActorState>> actorsMinExecutionTimes = new ArrayList<Pair<Integer, ActorState>>();
-		int minExecutionTime = Integer.MAX_VALUE;
-		for (ActorState actorState : getAllActorStates()) {
-			int firstTimeActorCanPeekNewMsg = firstTimeActorCanPeekNewMessage(actorState);
-			minExecutionTime = Math.min(minExecutionTime, firstTimeActorCanPeekNewMsg);
-			Pair<Integer, ActorState> actorTimePair = new Pair<Integer, ActorState>(firstTimeActorCanPeekNewMsg,
-					actorState);
-			actorsMinExecutionTimes.add(actorTimePair);
-		}
-		if (minExecutionTime == Integer.MAX_VALUE)
-			throw new ModelCheckingException("Deadlock");
-		for (Pair<Integer, ActorState> actorTimePair : actorsMinExecutionTimes) {
-			if (actorTimePair.getFirst() == minExecutionTime)
-				enabledActors.add(actorTimePair.getSecond());
-		}
-		return enabledActors;
-	}
-
-	private int firstTimeActorCanPeekNewMessage(ActorState actorState) {
-		if (actorState.variableIsDefined(InstructionUtilities.PC_STRING)) {
-			throw new RuntimeException("This version supports coarse grained execution.");
-		} else {
-			if (!actorState.actorQueueIsEmpty()) {
-				ActorTimeBundle actorTimeBundle = currentTimeBundle.getActorTimeBundle(actorState.getName());
-				int actorNow = actorTimeBundle.getNow();
-				TimeBundleElement firstMsgTime = actorTimeBundle.getQueueBundles().getFirst();
-				return Math.max(actorNow, firstMsgTime.getMessageArrivalTime());
+    public int getEnablingTime() throws ModelCheckingException {
+        int minExecutionTime = Integer.MAX_VALUE;
+        for (BaseActorState baseActorState : getAllActorStates()) {
+            if (baseActorState.variableIsDefined(InstructionUtilities.PC_STRING))
+			{
+				minExecutionTime = Math.min(minExecutionTime, ((TimedActorState) baseActorState).getResumingTime());
+			} else {
+				int firstTimeActorCanPeekNewMsg = ((TimedActorState) baseActorState).firstTimeActorCanPeekNewMessage();
+				minExecutionTime = Math.min(minExecutionTime, firstTimeActorCanPeekNewMsg);
 			}
-		}
-		return Integer.MAX_VALUE;
-	}
+        }
+        if (minExecutionTime == Integer.MAX_VALUE)
+            throw new ModelCheckingException("Deadlock");
+        int currentTime = ((TimedActorState) getAllActorStates().get(0)).getCurrentTime();
+        if (minExecutionTime < currentTime) minExecutionTime = currentTime;
+        return minExecutionTime;
+    }
+
+    public List<TimedActorState> getEnabledActors(int enablingTime) {
+        List<TimedActorState> enabledActors = new ArrayList<>();
+        for (BaseActorState baseActorState : getAllActorStates()) {
+            if ((baseActorState.variableIsDefined(InstructionUtilities.PC_STRING))) {
+                if (((TimedActorState) baseActorState).getResumingTime() <= enablingTime) {
+                    enabledActors.add(((TimedActorState) baseActorState));
+                }
+            } else if (((TimedActorState) baseActorState).firstTimeActorCanPeekNewMessage() <= enablingTime) {
+                enabledActors.add(((TimedActorState) baseActorState));
+            }
+        }
+        return enabledActors;
+    }
 }

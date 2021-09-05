@@ -1,0 +1,41 @@
+reactiveclass R1(3) {
+    knownrebecs {
+        R1 adj_r1;
+    }
+
+    statevars {
+		int var_1;
+	}
+}
+
+reactiveclass R2 extends R1(4) {
+    knownrebecs {
+        R2 adj_r2;
+    }
+
+    R2() {
+        var_1 = 2;
+        msg2();
+    }
+
+    msgsrv msg2 () {
+        if (var_1 > 2){
+            var_1 = 4;
+        }
+        R1 temp_r1 = adj_r1;
+        if (temp_r1 instanceof R2){
+            var_1 = 4;
+        }
+        msg2_2();
+    }
+    msgsrv msg2_2 () {
+        msg2();
+    }
+}
+
+main {
+    R1 r1(r1_2):();
+    R1 r1_2(r1):();
+    R2 r2_1(r2_2, r2_2):();
+    R2 r2_2(r2_2, r2_2):();
+}

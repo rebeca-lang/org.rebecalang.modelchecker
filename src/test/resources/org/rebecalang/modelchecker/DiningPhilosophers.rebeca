@@ -22,6 +22,7 @@ reactiveclass Philosopher(3)
 
 	msgsrv arrive()
 	{
+	    testMethod();
 		forkL.request();
 	}
 
@@ -56,6 +57,10 @@ reactiveclass Philosopher(3)
 		forkL.release();
 		forkR.release();
 		self.arrive();
+	}
+
+	int testMethod() {
+	    return 2;
 	}
 }
 
@@ -107,7 +112,7 @@ reactiveclass Fork(3)
 	msgsrv release()
 	{
 		if (sender == philL && lAssign){
-			leftReq = false;
+			self.leftReq = false;
 			lAssign = false;
 			if (rightReq) {
 				rAssign=true;
