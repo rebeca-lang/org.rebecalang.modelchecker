@@ -31,8 +31,19 @@ public class TimedRebecaTest {
     public ExceptionContainer exceptionContainer;
 
     @Test
-    public void pingPongTest() throws ModelCheckingException {
+    public void testPingPong() throws ModelCheckingException {
         File model = new File(MODEL_FILES_BASE + "ping_pong.rebeca");
+        Set<CompilerExtension> extension = new HashSet<>();
+        extension.add(CompilerExtension.TIMED_REBECA);
+        timedRebecaModelChecker.configPolicy(CoreRebecaModelChecker.COARSE_GRAINED_POLICY);
+        timedRebecaModelChecker.modelCheck(model, extension, CoreVersion.CORE_2_3);
+        printExceptions();
+        Assertions.assertTrue(exceptionContainer.exceptionsIsEmpty());
+    }
+
+    @Test
+    public void testDynamicPolymorphism() throws ModelCheckingException {
+        File model = new File(MODEL_FILES_BASE + "dynamic_polymorphism_in_time.rebeca");
         Set<CompilerExtension> extension = new HashSet<>();
         extension.add(CompilerExtension.TIMED_REBECA);
         timedRebecaModelChecker.configPolicy(CoreRebecaModelChecker.COARSE_GRAINED_POLICY);

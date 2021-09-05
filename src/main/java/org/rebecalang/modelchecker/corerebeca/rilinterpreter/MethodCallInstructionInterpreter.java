@@ -18,6 +18,7 @@ public class MethodCallInstructionInterpreter extends InstructionInterpreter {
         MethodCallInstructionBean mcib = (MethodCallInstructionBean) ib;
         if (mcib.getMethodName().equals("delay$int")) handleDelayMethod(mcib, baseActorState);
         else {
+            BaseActorState receiverState = (BaseActorState) baseActorState.retrieveVariableValue(mcib.getBase());
             List<Object> calculatedValuesOfParams = new LinkedList<Object>();
             for (int cnt = 0; cnt < mcib.getParameters().size(); cnt++) {
                 Object paramValue = mcib.getParameters().get(cnt);
@@ -26,13 +27,13 @@ public class MethodCallInstructionInterpreter extends InstructionInterpreter {
                 else
                     calculatedValuesOfParams.add(paramValue);
             }
-            baseActorState.pushInActorScope(baseActorState.getTypeName(), ((MethodCallInstructionBean) ib).getMethodName().split("\\.")[0]);
+            baseActorState.pushInActorScope(baseActorState.getTypeName(), receiverState.getTypeName());
             for (int cnt = 0; cnt < mcib.getParameters().size(); cnt++) {
                 Object paramValue = calculatedValuesOfParams.get(cnt);
                 String paramName = mcib.getParametersNames().get(cnt);
                 baseActorState.addVariableToRecentScope(paramName, paramValue);
             }
-            baseActorState.initializePC(mcib.getMethodName(), 0);
+            baseActorState.initializePC(receiverState.getTypeName() + "." + mcib.getMethodName().split("\\.")[1], 0);
         }
         return;
     }
@@ -41,5 +42,4 @@ public class MethodCallInstructionInterpreter extends InstructionInterpreter {
         int delay = (int) mcib.getParameters().get(0);
         ((TimedActorState)baseActorState).increaseResumingTime(delay);
     }
-
 }

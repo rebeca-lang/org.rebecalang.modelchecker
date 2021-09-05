@@ -116,7 +116,6 @@ public class ActorSate extends BaseActorState {
                         .retrieveInterpreter(instruction);
                 policy.executedInstruction(instruction);
                 interpreter.interpret(instruction, this, state);
-                int a = 2;
 
             } else if (!queue.isEmpty()) {
                 MessageSpecification executableMessage = queue.poll();
@@ -147,7 +146,6 @@ public class ActorSate extends BaseActorState {
                 actorScopeStack.pushInScopeStack(getTypeName(), relatedRebecType);
                 addVariableToRecentScope("sender", executableMessage.getSenderActorState());
                 initializePC(msgName, 0);
-                int a = 2;
 
             } else
                 throw new RebecaRuntimeInterpreterException("this case should not happen!");
