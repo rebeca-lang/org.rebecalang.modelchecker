@@ -11,7 +11,7 @@ import org.rebecalang.transparentactormodelchecker.AbstractSOSRule;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.action.Action;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.action.MessageAction;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaActorState;
-import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaMessage;
+import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaMessageState;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.transition.CoreRebecaDeterministicTransition;
 import org.springframework.stereotype.Component;
 
@@ -22,11 +22,14 @@ public class CoreRebecaSendMessageSOSRule extends AbstractSOSRule<Pair<CoreRebec
 	public CoreRebecaDeterministicTransition<Pair<CoreRebecaActorState, InstructionBean>> applyRule(
 			Pair<CoreRebecaActorState, InstructionBean> source) {
 		MsgsrvCallInstructionBean msgsrvCall = (MsgsrvCallInstructionBean) source.getSecond();
-		CoreRebecaMessage message = new CoreRebecaMessage();
+		CoreRebecaMessageState message = new CoreRebecaMessageState();
 		message.setName(msgsrvCall.getMethodName());
 		CoreRebecaActorState senderActor = source.getFirst();
 		message.setSender(senderActor);
-		message.setReceiver((CoreRebecaActorState) senderActor.getVariableValue(msgsrvCall.getBase().getVarName()));
+		if(msgsrvCall.getBase() != null)
+			message.setReceiver((CoreRebecaActorState) senderActor.getVariableValue(msgsrvCall.getBase().getVarName()));
+		else
+			message.setReceiver(senderActor);
 		for(Entry<String, Object> entry : msgsrvCall.getParameters().entrySet()) {
 			Object value = entry.getValue();
 			if(value instanceof Variable) {

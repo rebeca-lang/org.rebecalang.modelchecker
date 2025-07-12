@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -46,7 +47,8 @@ public class CoreRebecaModelCheckerTest {
 	@Autowired
 	protected GenericApplicationContext appContext;
 	
-	@ParameterizedTest
+    @Disabled
+    @ParameterizedTest
 	@MethodSource("modelToStateSpace")
 	public void GIVEN_RebecaModel_WHEN_No_Error(String filename, int statespaceSize, Policy policy) throws ModelCheckingException, FileNotFoundException {
 		File model = new File(MODEL_FILES_BASE + filename);

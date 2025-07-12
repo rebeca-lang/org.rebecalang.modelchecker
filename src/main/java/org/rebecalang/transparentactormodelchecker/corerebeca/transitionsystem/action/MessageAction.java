@@ -1,18 +1,18 @@
 package org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.action;
 
-import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaMessage;
+import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaMessageState;
 
 public class MessageAction extends Action {
 
-	private CoreRebecaMessage message;
+	private CoreRebecaMessageState message;
 	
-	public MessageAction(CoreRebecaMessage message) {
+	public MessageAction(CoreRebecaMessageState message) {
 		this.message = message;
 	}
-	public CoreRebecaMessage getMessage() {
+	public CoreRebecaMessageState getMessage() {
 		return message;
 	}
-	public void setMessage(CoreRebecaMessage message) {
+	public void setMessage(CoreRebecaMessageState message) {
 		this.message = message;
 	}
 	

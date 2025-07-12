@@ -19,6 +19,8 @@ public class CoreRebecaAssignmentSOSRule extends AbstractSOSRule<Pair<CoreRebeca
 		if (reference instanceof Variable) {
 			String varName = ((Variable) reference).getVarName();
 			return actorState.getVariableValue(varName);
+//		} else if (reference instanceof RebecInstantiationInstructionBean) {
+//			return CoreRebecaActorState.createTempCoreRebecaActorState();
 		}
 		return reference;
 	}
@@ -26,29 +28,31 @@ public class CoreRebecaAssignmentSOSRule extends AbstractSOSRule<Pair<CoreRebeca
 	@Override
 	public CoreRebecaDeterministicTransition<Pair<CoreRebecaActorState, InstructionBean>> applyRule(
 			Pair<CoreRebecaActorState, InstructionBean> source) {
+		Action resultAction = Action.TAU;
 		AssignmentInstructionBean aib = (AssignmentInstructionBean) source.getSecond();
 		Object valueFirst = getValue(aib.getFirstOperand(), source.getFirst());
+		Object rightSideResult = valueFirst;
+
 		Object valueSecond = getValue(aib.getSecondOperand(), source.getFirst());
 		String operator = aib.getOperator();
-		Object rightSideResult = valueFirst;
 		if (operator != null) {
 			if (valueFirst instanceof CoreRebecaActorState) {
 				if (operator.equals("=="))
-					rightSideResult = (((CoreRebecaActorState) valueFirst).getId()
-							.equals(((CoreRebecaActorState) valueSecond).getId()));
+					rightSideResult = ((CoreRebecaActorState) valueFirst)
+							.getId() == ((CoreRebecaActorState) valueSecond).getId();
 				else if (operator.equals("!="))
-					rightSideResult = !(((CoreRebecaActorState) valueFirst).getId()
-							.equals(((CoreRebecaActorState) valueSecond).getId()));
-//				else if (operator.equals("instanceof")) {
-//					try {
-//						result = coreRebecaTypeSystem.
-//								getType(((BaseActorState<?>) valueFirst).getTypeName()).
-//								canTypeDownCastTo(coreRebecaTypeSystem.getType((String)valueSecond));
-//					} catch (CodeCompilationException e) {
-//						result = false;
-//						e.printStackTrace();
+					rightSideResult = ((CoreRebecaActorState) valueFirst)
+							.getId() != ((CoreRebecaActorState) valueSecond).getId();
+//					else if (operator.equals("instanceof")) {
+//						try {
+//							result = coreRebecaTypeSystem.
+//									getType(((BaseActorState<?>) valueFirst).getTypeName()).
+//									canTypeDownCastTo(coreRebecaTypeSystem.getType((String)valueSecond));
+//						} catch (CodeCompilationException e) {
+//							result = false;
+//							e.printStackTrace();
+//						}
 //					}
-//				}
 				else
 					throw new RebecaRuntimeInterpreterException(
 							"this case should have been reported as an error by the compiler.");
@@ -58,11 +62,10 @@ public class CoreRebecaAssignmentSOSRule extends AbstractSOSRule<Pair<CoreRebeca
 
 		source.getFirst().setVariableValue((Variable) aib.getLeftVarName(), rightSideResult);
 		source.getFirst().movePCtoTheNextInstruction();
-		
-		CoreRebecaDeterministicTransition<Pair<CoreRebecaActorState, InstructionBean>> result = 
-				new CoreRebecaDeterministicTransition<Pair<CoreRebecaActorState, InstructionBean>>();
+
+		CoreRebecaDeterministicTransition<Pair<CoreRebecaActorState, InstructionBean>> result = new CoreRebecaDeterministicTransition<Pair<CoreRebecaActorState, InstructionBean>>();
 		result.setDestination(source);
-		result.setAction(Action.TAU);
+		result.setAction(resultAction);
 		return result;
 	}
 

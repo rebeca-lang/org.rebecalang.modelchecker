@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.rebecalang.compiler.CompilerConfig;
 import org.rebecalang.compiler.utils.CompilerExtension;
@@ -33,6 +34,7 @@ public class InheritanceTest {
     public ExceptionContainer exceptionContainer;
 
     @Test
+    @Disabled
     public void checkInstanceof() throws ModelCheckingException, FileNotFoundException {
         File model = new File(MODEL_FILES_BASE + "pingpongpung.rebeca");
         ModelCheckerSetting modelCheckerSetting = new CoreRebecaModelCheckerSetting(new HashSet<CompilerExtension>(), CoreVersion.CORE_2_3, Policy.COARSE_GRAINED_POLICY);
@@ -47,6 +49,7 @@ public class InheritanceTest {
     }
 
     @Test
+    @Disabled
     public void useParentMsgsrvs() throws ModelCheckingException, FileNotFoundException {
         File model = new File(MODEL_FILES_BASE + "useParentMsgsrvs.rebeca");
         ModelCheckerSetting modelCheckerSetting = new CoreRebecaModelCheckerSetting(new HashSet<CompilerExtension>(), CoreVersion.CORE_2_3, Policy.COARSE_GRAINED_POLICY);

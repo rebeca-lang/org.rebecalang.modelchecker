@@ -229,19 +229,20 @@ public abstract class ModelChecker {
                 BaseActorState<?> actorState = initialState.getActorState(definition.getName());
                 actorState.pushInScopeStackForMethodCallInitialization(definition.getType().getTypeName());
                 RebecInstantiationInstructionBean riib = (RebecInstantiationInstructionBean) mainInstructions.get(cnt++);
-                for(Map.Entry<String, Object> constructorParameter : riib.getConstructorParameters().entrySet()) {
-                    actorState.addVariableToRecentScope(
-                            constructorParameter.getKey(), constructorParameter.getValue());
-                }
-                actorState.initializePC(computedConstructorName, 0);
-                ProgramCounter pc = actorState.getPC();
-                ArrayList<InstructionBean> instructionsList =
-                        transformedRILModel.getInstructionList(pc.getMethodName());
-                while (actorState.variableIsDefined(InstructionUtilities.PC_STRING)) {
-                    InstructionBean ib = instructionsList.get(pc.getLineNumber());
-                    statementInterpreterContainer.retrieveInterpreter(ib).interpret(
-                            ib, actorState, initialState, rebecaModel);
-                }
+                assert(false);
+//                for(Map.Entry<String, Object> constructorParameter : riib.getConstructorParameters().entrySet()) {
+//                    actorState.addVariableToRecentScope(
+//                            constructorParameter.getKey(), constructorParameter.getValue());
+//                }
+//                actorState.initializePC(computedConstructorName, 0);
+//                ProgramCounter pc = actorState.getPC();
+//                ArrayList<InstructionBean> instructionsList =
+//                        transformedRILModel.getInstructionList(pc.getMethodName());
+//                while (actorState.variableIsDefined(InstructionUtilities.PC_STRING)) {
+//                    InstructionBean ib = instructionsList.get(pc.getLineNumber());
+//                    statementInterpreterContainer.retrieveInterpreter(ib).interpret(
+//                            ib, actorState, initialState, rebecaModel);
+//                }
             } catch (CodeCompilationException e) {
                 e.printStackTrace();
             }

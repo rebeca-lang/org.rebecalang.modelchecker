@@ -12,11 +12,13 @@ public class RebecaStateSerializationUtils {
 		CoreRebecaNetworkState clone = SerializationUtils.clone(object);
 		return clone;
 	}
+	
 	public static CoreRebecaActorState clone(CoreRebecaActorState object) {
 		CoreRebecaActorState clone = SerializationUtils.clone(object);
 		clone.setRILModel(object.getRILModel());
 		return clone;
 	}
+	
 	public static CoreRebecaSystemState clone(CoreRebecaSystemState object) {
 		CoreRebecaSystemState clone = SerializationUtils.clone(object);
 		

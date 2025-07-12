@@ -1,5 +1,8 @@
 package org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state;
 
-public abstract class CoreRebecaAbstractState {
+import java.io.Serializable;
+
+@SuppressWarnings("serial")
+public abstract class CoreRebecaAbstractState implements Serializable {
 
 }

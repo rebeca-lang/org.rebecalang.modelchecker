@@ -8,7 +8,7 @@ import org.rebecalang.modelchecker.corerebeca.RebecaRuntimeInterpreterException;
 import org.rebecalang.transparentactormodelchecker.AbstractSOSRule;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.action.Action;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.action.MessageAction;
-import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaMessage;
+import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaMessageState;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaNetworkState;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.transition.CoreRebecaNondeterministicTransition;
 import org.rebecalang.transparentactormodelchecker.corerebeca.utils.RebecaStateSerializationUtils;
@@ -21,13 +21,13 @@ public class CoreRebecaNetworkLevelDeliverMessage extends AbstractSOSRule<CoreRe
 	public CoreRebecaNondeterministicTransition<CoreRebecaNetworkState> applyRule(CoreRebecaNetworkState source) {
 		CoreRebecaNondeterministicTransition<CoreRebecaNetworkState> transitions = new CoreRebecaNondeterministicTransition<CoreRebecaNetworkState>();
 		CoreRebecaNetworkState backup = RebecaStateSerializationUtils.clone(source);
-		Iterator<Pair<String, String>> entrySetIterator = backup.getReceivedMessages().keySet().iterator();
+		Iterator<Pair<Integer, Integer>> entrySetIterator = backup.getReceivedMessages().keySet().iterator();
 		while(entrySetIterator.hasNext()) {
-			Pair<String, String> key = entrySetIterator.next();
-			ArrayList<CoreRebecaMessage> messages = source.getReceivedMessages().get(key);
+			Pair<Integer, Integer> key = entrySetIterator.next();
+			ArrayList<CoreRebecaMessageState> messages = source.getReceivedMessages().get(key);
 			if(messages.isEmpty())
 				continue;
-			CoreRebecaMessage message = messages.remove(0);
+			CoreRebecaMessageState message = messages.remove(0);
 			if(messages.isEmpty())
 				source.getReceivedMessages().remove(key);
 			MessageAction action = new MessageAction(message);

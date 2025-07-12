@@ -22,7 +22,7 @@ import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.PushARInstr
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.Variable;
 import org.rebecalang.transparentactormodelchecker.corerebeca.CoreRebecaSOSRule;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaActorState;
-import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaMessage;
+import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaMessageState;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaNetworkState;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaSystemState;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.Environment;
@@ -43,8 +43,8 @@ public class TransitionSystemSOSRulesTest {
 	
     CoreRebecaSystemState coreRebecaSystemState;
     
-    public final static String ACTOR_1_ID = "actor1";
-    public final static String ACTOR_2_ID = "actor2";
+    public final static int ACTOR_1_ID = 0;
+    public final static int ACTOR_2_ID = 1;
     
     @BeforeEach
     public void setup() {
@@ -58,7 +58,7 @@ public class TransitionSystemSOSRulesTest {
     @Test
     public void GIVEN_TwoActorsHaveMesssages_WHEN_StartExecution_THEN_TwoTargetStatesHaveToBeGenerated() {
     	
-    	CoreRebecaMessage message1 = new CoreRebecaMessage("m1", new HashMap<String, Object>());
+    	CoreRebecaMessageState message1 = new CoreRebecaMessageState("m1", new HashMap<String, Object>());
     	CoreRebecaActorState actor1 = coreRebecaSystemState.getActorState(ACTOR_1_ID);
     	message1.setReceiver(actor1);
     	actor1.receiveMessage(message1);
@@ -73,12 +73,11 @@ public class TransitionSystemSOSRulesTest {
 		rilModel.addMethod("m1", 
 				new ArrayList<InstructionBean>(Arrays.asList(puib, dib, aib, poib, emib)));
     	
-    	CoreRebecaMessage message2 = new CoreRebecaMessage("m2", new HashMap<String, Object>());
+    	CoreRebecaMessageState message2 = new CoreRebecaMessageState("m2", new HashMap<String, Object>());
     	CoreRebecaActorState actor2 = coreRebecaSystemState.getActorState(ACTOR_2_ID);
     	message2.setReceiver(actor2);
 		actor2.receiveMessage(message2);
     	aib = new AssignmentInstructionBean(v, 5, null, null);
-    	rilModel = new RILModel();
     	rilModel.addMethod("m2", 
 				new ArrayList<InstructionBean>(Arrays.asList(puib, dib, aib, poib, emib)));
 
@@ -99,7 +98,7 @@ public class TransitionSystemSOSRulesTest {
     	actor1.addVariableToScope(CoreRebecaActorState.PC, new Pair<String, Integer>("m1", 0));
     	actor1.addVariableToScope("actor2", actor2);
 		PushARInstructionBean puib = new PushARInstructionBean();
-		Variable reciever = new Variable(ACTOR_2_ID);
+		Variable reciever = new Variable("actor2");
     	MsgsrvCallInstructionBean mcib = new MsgsrvCallInstructionBean(reciever, "m2");
     	PopARInstructionBean poib = new PopARInstructionBean();
     	EndMsgSrvInstructionBean emib = new EndMsgSrvInstructionBean();
@@ -119,6 +118,9 @@ public class TransitionSystemSOSRulesTest {
 
 		transition = (CoreRebecaNondeterministicTransition<CoreRebecaSystemState>) sosRule.applyRule(coreRebecaSystemState);
 		Assertions.assertEquals(2, transition.getDestinations().size());
+
+//		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+//        System.out.println(gson.toJson(coreRebecaSystemState));
     }
 
 }

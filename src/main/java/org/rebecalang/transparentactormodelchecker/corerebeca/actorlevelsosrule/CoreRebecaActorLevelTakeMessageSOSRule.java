@@ -7,9 +7,9 @@ import org.rebecalang.compiler.utils.Pair;
 import org.rebecalang.modelchecker.corerebeca.RebecaRuntimeInterpreterException;
 import org.rebecalang.transparentactormodelchecker.AbstractSOSRule;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.action.Action;
-import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.action.TakeMessageAction;
+import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.action.MessageAction;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaActorState;
-import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaMessage;
+import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaMessageState;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.transition.CoreRebecaDeterministicTransition;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +20,7 @@ public class CoreRebecaActorLevelTakeMessageSOSRule extends AbstractSOSRule<Core
 	public CoreRebecaDeterministicTransition<CoreRebecaActorState> applyRule(CoreRebecaActorState source) {
 		if(source.messageQueueIsEmpty())
 			throw new RebecaRuntimeInterpreterException("Execution rule is disabled");
-		CoreRebecaMessage message = source.getFirstMessage();
+		CoreRebecaMessageState message = source.getFirstMessage();
 		source.pushToScope();
 		HashMap<String,Object> parameters = message.getParameters();
 		for(Entry<String, Object> entry : parameters.entrySet()) {
@@ -34,7 +34,7 @@ public class CoreRebecaActorLevelTakeMessageSOSRule extends AbstractSOSRule<Core
 
 		CoreRebecaDeterministicTransition<CoreRebecaActorState> result = 
 				new CoreRebecaDeterministicTransition<CoreRebecaActorState>();
-		result.setAction(new TakeMessageAction(message));
+		result.setAction(new MessageAction(message));
 		result.setDestination(source);
 		return result;
 	}

@@ -1,7 +1,11 @@
 package org.rebecalang.modelchecker.corerebeca;
 
+import java.io.PrintStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Map;
+
 import org.rebecalang.compiler.modelcompiler.abstractrebeca.AbstractTypeSystem;
-import org.rebecalang.compiler.modelcompiler.corerebeca.CoreRebecaTypeSystem;
 import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.ReactiveClassDeclaration;
 import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.RebecaModel;
 import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.Type;
@@ -10,15 +14,12 @@ import org.rebecalang.modelchecker.corerebeca.policy.AbstractPolicy;
 import org.rebecalang.modelchecker.corerebeca.rilinterpreter.InstructionInterpreter;
 import org.rebecalang.modelchecker.corerebeca.rilinterpreter.InstructionUtilities;
 import org.rebecalang.modelchecker.corerebeca.rilinterpreter.ProgramCounter;
-import org.rebecalang.modelchecker.timedrebeca.TimedMessageSpecification;
-import org.rebecalang.modelchecker.timedrebeca.TimedState;
 import org.rebecalang.modeltransformer.ril.RILModel;
-import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.*;
-
-import java.io.PrintStream;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Map;
+import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.AbstractCallingInstructionBean;
+import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.InstructionBean;
+import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.MethodCallInstructionBean;
+import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.MsgsrvCallInstructionBean;
+import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.Variable;
 
 @SuppressWarnings("serial")
 public abstract class BaseActorState<T extends MessageSpecification> implements Serializable {
@@ -264,7 +265,7 @@ public abstract class BaseActorState<T extends MessageSpecification> implements 
         addParamersValuesToScope((T) executableMessage);
     }
 
-    protected void resumeExecution(State<? extends BaseActorState> systemState,
+    protected void resumeExecution(State<? extends BaseActorState<T>> systemState,
                                    StatementInterpreterContainer statementInterpreterContainer,
                                    RILModel transformedRILModel, RebecaModel rebecaModel, AbstractPolicy policy) {
         do {
@@ -283,7 +284,7 @@ public abstract class BaseActorState<T extends MessageSpecification> implements 
         } while (!policy.isBreakable());
     }
 
-    public void execute(State<? extends BaseActorState> systemState,
+    public void execute(State<? extends BaseActorState<T>> systemState,
                         StatementInterpreterContainer statementInterpreterContainer,
                         RILModel transformedRILModel,
                         RebecaModel rebecaModel,

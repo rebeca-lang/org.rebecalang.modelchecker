@@ -1,31 +1,30 @@
 package org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.rebecalang.compiler.utils.Pair;
 
 @SuppressWarnings("serial")
-public class CoreRebecaNetworkState extends CoreRebecaAbstractState implements Serializable {
-	private HashMap<Pair<String, String>, ArrayList<CoreRebecaMessage>> receivedMessages;
+public class CoreRebecaNetworkState extends CoreRebecaAbstractState {
+	private HashMap<Pair<Integer, Integer>, ArrayList<CoreRebecaMessageState>> receivedMessages;
 	
 	public CoreRebecaNetworkState() {
-		receivedMessages = new HashMap<Pair<String,String>, ArrayList<CoreRebecaMessage>>();
+		receivedMessages = new HashMap<Pair<Integer, Integer>, ArrayList<CoreRebecaMessageState>>();
 	}
 	
-	public HashMap<Pair<String, String>, ArrayList<CoreRebecaMessage>> getReceivedMessages() {
+	public HashMap<Pair<Integer, Integer>, ArrayList<CoreRebecaMessageState>> getReceivedMessages() {
 		return receivedMessages;
 	}
-	public void setReceivedMessages(HashMap<Pair<String, String>, ArrayList<CoreRebecaMessage>> receivedMessages) {
+	public void setReceivedMessages(HashMap<Pair<Integer, Integer>, ArrayList<CoreRebecaMessageState>> receivedMessages) {
 		this.receivedMessages = receivedMessages;
 	}
 	
-	public void addMessage(CoreRebecaMessage message) {
-		Pair<String, String> key = new Pair<String, String>(
+	public void addMessage(CoreRebecaMessageState message) {
+		Pair<Integer, Integer> key = new Pair<Integer, Integer>(
 				message.getSender().getId(), message.getReceiver().getId());
 		if(!receivedMessages.containsKey(key))
-			receivedMessages. put(key, new ArrayList<CoreRebecaMessage>());
+			receivedMessages. put(key, new ArrayList<CoreRebecaMessageState>());
 		receivedMessages.get(key).add(message);
 	}
 	

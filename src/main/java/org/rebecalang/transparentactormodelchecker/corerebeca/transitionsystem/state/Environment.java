@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 
 @SuppressWarnings("serial")
-public class Environment implements Serializable{
+public class Environment implements Serializable {
 
 	private HashMap<String, Object> envVars;
 	
@@ -24,8 +24,12 @@ public class Environment implements Serializable{
 		return envVars.containsKey(varName);
 	}
 	
-	public String toString() {
-		return "[" + envVars + "]";
-	}
+//	public String toString() {
+//		String retValue =  "{";
+//		for(Entry<String, Object> entry : envVars.entrySet()) {
+//			retValue += entry.getKey() + ":" + entry.getValue();
+//		}
+//		return retValue + "}";
+//	}
 
 }

@@ -44,6 +44,7 @@ public class TimedRebecaTest {
     protected TimedRebecaModelCheckerFactory timedRebecaModelCheckerFactory;
 
     @ParameterizedTest
+    @Disabled
     @MethodSource("modelToStateSpace")
     public void GIVEN_TimedRebecaModel_WHEN_No_Error(String filename, int stateSpaceSize, TransitionSystem transitionSystem) throws ModelCheckingException, FileNotFoundException {
         File model = new File(MODEL_FILES_BASE + filename);

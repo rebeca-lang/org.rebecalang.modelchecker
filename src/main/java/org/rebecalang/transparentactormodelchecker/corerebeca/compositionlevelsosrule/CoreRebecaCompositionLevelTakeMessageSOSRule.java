@@ -23,7 +23,7 @@ public class CoreRebecaCompositionLevelTakeMessageSOSRule extends AbstractSOSRul
 		CoreRebecaNondeterministicTransition<CoreRebecaSystemState> transitions = new CoreRebecaNondeterministicTransition<CoreRebecaSystemState>();
 
 		CoreRebecaSystemState backup = RebecaStateSerializationUtils.clone(source);
-		for (String actorId : backup.getActorsIds()) {
+		for (int actorId : backup.getActorsIds()) {
 			CoreRebecaActorState coreRebecaActorState = source.getActorState(actorId);
 			if (coreRebecaActorLevelTakeAMessageSOSRule.isEnable(coreRebecaActorState)) {
 

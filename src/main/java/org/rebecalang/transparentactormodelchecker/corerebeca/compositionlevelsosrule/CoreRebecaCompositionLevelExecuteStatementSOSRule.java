@@ -1,6 +1,8 @@
 package org.rebecalang.transparentactormodelchecker.corerebeca.compositionlevelsosrule;
 
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Set;
 
 import org.rebecalang.compiler.utils.Pair;
 import org.rebecalang.modelchecker.corerebeca.RebecaRuntimeInterpreterException;
@@ -9,6 +11,7 @@ import org.rebecalang.transparentactormodelchecker.corerebeca.actorlevelsosrule.
 import org.rebecalang.transparentactormodelchecker.corerebeca.networklevelsosrule.CoreRebecaNetworkLevelReceiveMessageSOSRule;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.action.Action;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.action.MessageAction;
+import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.action.NewInstanceAction;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaActorState;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaSystemState;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.transition.CoreRebecaAbstractTransition;
@@ -33,9 +36,18 @@ public class CoreRebecaCompositionLevelExecuteStatementSOSRule extends AbstractS
 				new CoreRebecaNondeterministicTransition<CoreRebecaSystemState>();
 
 		CoreRebecaSystemState backup = RebecaStateSerializationUtils.clone(source);
-		for(String actorId : backup.getActorsState().keySet()) {
+		Set<Integer> actorsIds = backup.getActorsState().keySet();
+		int priority = Integer.MAX_VALUE;
+		for(Integer actorId : actorsIds) {
 			CoreRebecaActorState coreRebecaActorState = source.getActorState(actorId);
-			if(!coreRebecaActorState.hasVariableInScope(CoreRebecaActorState.PC))
+			if(coreRebecaActorState.hasVariableInScope(CoreRebecaActorState.PC))
+				priority = Math.min(priority, coreRebecaActorState.getPriority());
+		}
+		
+		for(Integer actorId : actorsIds) {
+			CoreRebecaActorState coreRebecaActorState = source.getActorState(actorId);
+			if(!coreRebecaActorState.hasVariableInScope(CoreRebecaActorState.PC) ||
+					coreRebecaActorState.getPriority() > priority)
 				continue;
 
 			CoreRebecaAbstractTransition<CoreRebecaActorState> executionResult = 
@@ -47,6 +59,9 @@ public class CoreRebecaCompositionLevelExecuteStatementSOSRule extends AbstractS
 				if(transition.getAction() instanceof MessageAction) {
 					coreRebecaNetworkLevelReceiveMessageSOSRule.applyRule(
 							transition.getAction(), source.getNetworkState());
+				} else if(transition.getAction() instanceof NewInstanceAction){
+					NewInstanceAction newInstanceAction = (NewInstanceAction) transition.getAction();
+					source.addNewActorState(newInstanceAction.getNewInstanceReference());
 				}
 				transitions.addDestination(transition.getAction(), source);
 			} else if(executionResult instanceof CoreRebecaNondeterministicTransition<CoreRebecaActorState>) {
@@ -73,6 +88,11 @@ public class CoreRebecaCompositionLevelExecuteStatementSOSRule extends AbstractS
 	@Override
 	public CoreRebecaNondeterministicTransition<CoreRebecaSystemState> applyRule(Action action, CoreRebecaSystemState source) {
 		throw new RebecaRuntimeInterpreterException("Composition level execute statement rule does not accept input action");	
+	}
+
+	public void setMethodLookupTable(HashMap<String, String> methodLookupTable) {
+		coreRebecaActorLevelExecuteStatementSOSRule.setMethodLookupTable(methodLookupTable);
+		
 	}
 
 }
