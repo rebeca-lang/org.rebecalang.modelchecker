@@ -1,5 +1,6 @@
 package org.rebecalang.transparentactormodelchecker.corerebeca.statementlevelrule;
 
+import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.Type;
 import org.rebecalang.compiler.utils.Pair;
 import org.rebecalang.modelchecker.corerebeca.RebecaRuntimeInterpreterException;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.InstructionBean;
@@ -23,13 +24,15 @@ public class CoreRebecaRebecInstantiationSOSRule extends AbstractSOSRule<Pair<Co
 		CoreRebecaActorState actorState = source.getFirst();
 		actorState.movePCtoTheNextInstruction();
 		
+		Type newInstanceType = riib.getType();
 		CoreRebecaActorState newInstance = 
-				CoreRebecaActorState.createTempCoreRebecaActorState();
+				CoreRebecaActorState.createTempCoreRebecaActorState(newInstanceType);
 		actorState.addVariableToScope(riib.getResultTarget().getVarName(), 
 				newInstance);
 		newInstance.setRILModel(actorState.getRILModel());
 		NewInstanceAction resultAction = new NewInstanceAction(
-				newInstance, riib.getType());
+				newInstance, newInstanceType);
+		
 		CoreRebecaDeterministicTransition<Pair<CoreRebecaActorState, InstructionBean>> result = 
 				new CoreRebecaDeterministicTransition<Pair<CoreRebecaActorState,InstructionBean>>();
 		result.setDestination(source);

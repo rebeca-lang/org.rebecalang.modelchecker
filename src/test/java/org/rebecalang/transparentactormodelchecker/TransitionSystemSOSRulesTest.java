@@ -56,7 +56,7 @@ public class TransitionSystemSOSRulesTest {
     }
 
     @Test
-    public void GIVEN_TwoActorsHaveMesssages_WHEN_StartExecution_THEN_TwoTargetStatesHaveToBeGenerated() {
+    public void GIVEN_TwoActorsHaveMesssages_WHEN_StartExecution_THEN_TwoTargetStatesHaveToBeGenerated() throws RuleIsDisabledException {
     	
     	CoreRebecaMessageState message1 = new CoreRebecaMessageState("m1", new HashMap<String, Object>());
     	CoreRebecaActorState actor1 = coreRebecaSystemState.getActorState(ACTOR_1_ID);
@@ -91,7 +91,7 @@ public class TransitionSystemSOSRulesTest {
     }
    
     @Test
-    public void GIVEN_TwoActors_WHEN_SendMessageStatementIsExecuted_THEN_SentMessageHasToBedeliveredToTheTarget() {
+    public void GIVEN_TwoActors_WHEN_SendMessageStatementIsExecuted_THEN_SentMessageHasToBedeliveredToTheTarget() throws RuleIsDisabledException {
     	CoreRebecaActorState actor1 = coreRebecaSystemState.getActorState(ACTOR_1_ID);
     	CoreRebecaActorState actor2 = coreRebecaSystemState.getActorState(ACTOR_2_ID);
     	

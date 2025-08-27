@@ -2,6 +2,7 @@ package org.rebecalang.transparentactormodelchecker.corerebeca.actorlevelsosrule
 
 import org.rebecalang.modelchecker.corerebeca.RebecaRuntimeInterpreterException;
 import org.rebecalang.transparentactormodelchecker.AbstractSOSRule;
+import org.rebecalang.transparentactormodelchecker.RuleIsDisabledException;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.action.Action;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.action.MessageAction;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaActorState;
@@ -12,7 +13,7 @@ import org.springframework.stereotype.Component;
 public class CoreRebecaActorLevelReceiveSOSRule extends AbstractSOSRule<CoreRebecaActorState> {
 
 	@Override
-	public CoreRebecaDeterministicTransition<CoreRebecaActorState> applyRule(CoreRebecaActorState source) {
+	public CoreRebecaDeterministicTransition<CoreRebecaActorState> applyRule(CoreRebecaActorState source) throws RuleIsDisabledException {
 //		if(!source.hasVariableInScope(CoreRebecaActorState.PC))
 //			throw new RebecaRuntimeInterpreterException("Execution rule is disabled");
 //		CoreRebecaMessage message = source.getFirstMessage();
@@ -30,7 +31,7 @@ public class CoreRebecaActorLevelReceiveSOSRule extends AbstractSOSRule<CoreRebe
 	}
 	
 	@Override
-	public CoreRebecaDeterministicTransition<CoreRebecaActorState> applyRule(Action action, CoreRebecaActorState source) {
+	public CoreRebecaDeterministicTransition<CoreRebecaActorState> applyRule(Action action, CoreRebecaActorState source) throws RuleIsDisabledException {
 		source.receiveMessage(((MessageAction)action).getMessage());
 		
 		CoreRebecaDeterministicTransition<CoreRebecaActorState> result =

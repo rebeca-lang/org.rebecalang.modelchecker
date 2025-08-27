@@ -7,6 +7,7 @@ import java.util.Set;
 import org.rebecalang.compiler.utils.Pair;
 import org.rebecalang.modelchecker.corerebeca.RebecaRuntimeInterpreterException;
 import org.rebecalang.transparentactormodelchecker.AbstractSOSRule;
+import org.rebecalang.transparentactormodelchecker.RuleIsDisabledException;
 import org.rebecalang.transparentactormodelchecker.corerebeca.actorlevelsosrule.CoreRebecaActorLevelExecuteStatementSOSRule;
 import org.rebecalang.transparentactormodelchecker.corerebeca.networklevelsosrule.CoreRebecaNetworkLevelReceiveMessageSOSRule;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.action.Action;
@@ -31,7 +32,7 @@ public class CoreRebecaCompositionLevelExecuteStatementSOSRule extends AbstractS
 	CoreRebecaNetworkLevelReceiveMessageSOSRule coreRebecaNetworkLevelReceiveMessageSOSRule;
 	
 	@Override
-	public CoreRebecaNondeterministicTransition<CoreRebecaSystemState> applyRule(CoreRebecaSystemState source) {
+	public CoreRebecaNondeterministicTransition<CoreRebecaSystemState> applyRule(CoreRebecaSystemState source) throws RuleIsDisabledException {
 		CoreRebecaNondeterministicTransition<CoreRebecaSystemState> transitions = 
 				new CoreRebecaNondeterministicTransition<CoreRebecaSystemState>();
 
@@ -82,11 +83,13 @@ public class CoreRebecaCompositionLevelExecuteStatementSOSRule extends AbstractS
 			source = RebecaStateSerializationUtils.clone(backup);
 		}
 
+		if(transitions.getDestinations().isEmpty())
+			throw new RuleIsDisabledException();
 		return transitions;
 	}
 
 	@Override
-	public CoreRebecaNondeterministicTransition<CoreRebecaSystemState> applyRule(Action action, CoreRebecaSystemState source) {
+	public CoreRebecaNondeterministicTransition<CoreRebecaSystemState> applyRule(Action action, CoreRebecaSystemState source) throws RuleIsDisabledException {
 		throw new RebecaRuntimeInterpreterException("Composition level execute statement rule does not accept input action");	
 	}
 

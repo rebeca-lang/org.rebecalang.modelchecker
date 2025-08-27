@@ -5,7 +5,6 @@ public class RebecaRuntimeInterpreterException extends RuntimeException {
 	
 	public RebecaRuntimeInterpreterException(String message) {
 		super(message);
-		
 	}
 
 }

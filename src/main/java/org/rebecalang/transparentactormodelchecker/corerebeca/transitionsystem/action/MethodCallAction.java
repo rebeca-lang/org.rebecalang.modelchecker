@@ -15,7 +15,7 @@ public class MethodCallAction extends Action {
 	}
 	
 	@Override
-	public String getActionLable() {
+	public String getActionLabel() {
 		return message;
 	}
 	

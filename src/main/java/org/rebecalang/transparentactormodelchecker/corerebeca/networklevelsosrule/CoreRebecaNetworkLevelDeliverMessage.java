@@ -6,6 +6,7 @@ import java.util.Iterator;
 import org.rebecalang.compiler.utils.Pair;
 import org.rebecalang.modelchecker.corerebeca.RebecaRuntimeInterpreterException;
 import org.rebecalang.transparentactormodelchecker.AbstractSOSRule;
+import org.rebecalang.transparentactormodelchecker.RuleIsDisabledException;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.action.Action;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.action.MessageAction;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaMessageState;
@@ -18,7 +19,7 @@ import org.springframework.stereotype.Component;
 public class CoreRebecaNetworkLevelDeliverMessage extends AbstractSOSRule<CoreRebecaNetworkState> {
 
 	@Override
-	public CoreRebecaNondeterministicTransition<CoreRebecaNetworkState> applyRule(CoreRebecaNetworkState source) {
+	public CoreRebecaNondeterministicTransition<CoreRebecaNetworkState> applyRule(CoreRebecaNetworkState source) throws RuleIsDisabledException {
 		CoreRebecaNondeterministicTransition<CoreRebecaNetworkState> transitions = new CoreRebecaNondeterministicTransition<CoreRebecaNetworkState>();
 		CoreRebecaNetworkState backup = RebecaStateSerializationUtils.clone(source);
 		Iterator<Pair<Integer, Integer>> entrySetIterator = backup.getReceivedMessages().keySet().iterator();
@@ -34,11 +35,15 @@ public class CoreRebecaNetworkLevelDeliverMessage extends AbstractSOSRule<CoreRe
 			transitions.addDestination(action, source);
 			source = RebecaStateSerializationUtils.clone(backup);
 		}
+		
+		if(transitions.getDestinations().isEmpty())
+			throw new RuleIsDisabledException();
+		
 		return transitions;
 	}
 
 	@Override
-	public CoreRebecaNondeterministicTransition<CoreRebecaNetworkState> applyRule(Action action, CoreRebecaNetworkState source) {
+	public CoreRebecaNondeterministicTransition<CoreRebecaNetworkState> applyRule(Action action, CoreRebecaNetworkState source) throws RuleIsDisabledException {
 		throw new RebecaRuntimeInterpreterException("Network level deliver message rule does not accept input action");
 	}
 

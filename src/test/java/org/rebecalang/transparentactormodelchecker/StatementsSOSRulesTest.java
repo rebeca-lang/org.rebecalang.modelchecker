@@ -120,4 +120,40 @@ public class StatementsSOSRulesTest {
 		Assertions.assertEquals(result.getAction().getClass(), NewInstanceAction.class);
 
     }
+    @Test
+    public void GIVEN_ActorStateHasAVariable_WHEN_AssignmentInstructionIsExecutedAndAccessedBySelfKeyword_THEN_ValueHasToBeUpdated() {
+
+    	coreRebecaActorState.addVariableToScope("var1", 1);
+    	coreRebecaActorState.addVariableToScope("self", coreRebecaActorState);
+    	coreRebecaActorState.addVariableToScope(CoreRebecaActorState.PC, new Pair<String, Integer>("-", 0));
+
+    	
+    	Variable base = new Variable("self");
+    	Variable v1 = new Variable(base, "var1");
+    	AssignmentInstructionBean aib = new AssignmentInstructionBean(v1, 10, null, null);
+    	Pair<CoreRebecaActorState, InstructionBean> state = new Pair<CoreRebecaActorState, InstructionBean>(coreRebecaActorState, aib);
+		state.setSecond(aib);
+		assignmentSOSRule.applyRule(state);
+		
+		Assertions.assertEquals(state.getFirst().getVariableValue("var1"), 10);
+    }
+
+    @Test
+    public void GIVEN_ActorStateHasAVariable_WHEN_ConditionalInstructionIsExecutedAndConditionIsTrue_THEN_NoJumpIsNeeded() {
+
+    	coreRebecaActorState.addVariableToScope("var1", 1);
+    	coreRebecaActorState.addVariableToScope("var2", 1);
+    	coreRebecaActorState.addVariableToScope(CoreRebecaActorState.PC, new Pair<String, Integer>("-", 0));
+
+    	
+    	Variable base = new Variable("var2");
+    	Variable v1 = new Variable(base, "var1");
+    	AssignmentInstructionBean aib = new AssignmentInstructionBean(v1, 10, null, null);
+    	Pair<CoreRebecaActorState, InstructionBean> state = new Pair<CoreRebecaActorState, InstructionBean>(coreRebecaActorState, aib);
+		state.setSecond(aib);
+		assignmentSOSRule.applyRule(state);
+		
+		Assertions.assertEquals(state.getFirst().getVariableValue("var1"), 10);
+    }
+
 }

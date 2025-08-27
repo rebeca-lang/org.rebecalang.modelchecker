@@ -8,6 +8,7 @@ import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.Instruction
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.Variable;
 import org.rebecalang.transparentactormodelchecker.AbstractSOSRule;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.action.Action;
+import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.action.TauAction;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaActorState;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.transition.CoreRebecaDeterministicTransition;
 import org.springframework.stereotype.Component;
@@ -15,7 +16,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class CoreRebecaAssignmentSOSRule extends AbstractSOSRule<Pair<CoreRebecaActorState, InstructionBean>> {
 
-	private Object getValue(Object reference, CoreRebecaActorState actorState) {
+	public static Object getValue(Object reference, CoreRebecaActorState actorState) {
 		if (reference instanceof Variable) {
 			String varName = ((Variable) reference).getVarName();
 			return actorState.getVariableValue(varName);
@@ -28,14 +29,16 @@ public class CoreRebecaAssignmentSOSRule extends AbstractSOSRule<Pair<CoreRebeca
 	@Override
 	public CoreRebecaDeterministicTransition<Pair<CoreRebecaActorState, InstructionBean>> applyRule(
 			Pair<CoreRebecaActorState, InstructionBean> source) {
-		Action resultAction = Action.TAU;
+		Action resultAction = TauAction.TAU;
+		CoreRebecaActorState actorState = source.getFirst();
+
 		AssignmentInstructionBean aib = (AssignmentInstructionBean) source.getSecond();
-		Object valueFirst = getValue(aib.getFirstOperand(), source.getFirst());
+		Object valueFirst = getValue(aib.getFirstOperand(), actorState);
 		Object rightSideResult = valueFirst;
 
-		Object valueSecond = getValue(aib.getSecondOperand(), source.getFirst());
 		String operator = aib.getOperator();
 		if (operator != null) {
+			Object valueSecond = getValue(aib.getSecondOperand(), actorState);
 			if (valueFirst instanceof CoreRebecaActorState) {
 				if (operator.equals("=="))
 					rightSideResult = ((CoreRebecaActorState) valueFirst)
@@ -60,8 +63,8 @@ public class CoreRebecaAssignmentSOSRule extends AbstractSOSRule<Pair<CoreRebeca
 				rightSideResult = SemanticCheckerUtils.evaluateConstantTerm(operator, null, valueFirst, valueSecond);
 		}
 
-		source.getFirst().setVariableValue((Variable) aib.getLeftVarName(), rightSideResult);
-		source.getFirst().movePCtoTheNextInstruction();
+		actorState.setVariableValue((Variable) aib.getLeftVarName(), rightSideResult);
+		actorState.movePCtoTheNextInstruction();
 
 		CoreRebecaDeterministicTransition<Pair<CoreRebecaActorState, InstructionBean>> result = new CoreRebecaDeterministicTransition<Pair<CoreRebecaActorState, InstructionBean>>();
 		result.setDestination(source);

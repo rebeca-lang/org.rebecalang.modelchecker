@@ -9,8 +9,8 @@ public abstract class AbstractSOSRule<T> {
 		return true;
 	}
 	
-	public abstract CoreRebecaAbstractTransition<T> applyRule(T source);
+	public abstract CoreRebecaAbstractTransition<T> applyRule(T source) throws RuleIsDisabledException;
 
-	public abstract CoreRebecaAbstractTransition<T> applyRule(Action synchAction, T source);
+	public abstract CoreRebecaAbstractTransition<T> applyRule(Action synchAction, T source) throws RuleIsDisabledException;
 
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import org.rebecalang.compiler.utils.Pair;
 import org.rebecalang.modelchecker.corerebeca.RebecaRuntimeInterpreterException;
 import org.rebecalang.transparentactormodelchecker.AbstractSOSRule;
+import org.rebecalang.transparentactormodelchecker.RuleIsDisabledException;
 import org.rebecalang.transparentactormodelchecker.corerebeca.compositionlevelsosrule.CoreRebecaCompositionLevelExecuteStatementSOSRule;
 import org.rebecalang.transparentactormodelchecker.corerebeca.compositionlevelsosrule.CoreRebecaCompositionLevelNetworkDeliverySOSRule;
 import org.rebecalang.transparentactormodelchecker.corerebeca.compositionlevelsosrule.CoreRebecaCompositionLevelTakeMessageSOSRule;
@@ -29,27 +30,35 @@ public class CoreRebecaSOSRule extends AbstractSOSRule<CoreRebecaSystemState>{
 	CoreRebecaCompositionLevelTakeMessageSOSRule takeMessageSOSRule;
 	
 	@Override
-	public CoreRebecaAbstractTransition<CoreRebecaSystemState> applyRule(CoreRebecaSystemState source) {
+	public CoreRebecaAbstractTransition<CoreRebecaSystemState> applyRule(CoreRebecaSystemState source) throws RuleIsDisabledException {
 		CoreRebecaNondeterministicTransition<CoreRebecaSystemState> transitions = new 
 				CoreRebecaNondeterministicTransition<CoreRebecaSystemState>();
 		CoreRebecaSystemState backup = RebecaStateSerializationUtils.clone(source);
+		List<Pair<? extends Action, CoreRebecaSystemState>> destinations = null;
+		try {
+			destinations = executeStatementSOSRule.applyRule(source).getDestinations();
+			transitions.addAllDestinations(destinations);
+			source = RebecaStateSerializationUtils.clone(backup);
+		} catch (RuleIsDisabledException exception) {}
+			
+		try {
+			destinations = takeMessageSOSRule.applyRule(source).getDestinations();
+			transitions.addAllDestinations(destinations);
+			source = RebecaStateSerializationUtils.clone(backup);
+		} catch (RuleIsDisabledException exception) {}
 
-		List<Pair<? extends Action, CoreRebecaSystemState>> destinations = executeStatementSOSRule.applyRule(source).getDestinations();
-		transitions.addAllDestinations(destinations);
-		if(destinations.size() != 0)
-			source = RebecaStateSerializationUtils.clone(backup);
-		destinations = takeMessageSOSRule.applyRule(source).getDestinations();
-		transitions.addAllDestinations(destinations);
-		if(destinations.size() != 0)
-			source = RebecaStateSerializationUtils.clone(backup);
-		destinations = networkDeliverySOSRule.applyRule(source).getDestinations();
-		transitions.addAllDestinations(destinations);
+		try {
+			destinations = networkDeliverySOSRule.applyRule(source).getDestinations();
+			transitions.addAllDestinations(destinations);
+		} catch (RuleIsDisabledException exception) {}
+		if(transitions.getDestinations().isEmpty())
+			throw new RuleIsDisabledException();
 		return transitions;
 	}
 
 	@Override
 	public CoreRebecaAbstractTransition<CoreRebecaSystemState> applyRule(Action synchAction,
-			CoreRebecaSystemState source) {
+			CoreRebecaSystemState source) throws RuleIsDisabledException {
 		throw new RebecaRuntimeInterpreterException("Core Rebeca level rule does not accept input action");	
 	}
 

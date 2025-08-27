@@ -20,7 +20,7 @@ public class NewInstanceAction extends Action {
 	}
 	
 	@Override
-	public String getActionLable() {
+	public String getActionLabel() {
 		return "new " + type.getTypeName();
 	}
 

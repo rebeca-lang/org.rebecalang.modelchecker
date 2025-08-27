@@ -1,13 +1,15 @@
 package org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.transition;
 
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.action.Action;
+import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.action.TauAction;
 
 public class CoreRebecaDeterministicTransition<T> extends CoreRebecaAbstractTransition<T> {
+		
 	private T destination;
 	private Action action;
 
 	public CoreRebecaDeterministicTransition() {
-		action = Action.TAU;
+		action = TauAction.TAU;
 	}
 	
 	public CoreRebecaDeterministicTransition(T destination) {

@@ -7,17 +7,17 @@ import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.s
 
 class TransparentActorCoreRebecaTransitionSystemState {
 	
-	public static TransparentActorCoreRebecaTransitionSystemState createEmptyState() {
-		TransparentActorCoreRebecaTransitionSystemState state = 
-				new TransparentActorCoreRebecaTransitionSystemState();
-		state.setNextStates(new ArrayList<CoreRebecaSystemState>());
-		state.setPreviousStates(new ArrayList<CoreRebecaSystemState>());
-		return state;
+
+	public TransparentActorCoreRebecaTransitionSystemState(int id) {
+		this.id = id;
+		nextStates = new ArrayList<TransparentActorCoreRebecaTransitionSystemState>();
+		previousStates = new ArrayList<TransparentActorCoreRebecaTransitionSystemState>();
 	}
-	
+
+	private int id;
 	private CoreRebecaSystemState state;
-	private ArrayList<CoreRebecaSystemState> nextStates;
-	private ArrayList<CoreRebecaSystemState> previousStates;
+	private ArrayList<TransparentActorCoreRebecaTransitionSystemState> nextStates;
+	private ArrayList<TransparentActorCoreRebecaTransitionSystemState> previousStates;
 
 	public CoreRebecaSystemState getState() {
 		return state;
@@ -36,19 +36,36 @@ class TransparentActorCoreRebecaTransitionSystemState {
 		this.state = state;
 	}
 	
-	public ArrayList<CoreRebecaSystemState> getNextStates() {
+	public ArrayList<TransparentActorCoreRebecaTransitionSystemState> getNextStates() {
 		return nextStates;
 	}
 	
-	public void setNextStates(ArrayList<CoreRebecaSystemState> nextStates) {
+	public void setNextStates(ArrayList<TransparentActorCoreRebecaTransitionSystemState> nextStates) {
 		this.nextStates = nextStates;
 	}
 	
-	public ArrayList<CoreRebecaSystemState> getPreviousStates() {
+	public ArrayList<TransparentActorCoreRebecaTransitionSystemState> getPreviousStates() {
 		return previousStates;
 	}
 	
-	public void setPreviousStates(ArrayList<CoreRebecaSystemState> previousStates) {
+	public void setPreviousStates(ArrayList<TransparentActorCoreRebecaTransitionSystemState> previousStates) {
 		this.previousStates = previousStates;
+	}
+	
+	public void addPreviousState(TransparentActorCoreRebecaTransitionSystemState previousState) {
+		previousStates.add(previousState);
+	}
+	
+	public void addNextState(TransparentActorCoreRebecaTransitionSystemState nextState) {
+		nextStates.add(nextState);
+	}
+	
+	public int getId() {
+		return id;
+	}
+	
+	@Override
+	public String toString() {
+		return "\n-------------\n" + id + "->" + state.toString() + "\n-------------\n";
 	}
 }

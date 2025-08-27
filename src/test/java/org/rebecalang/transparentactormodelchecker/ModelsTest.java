@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -23,7 +25,10 @@ import org.rebecalang.modelchecker.corerebeca.utils.Policy;
 import org.rebecalang.modeltransformer.ModelTransformerConfig;
 import org.rebecalang.modeltransformer.ril.RILModel;
 import org.rebecalang.modeltransformer.ril.Rebeca2RILModelTransformer;
-import org.rebecalang.transparentactormodelchecker.corerebeca.TransparentActorCoreRebecaDFSModelChecker;
+import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.InstructionBean;
+import org.rebecalang.transparentactormodelchecker.corerebeca.TransparentActorCoreRebecaFineGrainedDFSModelChecker;
+import org.rebecalang.transparentactormodelchecker.corerebeca.TransparentActorCoreRebecaCoarseGrainedDFSModelChecker;
+import org.rebecalang.transparentactormodelchecker.corerebeca.TransparentActorCoreRebecaFineGrainedBFSModelChecker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -46,9 +51,15 @@ public class ModelsTest {
     protected Rebeca2RILModelTransformer rebeca2RILModelTransformer;
     
     @Autowired
-    protected TransparentActorCoreRebecaDFSModelChecker dfsModelChecker;
+    protected TransparentActorCoreRebecaFineGrainedDFSModelChecker dfsModelChecker;
 
-	@ParameterizedTest
+    @Autowired
+    protected TransparentActorCoreRebecaFineGrainedBFSModelChecker fineGrainedBFSModelChecker;
+    
+    @Autowired
+    protected TransparentActorCoreRebecaCoarseGrainedDFSModelChecker coarseGrainedDFSModelChecker;
+
+//	@ParameterizedTest
 	@MethodSource("modelToStateSpace")
 	public void GIVEN_RebecaModel_WHEN_No_Error(String filename, int statespaceSize, Policy policy) throws ModelCheckingException, IOException {
 		String rebecaModel = 
@@ -66,7 +77,12 @@ public class ModelsTest {
 						}
 					
 						msgsrv ping() {
-							self.t = t;
+							//self.t = -t + 7;
+							//boolean b;
+							//b = true == false;
+							//Pong p = po;
+							if(true)
+								t = t;
 							po.pong();
 						}
 					}
@@ -89,8 +105,6 @@ public class ModelsTest {
 				""";
 		File rebecaFile = FileUtils.createTempFile(rebecaModel);
 		
-//		File model = new File(MODEL_FILES_BASE + filename);
-		
 		Pair<RebecaModel, SymbolTable> compiledRebecaFile = 
 				rebecaModelCompiler.compileRebecaFile(rebecaFile, new HashSet<CompilerExtension>(), CoreVersion.CORE_2_3);
 		if(!exceptionContainer.exceptionsIsEmpty()) {
@@ -100,17 +114,16 @@ public class ModelsTest {
         RILModel transformedRILModel = rebeca2RILModelTransformer.transformModel(
         		compiledRebecaFile, new HashSet<CompilerExtension>(), CoreVersion.CORE_2_3);
         
-        dfsModelChecker.modelcheck(compiledRebecaFile, transformedRILModel);
-        
-//		for(String methodName : transformedRILModel.getMethodNames()) {
-//			System.out.println(methodName);
-//			int counter = 0;
-//			for(InstructionBean instruction : transformedRILModel.getInstructionList(methodName)) {
-//				System.out.println("" + counter++ +":" + instruction);
-//			}
-//			System.out.println("...............................................");
-//		}
 
+		printRILModel(transformedRILModel);
+//		TransparentActorModelCheckingResult dfsResult = dfsModelChecker.modelcheck(compiledRebecaFile, transformedRILModel);
+//
+//		TransparentActorModelCheckingResult bfsResult = fineGrainedBFSModelChecker.modelcheck(compiledRebecaFile, transformedRILModel);
+//
+//		Assertions.assertEquals(dfsResult.getTransitionSystem().size(),
+//				bfsResult.getTransitionSystem().size());
+		
+		TransparentActorModelCheckingResult coarseDfsResult = coarseGrainedDFSModelChecker.modelcheck(compiledRebecaFile, transformedRILModel);
 //		coreRebecaModelChecker.modelCheck(model, modelCheckerSetting);
 //
 //		if(!exceptionContainer.exceptionsIsEmpty())
@@ -125,11 +138,45 @@ public class ModelsTest {
 //
 //		Assertions.assertEquals(statespaceSize, stateSpace.size());
 	}
+
+	@ParameterizedTest
+	@MethodSource("philosophers")
+	public void GIVEN_DiningPhilosopherModel_WHEN_No_Error(String model, int statespaceSize) throws ModelCheckingException, IOException {
+		File rebecaFile = FileUtils.createTempFile(model);
+		
+		Pair<RebecaModel, SymbolTable> compiledRebecaFile = 
+				rebecaModelCompiler.compileRebecaFile(rebecaFile, new HashSet<CompilerExtension>(), CoreVersion.CORE_2_3);
+		if(!exceptionContainer.exceptionsIsEmpty()) {
+			exceptionContainer.print(System.out);
+			return;
+		}
+        RILModel transformedRILModel = rebeca2RILModelTransformer.transformModel(
+        		compiledRebecaFile, new HashSet<CompilerExtension>(), CoreVersion.CORE_2_3);
+        
+
+		printRILModel(transformedRILModel);
+		
+		TransparentActorModelCheckingResult coarseDfsResult = coarseGrainedDFSModelChecker.modelcheck(compiledRebecaFile, transformedRILModel);
+		Assertions.assertEquals(statespaceSize, coarseDfsResult.getTransitionSystem().size());
+	}
 	
-	protected static Stream<Arguments> modelToStateSpace() {
+	private void printRILModel(RILModel transformedRILModel) {
+		for(String methodName : transformedRILModel.getMethodNames()) {
+			System.out.println(methodName);
+			int counter = 0;
+			for(InstructionBean instruction : transformedRILModel.getInstructionList(methodName)) {
+				System.out.println("" + counter++ +":" + instruction);
+			}
+			System.out.println("...............................................");
+		}
+	}
+	
+	protected static Stream<Arguments> philosophers() {
 	    return Stream.of(
-//	    		Arguments.arguments("pingpong.rebeca", 3, Policy.COARSE_GRAINED_POLICY)
-	    		Arguments.arguments("pingpong.rebeca", 12, Policy.FINE_GRAINED_POLICY)
+	    		Arguments.arguments(DiningPhilosophersSourceCodes.TWO_PHILOSOPHERS, 106),
+	    		Arguments.arguments(DiningPhilosophersSourceCodes.THREE_PHILOSOPHERS, 1472),
+	    		Arguments.arguments(DiningPhilosophersSourceCodes.FOUR_PHILOSOPHERS, 18054),
+	    		Arguments.arguments(DiningPhilosophersSourceCodes.FIVE_PHILOSOPHERS, 214108)
 	    );
 	}
 }

@@ -2,11 +2,11 @@ package org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.
 
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaMessageState;
 
-public class MessageAction extends Action {
+public class TakeMessageAction extends Action {
 
 	private CoreRebecaMessageState message;
 	
-	public MessageAction(CoreRebecaMessageState message) {
+	public TakeMessageAction(CoreRebecaMessageState message) {
 		this.message = message;
 	}
 	public CoreRebecaMessageState getMessage() {
@@ -18,8 +18,13 @@ public class MessageAction extends Action {
 	
 	@Override
 	public String getActionLabel() {
-		return "tau[" + message.getSender().getId() + "->" + 
-				message.getReceiver().getId() + "(" + message.getName() + ")]";
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append("(").append(message.getSender().getId()).
+			append("->").
+			append(message.getReceiver().getId()).
+			append(")::").
+			append(message.getName());
+		return stringBuilder.toString();
 	}
 	
 	public String toString() {

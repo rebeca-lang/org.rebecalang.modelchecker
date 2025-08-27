@@ -3,10 +3,12 @@ package org.rebecalang.transparentactormodelchecker.corerebeca.compositionlevels
 import org.rebecalang.compiler.utils.Pair;
 import org.rebecalang.modelchecker.corerebeca.RebecaRuntimeInterpreterException;
 import org.rebecalang.transparentactormodelchecker.AbstractSOSRule;
+import org.rebecalang.transparentactormodelchecker.RuleIsDisabledException;
 import org.rebecalang.transparentactormodelchecker.corerebeca.actorlevelsosrule.CoreRebecaActorLevelReceiveSOSRule;
 import org.rebecalang.transparentactormodelchecker.corerebeca.networklevelsosrule.CoreRebecaNetworkLevelDeliverMessage;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.action.Action;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.action.MessageAction;
+import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.action.NetworkDeliveryAction;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaNetworkState;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaSystemState;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.transition.CoreRebecaNondeterministicTransition;
@@ -24,16 +26,17 @@ public class CoreRebecaCompositionLevelNetworkDeliverySOSRule extends AbstractSO
 	CoreRebecaActorLevelReceiveSOSRule coreRebecaActorLevelReceiveSOSRule;
 	
 	@Override
-	public CoreRebecaNondeterministicTransition<CoreRebecaSystemState> applyRule(Action action, CoreRebecaSystemState source) {
+	public CoreRebecaNondeterministicTransition<CoreRebecaSystemState> applyRule(Action action, CoreRebecaSystemState source) throws RuleIsDisabledException {
 		throw new RebecaRuntimeInterpreterException("Composition level network delivery rule does not accept input action");	
 	}
 
 	@Override
-	public CoreRebecaNondeterministicTransition<CoreRebecaSystemState> applyRule(CoreRebecaSystemState source) {
+	public CoreRebecaNondeterministicTransition<CoreRebecaSystemState> applyRule(CoreRebecaSystemState source) throws RuleIsDisabledException {
 		CoreRebecaNondeterministicTransition<CoreRebecaSystemState> transitions = new 
 				CoreRebecaNondeterministicTransition<CoreRebecaSystemState>();
+		
 		if(source.getNetworkState().getReceivedMessages().size() == 0)
-			return transitions;
+			throw new RuleIsDisabledException();
 		
 		CoreRebecaSystemState backup = null;
 		CoreRebecaNondeterministicTransition<CoreRebecaNetworkState> deliveredMessageTransitions = 
@@ -45,7 +48,7 @@ public class CoreRebecaCompositionLevelNetworkDeliverySOSRule extends AbstractSO
 			source.setNetworkState(deliverable.getSecond());
 			source.getActorState(action.getMessage().getReceiver().getId()).
 				receiveMessage(action.getMessage());
-			transitions.addDestination(Action.TAU, source);
+			transitions.addDestination(new NetworkDeliveryAction(action.getMessage()), source);
 			source = backup;
 		}
 			

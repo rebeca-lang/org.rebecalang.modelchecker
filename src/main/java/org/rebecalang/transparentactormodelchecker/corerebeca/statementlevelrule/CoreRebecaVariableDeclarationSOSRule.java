@@ -6,6 +6,7 @@ import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.Declaration
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.InstructionBean;
 import org.rebecalang.transparentactormodelchecker.AbstractSOSRule;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.action.Action;
+import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.action.TauAction;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaActorState;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.transition.CoreRebecaDeterministicTransition;
 import org.springframework.stereotype.Component;
@@ -24,7 +25,7 @@ public class CoreRebecaVariableDeclarationSOSRule extends AbstractSOSRule<Pair<C
 		CoreRebecaDeterministicTransition<Pair<CoreRebecaActorState, InstructionBean>> result = 
 				new CoreRebecaDeterministicTransition<Pair<CoreRebecaActorState,InstructionBean>>();
 		result.setDestination(source);
-		result.setAction(Action.TAU);
+		result.setAction(TauAction.TAU);
 
 		return result;
 	}

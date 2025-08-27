@@ -6,8 +6,9 @@ import java.util.Map.Entry;
 import org.rebecalang.compiler.utils.Pair;
 import org.rebecalang.modelchecker.corerebeca.RebecaRuntimeInterpreterException;
 import org.rebecalang.transparentactormodelchecker.AbstractSOSRule;
+import org.rebecalang.transparentactormodelchecker.RuleIsDisabledException;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.action.Action;
-import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.action.MessageAction;
+import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.action.TakeMessageAction;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaActorState;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaMessageState;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.transition.CoreRebecaDeterministicTransition;
@@ -17,9 +18,9 @@ import org.springframework.stereotype.Component;
 public class CoreRebecaActorLevelTakeMessageSOSRule extends AbstractSOSRule<CoreRebecaActorState> {
 
 	@Override
-	public CoreRebecaDeterministicTransition<CoreRebecaActorState> applyRule(CoreRebecaActorState source) {
+	public CoreRebecaDeterministicTransition<CoreRebecaActorState> applyRule(CoreRebecaActorState source) throws RuleIsDisabledException {
 		if(source.messageQueueIsEmpty())
-			throw new RebecaRuntimeInterpreterException("Execution rule is disabled");
+			throw new RuleIsDisabledException();
 		CoreRebecaMessageState message = source.getFirstMessage();
 		source.pushToScope();
 		HashMap<String,Object> parameters = message.getParameters();
@@ -27,14 +28,12 @@ public class CoreRebecaActorLevelTakeMessageSOSRule extends AbstractSOSRule<Core
 			source.addVariableToScope(entry.getKey(), entry.getValue());
 		}
 		source.addVariableToScope("sender", message.getSender());
-		Pair<String, Integer> pc = new Pair<String, Integer>();
-		pc.setFirst(message.getName());
-		pc.setSecond(0);
+		Pair<String, Integer> pc = new Pair<String, Integer>(message.getName(), 0);
 		source.addVariableToScope(CoreRebecaActorState.PC, pc);
 
 		CoreRebecaDeterministicTransition<CoreRebecaActorState> result = 
 				new CoreRebecaDeterministicTransition<CoreRebecaActorState>();
-		result.setAction(new MessageAction(message));
+		result.setAction(new TakeMessageAction(message));
 		result.setDestination(source);
 		return result;
 	}
