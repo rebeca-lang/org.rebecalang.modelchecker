@@ -1,5 +1,6 @@
 package org.rebecalang.transparentactormodelchecker;
 
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,12 +12,12 @@ import org.rebecalang.modeltransformer.ModelTransformerConfig;
 import org.rebecalang.modeltransformer.ril.RILModel;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.InstructionBean;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.PushARInstructionBean;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.Environment;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaActorState;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaMessageState;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaNetworkState;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaSystemState;
-import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.Environment;
-import org.rebecalang.transparentactormodelchecker.corerebeca.utils.RebecaStateSerializationUtils;
+import org.rebecalang.transparentactormodelchecker.corerebeca.utils.RebecaStateSerializationUtil;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
@@ -35,7 +36,7 @@ public class CloningTests {
     	coreRebecaSystemState.setActorState(ACTOR_1_ID, new CoreRebecaActorState(ACTOR_1_ID));
 
     	CoreRebecaMessageState message1 = new CoreRebecaMessageState("m1", new HashMap<String, Object>());
-    	CoreRebecaActorState actor1 = coreRebecaSystemState.getActorState(ACTOR_1_ID);
+    	CoreRebecaActorState actor1 = (CoreRebecaActorState) coreRebecaSystemState.getActorState(ACTOR_1_ID);
     	message1.setReceiver(actor1);
     	message1.setSender(actor1);
     	actor1.receiveMessage(message1);
@@ -47,7 +48,7 @@ public class CloningTests {
     	
     	actor1.setRILModel(rilModel);
     	
-    	RebecaStateSerializationUtils.clone(coreRebecaSystemState);
+    	RebecaStateSerializationUtil.clone(coreRebecaSystemState);
     	
 	}
 //    @Test

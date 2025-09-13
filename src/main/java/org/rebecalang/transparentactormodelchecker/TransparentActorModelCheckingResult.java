@@ -1,14 +1,13 @@
 package org.rebecalang.transparentactormodelchecker;
 
-import org.rebecalang.transparentactormodelchecker.corerebeca.TransparentActorCoreRebecaTransitionSystem;
-
 public class TransparentActorModelCheckingResult {
 
 	public static final String DEADLOCK = "Deadlock";
 	public static final String SATISFIED = "Satisfied";
 	
+	private long time;
 	private String message;
-	private TransparentActorCoreRebecaTransitionSystem transitionSystem;
+	private TransparentActorTransitionSystem<?> transitionSystem;
 
 	public TransparentActorModelCheckingResult(String message) {
 		this.setMessage(message);
@@ -22,10 +21,19 @@ public class TransparentActorModelCheckingResult {
 		this.message = message;
 	}
 	
-	public TransparentActorCoreRebecaTransitionSystem getTransitionSystem() {
+	public TransparentActorTransitionSystem<?> getTransitionSystem() {
 		return transitionSystem;
 	}
-	public void setTransitionSystem(TransparentActorCoreRebecaTransitionSystem transitionSystem) {
+	
+	public void setTransitionSystem(TransparentActorTransitionSystem<?> transitionSystem) {
 		this.transitionSystem = transitionSystem;
+	}
+	
+	public void setTime(long time) {
+		this.time = time;
+	}
+	
+	public long getTime() {
+		return time;
 	}
 }

@@ -5,7 +5,7 @@ import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.Literal;
 import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.OrdinaryVariableInitializer;
 import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.RebecaModel;
 import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.VariableDeclarator;
-import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.Environment;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.Environment;
 
 public class StateGenerationUtils {
     public static Environment getEnvironment(RebecaModel rebecaModel) {

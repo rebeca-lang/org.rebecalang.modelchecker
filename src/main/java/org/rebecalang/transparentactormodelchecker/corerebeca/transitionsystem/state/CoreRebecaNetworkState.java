@@ -1,14 +1,15 @@
 package org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
 import org.rebecalang.compiler.utils.Pair;
-import org.rebecalang.transparentactormodelchecker.corerebeca.utils.CloningRepository;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.util.CloningRepository;
 
 @SuppressWarnings("serial")
-public class CoreRebecaNetworkState extends CoreRebecaAbstractState {
+public class CoreRebecaNetworkState implements Serializable, Cloneable {
 	private HashMap<Pair<Integer, Integer>, ArrayList<CoreRebecaMessageState>> receivedMessages;
 	
 	public CoreRebecaNetworkState() {
@@ -65,7 +66,7 @@ public class CoreRebecaNetworkState extends CoreRebecaAbstractState {
 		for(Entry<Pair<Integer, Integer>, ArrayList<CoreRebecaMessageState>> entry : receivedMessages.entrySet()) {
 			Pair<Integer, Integer> key = 
 					new Pair<Integer, Integer>(entry.getKey().getFirst(), entry.getKey().getSecond());
-			ArrayList<CoreRebecaMessageState> messages = CloningRepository.cloneMessageQueue(entry.getValue());
+			ArrayList<CoreRebecaMessageState> messages = CloningRepository.cloneArrayList(entry.getValue());
 			clonedNetworkState.receivedMessages.put(key, messages);
 		}
 		return clonedNetworkState;

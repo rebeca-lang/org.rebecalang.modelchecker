@@ -1,83 +1,22 @@
 package org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state;
 
-import java.util.Collection;
-import java.util.Collections;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map.Entry;
-import java.util.Set;
 
-import org.rebecalang.transparentactormodelchecker.corerebeca.utils.CloningRepository;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractActorState;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractSystemState;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.util.CloningRepository;
 
 @SuppressWarnings("serial")
-public class CoreRebecaSystemState extends CoreRebecaAbstractState implements Cloneable {
+public class CoreRebecaSystemState extends AbstractSystemState implements Serializable, Cloneable {
 	
-	private volatile Environment environment;
-	private HashMap<Integer, CoreRebecaActorState> actorsState;
-	private CoreRebecaNetworkState networkState;
+	protected CoreRebecaNetworkState networkState;
 
 	public CoreRebecaSystemState() {
-		actorsState = new HashMap<Integer, CoreRebecaActorState>();
+		super();
 		networkState = new CoreRebecaNetworkState();
 	}
-	
-	public Collection<CoreRebecaActorState> getActorsStatesValues() {
-		return actorsState.values();
-	}
-	
-	public Set<Integer> getActorsIds() {
-		return actorsState.keySet();
-	}
-	
-	public HashMap<Integer, CoreRebecaActorState> getActorsState() {
-		return actorsState;
-	}
-	
-	public void setActorState(int id, CoreRebecaActorState newState) {
-		newState.setEnvironment(environment);
-		actorsState.put(id, newState);
-	}
-
-	public void setActorState(CoreRebecaActorState newState) {
-		newState.setEnvironment(environment);
-		actorsState.put(newState.getId(), newState);
-	}
-	
-	public void destroyActorState(CoreRebecaActorState newState) {
-		actorsState.remove(newState.getId());
-	}
-	
-	public void addNewActorState(CoreRebecaActorState newState) {
-		Integer max = Collections.max(getActorsIds());
-		newState.setId(max + 1);
-		setActorState(newState);
-	}
-
-	public CoreRebecaActorState getActorState(int id) {
-		return actorsState.get(id);
-	}
-
-	public CoreRebecaNetworkState getNetworkState() {
-		return networkState;
-	}
-	
-	public void setNetworkState(CoreRebecaNetworkState networkState) {
-		this.networkState = networkState;
-	}
-	
-	public void setEnvironment(Environment environment) {
-		this.environment = environment;
-		for(CoreRebecaActorState actorState : actorsState.values())
-			actorState.setEnvironment(environment);
-	}
-	
-	public String toString() {
-		String result = "{\nEnv:" + environment + "|\n";
-		for(CoreRebecaActorState actorState : actorsState.values())
-			result += actorState.deepToString() + "|\n";
-		result += "net:" + networkState + "\n}";
-		return result;
-	}
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -85,7 +24,7 @@ public class CoreRebecaSystemState extends CoreRebecaAbstractState implements Cl
 //		int result = 1;
 //		result = prime * result + ((actorsState == null) ? 0 : actorsState.hashCode());
 		int result = prime;
-		for(Entry<Integer, CoreRebecaActorState> entry : actorsState.entrySet()) {
+		for(Entry<Integer, AbstractActorState> entry : actorsState.entrySet()) {
 			result += entry.getKey().hashCode() ^ entry.getValue().deepHashCode();
 		}
 		
@@ -109,9 +48,9 @@ public class CoreRebecaSystemState extends CoreRebecaAbstractState implements Cl
 		} else {
 	        if (actorsState.size() != other.actorsState.size())
 	            return false;
-            for (Entry<Integer, CoreRebecaActorState> entry : actorsState.entrySet()) {
+            for (Entry<Integer, AbstractActorState> entry : actorsState.entrySet()) {
                 Integer key = entry.getKey();
-                CoreRebecaActorState value = entry.getValue();
+                AbstractActorState value = entry.getValue();
                 if (value == null) {
                     if (!(other.actorsState.get(key) == null && other.actorsState.containsKey(key)))
                         return false;
@@ -136,14 +75,28 @@ public class CoreRebecaSystemState extends CoreRebecaAbstractState implements Cl
 	}
 	
 	public CoreRebecaSystemState clone() {
-		CoreRebecaSystemState clonedState = new CoreRebecaSystemState();
 		CloningRepository.resetRepository();
+		CoreRebecaSystemState clonedState = new CoreRebecaSystemState();
 		clonedState.environment = environment.clone();
 		clonedState.networkState = networkState.clone();
-		clonedState.actorsState = new HashMap<Integer, CoreRebecaActorState>();
-		for(Entry<Integer, CoreRebecaActorState> entry : actorsState.entrySet()) {
+		clonedState.actorsState = (HashMap<Integer, AbstractActorState>) new HashMap<Integer, AbstractActorState>();
+		for(Entry<Integer, AbstractActorState> entry : actorsState.entrySet()) {
 			clonedState.actorsState.put(entry.getKey(), entry.getValue().clone());
 		}
 		return clonedState;
+	}
+	
+	public CoreRebecaNetworkState getNetworkState() {
+		return networkState;
+	}
+
+	public void setNetworkState(CoreRebecaNetworkState networkState) {
+		this.networkState = networkState;
+	}
+	
+	public String toString() {
+		String result = super.toString();
+		result = result.substring(0, result.length() - 1) +  "net:" + networkState + "\n}";
+		return result;
 	}
 }

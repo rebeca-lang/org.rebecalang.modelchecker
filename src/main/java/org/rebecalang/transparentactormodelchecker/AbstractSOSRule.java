@@ -1,16 +1,16 @@
 package org.rebecalang.transparentactormodelchecker;
 
-import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.action.Action;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.action.Action;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.transitionsystem.AbstractTransition;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaActorState;
-import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.transition.CoreRebecaAbstractTransition;
 
 public abstract class AbstractSOSRule<T> {
-	public boolean isEnable(CoreRebecaActorState source) {
+	public boolean isEnabled(CoreRebecaActorState source) {
 		return true;
 	}
 	
-	public abstract CoreRebecaAbstractTransition<T> applyRule(T source) throws RuleIsDisabledException;
+	public abstract AbstractTransition<T> applyRule(T base, T state) throws RuleIsDisabledException;
 
-	public abstract CoreRebecaAbstractTransition<T> applyRule(Action synchAction, T source) throws RuleIsDisabledException;
+	public abstract AbstractTransition<T> applyRule(T base, Action synchAction, T state) throws RuleIsDisabledException;
 
 }

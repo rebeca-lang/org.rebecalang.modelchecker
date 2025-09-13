@@ -9,10 +9,11 @@ import org.rebecalang.compiler.utils.Pair;
 import org.rebecalang.modeltransformer.ril.RILModel;
 import org.rebecalang.transparentactormodelchecker.RuleIsDisabledException;
 import org.rebecalang.transparentactormodelchecker.TransparentActorModelCheckingResult;
-import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.action.Action;
+import org.rebecalang.transparentactormodelchecker.TransparentActorTransitionSystem;
+import org.rebecalang.transparentactormodelchecker.TransparentActorTransitionSystemState;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.action.Action;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.transitionsystem.NondeterministicTransition;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaSystemState;
-import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.transition.CoreRebecaNondeterministicTransition;
-import org.rebecalang.transparentactormodelchecker.corerebeca.utils.RebecaStateSerializationUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -23,28 +24,28 @@ public class TransparentActorCoreRebecaFineGrainedBFSModelChecker extends Transp
 	public TransparentActorModelCheckingResult modelcheck(Pair<RebecaModel,SymbolTable> compiledRebecaFile, RILModel rilModel) {
 		this.compiledRebecaFile = compiledRebecaFile;
 		this.rilModel = rilModel;
-		transitionSystem = new TransparentActorCoreRebecaTransitionSystem();
+		transitionSystem = new TransparentActorTransitionSystem<CoreRebecaSystemState>();
 		setInitialState();
 		
-		TransparentActorCoreRebecaTransitionSystemState initialState = 
+		TransparentActorTransitionSystemState<CoreRebecaSystemState> initialState = 
 				transitionSystem.getInitialState();
 
-		LinkedList<TransparentActorCoreRebecaTransitionSystemState> openBorder = 
-				new LinkedList<TransparentActorCoreRebecaTransitionSystemState>();
+		LinkedList<TransparentActorTransitionSystemState<CoreRebecaSystemState>> openBorder = 
+				new LinkedList<TransparentActorTransitionSystemState<CoreRebecaSystemState>>();
 		
 		openBorder.add(initialState);
 		
 		try {
 			while(!openBorder.isEmpty()) {
-				TransparentActorCoreRebecaTransitionSystemState readyToExpand = 
+				TransparentActorTransitionSystemState<CoreRebecaSystemState> readyToExpand = 
 						openBorder.remove();
-				CoreRebecaNondeterministicTransition<CoreRebecaSystemState> transitions = 
-						(CoreRebecaNondeterministicTransition<CoreRebecaSystemState>) sosRule.applyRule(
-								RebecaStateSerializationUtils.clone(readyToExpand.getState()));
+				NondeterministicTransition<CoreRebecaSystemState> transitions = 
+						(NondeterministicTransition<CoreRebecaSystemState>) sosRule.applyRule(
+								readyToExpand.getState(), readyToExpand.getState().clone());
 				List<Pair<? extends Action, CoreRebecaSystemState>> destinations = 
 						transitions.getDestinations();
 				for(Pair<? extends Action, CoreRebecaSystemState> destination : destinations) {
-					Pair<Boolean, TransparentActorCoreRebecaTransitionSystemState> result = 
+					Pair<Boolean, TransparentActorTransitionSystemState<CoreRebecaSystemState>> result = 
 							transitionSystem.addIfNotExists(readyToExpand, destination.getSecond());
 					if(result.getFirst())
 						openBorder.addLast(result.getSecond());
@@ -56,5 +57,10 @@ public class TransparentActorCoreRebecaFineGrainedBFSModelChecker extends Transp
 				new TransparentActorModelCheckingResult(TransparentActorModelCheckingResult.SATISFIED);
 		result.setTransitionSystem(transitionSystem);
 		return result;
+	}
+
+	@Override
+	protected CoreRebecaSystemState createSystemState() {
+		return new CoreRebecaSystemState();
 	}
 }
