@@ -1,4 +1,4 @@
-package org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state;
+package org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.state;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -12,21 +12,24 @@ import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.Abst
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.ActorScope;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.util.CloningRepository;
 
+import static org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.state.TimedRebecaMessageState.FALSE;
+import static org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.state.TimedRebecaMessageState.TRUE;
+import static org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.state.TimedActorScope.TIME_VARIABLE_NAME;
 @SuppressWarnings("serial")
-public class CoreRebecaActorState extends AbstractActorState implements Serializable, Cloneable {
+public class TimedRebecaActorState extends AbstractActorState implements Serializable, Cloneable {
 
-	protected ArrayList<CoreRebecaMessageState> queue;
+	protected ArrayList<TimedRebecaMessageState> queue;
 
-	public CoreRebecaActorState(int id) {
+	public TimedRebecaActorState(int id) {
 		super(id);
-		queue = new ArrayList<CoreRebecaMessageState>();
+		queue = new ArrayList<TimedRebecaMessageState>();
 	}
 	
-	public CoreRebecaMessageState getFirstMessage() {
+	public TimedRebecaMessageState getFirstMessage() {
 		return queue.remove(0);
 	}
 
-	public void receiveMessage(CoreRebecaMessageState newMessage) {
+	public void receiveMessage(TimedRebecaMessageState newMessage) {
 		queue.add(newMessage);
 	}
 
@@ -44,12 +47,12 @@ public class CoreRebecaActorState extends AbstractActorState implements Serializ
 		pc.setSecond(pc.getSecond() + 1);
 	}
 
-	public static CoreRebecaActorState createTempCoreRebecaActorState() {
-		return new CoreRebecaActorState(-1);
+	public static TimedRebecaActorState createTempTimedRebecaActorState() {
+		return new TimedRebecaActorState(-1);
 	}
 
-	public static CoreRebecaActorState createTempCoreRebecaActorState(Type type) {
-		CoreRebecaActorState temp = createTempCoreRebecaActorState();
+	public static TimedRebecaActorState createTempCoreRebecaActorState(Type type) {
+		TimedRebecaActorState temp = createTempTimedRebecaActorState();
 		try {
 			BaseClassDeclaration metaData = type.getTypeSystem().getMetaData(type);
 			if(metaData instanceof ReactiveClassDeclaration) {
@@ -76,7 +79,7 @@ public class CoreRebecaActorState extends AbstractActorState implements Serializ
 			return true;
 		if(!super.deepEquals(obj))
 			return false;
-		CoreRebecaActorState other = (CoreRebecaActorState) obj;
+		TimedRebecaActorState other = (TimedRebecaActorState) obj;
 		if (queue == null) {
 			if (other.queue != null)
 				return false;
@@ -85,11 +88,11 @@ public class CoreRebecaActorState extends AbstractActorState implements Serializ
 		return true;
 	}
 
-	public CoreRebecaActorState clone() {
-		CoreRebecaActorState actor = (CoreRebecaActorState) CloningRepository.getActor(this.id);
+	public TimedRebecaActorState clone() {
+		TimedRebecaActorState actor = (TimedRebecaActorState) CloningRepository.getActor(this.id);
 		if(actor != null)
 			return actor;
-		CoreRebecaActorState clonedState = new CoreRebecaActorState(this.id);
+		TimedRebecaActorState clonedState = new TimedRebecaActorState(this.id);
 		CloningRepository.addActor(clonedState);
 		clonedState.queue = CloningRepository.cloneArrayList(this.queue);
 		clonedState.priority = this.priority;
@@ -101,9 +104,31 @@ public class CoreRebecaActorState extends AbstractActorState implements Serializ
 	public boolean messageQueueIsEmpty() {
 		return queue.isEmpty();
 	}
+	
+	public Pair<Boolean, Integer> shiftEquals(TimedRebecaActorState other) {
+		int thisTime = (int) this.scope.getVariableValue(TIME_VARIABLE_NAME);
+		int otherTime = (int) other.scope.getVariableValue(TIME_VARIABLE_NAME);
+		int shift = otherTime - thisTime;
+		if(this.deepEquals(other))
+			return FALSE;
+		if(this.queue.size() != other.queue.size())
+			return FALSE;
+		if(this.queue.size() == 0)
+			return TRUE;
+		
+		for(int cnt = 0; cnt < this.queue.size(); cnt++) {
+			Pair<Boolean, Integer> result = 
+					this.queue.get(cnt).shiftEquals(other.queue.get(cnt));
+			if(!result.getFirst())
+				return FALSE;
+			if(shift != result.getSecond())
+				return FALSE;
+		}
+		return new Pair<Boolean, Integer>(true, shift);
+	}
 
 	@Override
 	public ActorScope getNewActorScope() {
-		return new ActorScope();
+		return new TimedActorScope();
 	}
 }

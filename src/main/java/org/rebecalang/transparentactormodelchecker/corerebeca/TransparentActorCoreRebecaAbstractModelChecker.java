@@ -1,8 +1,6 @@
 package org.rebecalang.transparentactormodelchecker.corerebeca;
 
 import org.rebecalang.transparentactormodelchecker.corerebeca.sos.CoreRebecaSOSRule;
-import org.rebecalang.transparentactormodelchecker.corerebeca.sos.compositionlevelsosrule.CoreRebecaCompositionLevelExecuteStatementSOSRule;
-import org.rebecalang.transparentactormodelchecker.corerebeca.sos.compositionlevelsosrule.CoreRebecaCompositionLevelNetworkDeliverySOSRule;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaSystemState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;

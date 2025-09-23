@@ -8,10 +8,10 @@ import org.rebecalang.compiler.utils.Pair;
 import org.rebecalang.modeltransformer.ril.RILModel;
 import org.rebecalang.transparentactormodelchecker.RuleIsDisabledException;
 import org.rebecalang.transparentactormodelchecker.TransparentActorModelCheckingResult;
-import org.rebecalang.transparentactormodelchecker.TransparentActorTransitionSystem;
 import org.rebecalang.transparentactormodelchecker.TransparentActorTransitionSystemState;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.action.Action;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.transitionsystem.NondeterministicTransition;
+import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.CoreRebecaTransitionSystem;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaSystemState;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -23,7 +23,7 @@ public class TransparentActorCoreRebecaFineGrainedDFSModelChecker extends Transp
 	public TransparentActorModelCheckingResult modelcheck(Pair<RebecaModel,SymbolTable> compiledRebecaFile, RILModel rilModel) {
 		this.compiledRebecaFile = compiledRebecaFile;
 		this.rilModel = rilModel;
-		transitionSystem = new TransparentActorTransitionSystem<CoreRebecaSystemState>();
+		transitionSystem = new CoreRebecaTransitionSystem();
 		setInitialState();
 		
 		TransparentActorTransitionSystemState<CoreRebecaSystemState> initialState = 

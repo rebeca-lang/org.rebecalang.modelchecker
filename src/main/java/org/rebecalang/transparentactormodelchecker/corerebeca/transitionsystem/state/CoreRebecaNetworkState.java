@@ -6,10 +6,11 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 
 import org.rebecalang.compiler.utils.Pair;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractNetworkState;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.util.CloningRepository;
 
 @SuppressWarnings("serial")
-public class CoreRebecaNetworkState implements Serializable, Cloneable {
+public class CoreRebecaNetworkState extends AbstractNetworkState implements Serializable, Cloneable {
 	private HashMap<Pair<Integer, Integer>, ArrayList<CoreRebecaMessageState>> receivedMessages;
 	
 	public CoreRebecaNetworkState() {

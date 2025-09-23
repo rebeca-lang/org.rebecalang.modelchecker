@@ -17,21 +17,22 @@ public class CoreRebecaSystemState extends AbstractSystemState implements Serial
 		super();
 		networkState = new CoreRebecaNetworkState();
 	}
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-
-//		int result = 1;
-//		result = prime * result + ((actorsState == null) ? 0 : actorsState.hashCode());
-		int result = prime;
-		for(Entry<Integer, AbstractActorState> entry : actorsState.entrySet()) {
-			result += entry.getKey().hashCode() ^ entry.getValue().deepHashCode();
-		}
-		
-		result = prime * result + ((environment == null) ? 0 : environment.hashCode());
-		result = prime * result + ((networkState == null) ? 0 : networkState.hashCode());
-		return result;
-	}
+	
+//	@Override
+//	public int hashCode() {
+//		final int prime = 31;
+//
+////		int result = 1;
+////		result = prime * result + ((actorsState == null) ? 0 : actorsState.hashCode());
+//		int result = prime;
+//		for(Entry<Integer, AbstractActorState> entry : actorsState.entrySet()) {
+//			result += entry.getKey().hashCode() ^ entry.getValue().deepHashCode();
+//		}
+//		
+//		result = prime * result + ((environment == null) ? 0 : environment.hashCode());
+//		result = prime * result + ((networkState == null) ? 0 : networkState.hashCode());
+//		return result;
+//	}
 
 	@Override
 	public boolean equals(Object obj) {
@@ -86,6 +87,7 @@ public class CoreRebecaSystemState extends AbstractSystemState implements Serial
 		return clonedState;
 	}
 	
+	@Override
 	public CoreRebecaNetworkState getNetworkState() {
 		return networkState;
 	}

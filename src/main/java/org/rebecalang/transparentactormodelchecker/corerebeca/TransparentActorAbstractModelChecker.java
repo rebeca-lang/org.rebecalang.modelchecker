@@ -63,6 +63,7 @@ public abstract class TransparentActorAbstractModelChecker<T extends AbstractSys
 		executeMainBody();
 	}
 
+	@SuppressWarnings("unchecked")
 	private void executeMainBody() {
 		TransparentActorTransitionSystemState<T> initialState = 
 				transitionSystem.getInitialState();

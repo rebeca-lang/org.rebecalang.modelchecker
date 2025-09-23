@@ -8,6 +8,7 @@ public class TransparentActorModelCheckingResult {
 	private long time;
 	private String message;
 	private TransparentActorTransitionSystem<?> transitionSystem;
+	private int collisions;
 
 	public TransparentActorModelCheckingResult(String message) {
 		this.setMessage(message);
@@ -35,5 +36,12 @@ public class TransparentActorModelCheckingResult {
 	
 	public long getTime() {
 		return time;
+	}
+
+	public void setCollisions(int collisions) {
+		this.collisions = collisions;
+	}
+	public int getCollisions() {
+		return collisions;
 	}
 }

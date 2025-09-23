@@ -5,13 +5,15 @@ import java.util.HashMap;
 
 import org.rebecalang.compiler.utils.Pair;
 
-public class TransparentActorTransitionSystem<T> {
+public abstract class TransparentActorTransitionSystem<T> {
 
-	TransparentActorTransitionSystemState<T> initialState;
+	protected TransparentActorTransitionSystemState<T> initialState;
 	
-	HashMap<Integer, ArrayList<TransparentActorTransitionSystemState<T>>> transitionSystemStates;
+	protected HashMap<Integer, ArrayList<TransparentActorTransitionSystemState<T>>> transitionSystemStates;
 	
-	int size;
+	protected int size;
+	
+	protected int collisions;
 	
 	public void setInitialState(TransparentActorTransitionSystemState<T> initialState) {
 		this.transitionSystemStates = new HashMap<Integer, ArrayList<TransparentActorTransitionSystemState<T>>>();
@@ -26,45 +28,22 @@ public class TransparentActorTransitionSystem<T> {
 		
 		transitionSystemStates.put(hashCode, temp);
 		size = 1;
+		collisions = 0;
 	}
 	
 	public TransparentActorTransitionSystemState<T> getInitialState() {
 		return initialState;
 	}
 	
-	public Pair<Boolean, TransparentActorTransitionSystemState<T>> addIfNotExists(
+	public abstract Pair<Boolean, TransparentActorTransitionSystemState<T>> addIfNotExists(
 			TransparentActorTransitionSystemState<T> previousSystemState, 
-			T systemState) {
-		int hashCode = systemState.hashCode();
-		ArrayList<TransparentActorTransitionSystemState<T>> result = 
-				transitionSystemStates.get(hashCode);
-		if(result == null) {
-			result = new ArrayList<TransparentActorTransitionSystemState<T>>();
-			transitionSystemStates.put(hashCode, result);			
-		} else {
-			for(TransparentActorTransitionSystemState<T> state : result) {
-				if(state.getState().equals(systemState)) {
-					previousSystemState.addNextState(state);
-					state.addPreviousState(previousSystemState);
-					return new Pair<Boolean, TransparentActorTransitionSystemState<T>>(false, state);
-				}
-			}
-		}
-		
-		TransparentActorTransitionSystemState<T> newState = 
-				new TransparentActorTransitionSystemState<T>(size);
-		newState.setNextStates(new ArrayList<TransparentActorTransitionSystemState<T>>());
-		newState.setPreviousStates(new ArrayList<TransparentActorTransitionSystemState<T>>());
-		newState.setState(systemState);
-		previousSystemState.addNextState(newState);
-		newState.addPreviousState(previousSystemState);
-		result.add(newState);
-		
-		size++;
-		return new Pair<Boolean, TransparentActorTransitionSystemState<T>>(true, newState); 
-	}
+			T systemState);
 
 	public int size() {
 		return size;
+	}
+
+	public int getCollisions() {
+		return collisions;
 	}
 }

@@ -163,6 +163,8 @@ public class CoreRebecaModelsTest {
 		TransparentActorModelCheckingResult coarseDfsResult = coarseGrainedDFSModelChecker.modelcheck(compiledRebecaFile, transformedRILModel);
 		Assertions.assertEquals(statespaceSize, coarseDfsResult.getTransitionSystem().size());
 		System.out.println(coarseDfsResult.getTime());
+		System.out.print(coarseDfsResult.getTransitionSystem().size());
+		System.out.println("(" + coarseDfsResult.getCollisions() + ")");
 	}
 	
 	private void printRILModel(RILModel transformedRILModel) {

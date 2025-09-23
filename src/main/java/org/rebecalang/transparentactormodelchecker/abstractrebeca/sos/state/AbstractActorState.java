@@ -27,7 +27,7 @@ public abstract class AbstractActorState implements Serializable, Cloneable {
 	public AbstractActorState(int id) {
 		this.id = id;
 		this.priority = MIN_PRIORITY;
-		scope = new ActorScope();
+		scope = getNewActorScope();
 	}
 	
 	public int getId() {
@@ -195,4 +195,6 @@ public abstract class AbstractActorState implements Serializable, Cloneable {
 	}
 
 	public abstract AbstractActorState clone();
+	
+	public abstract ActorScope getNewActorScope();
 }

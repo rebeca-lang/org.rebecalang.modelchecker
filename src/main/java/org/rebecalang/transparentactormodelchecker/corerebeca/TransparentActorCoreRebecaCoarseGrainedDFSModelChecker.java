@@ -8,11 +8,11 @@ import org.rebecalang.compiler.utils.Pair;
 import org.rebecalang.modeltransformer.ril.RILModel;
 import org.rebecalang.transparentactormodelchecker.RuleIsDisabledException;
 import org.rebecalang.transparentactormodelchecker.TransparentActorModelCheckingResult;
-import org.rebecalang.transparentactormodelchecker.TransparentActorTransitionSystem;
 import org.rebecalang.transparentactormodelchecker.TransparentActorTransitionSystemState;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.action.Action;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.transitionsystem.NondeterministicTransition;
 import org.rebecalang.transparentactormodelchecker.corerebeca.sos.compositionlevelsosrule.CoreRebecaCompositionLevelTakeMessageSOSRule;
+import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.CoreRebecaTransitionSystem;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaSystemState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -29,7 +29,7 @@ public class TransparentActorCoreRebecaCoarseGrainedDFSModelChecker extends Tran
 		this.compiledRebecaFile = compiledRebecaFile;
 		this.rilModel = rilModel;
 		long start = System.currentTimeMillis();
-		transitionSystem = new TransparentActorTransitionSystem<CoreRebecaSystemState>();
+		transitionSystem = new CoreRebecaTransitionSystem();
 		setInitialState();
 		
 		TransparentActorTransitionSystemState<CoreRebecaSystemState> initialState = 
@@ -46,6 +46,7 @@ public class TransparentActorCoreRebecaCoarseGrainedDFSModelChecker extends Tran
 				new TransparentActorModelCheckingResult(TransparentActorModelCheckingResult.SATISFIED);
 		result.setTransitionSystem(transitionSystem);
 		result.setTime((System.currentTimeMillis() - start) / 1000);
+		result.setCollisions(transitionSystem.getCollisions());
 		return result;
 	}
 
