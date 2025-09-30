@@ -56,8 +56,4 @@ public class TransparentActorCoreRebecaFineGrainedDFSModelChecker extends Transp
 			System.out.println("S" + state.getId() + " -> S" + result.getSecond().getId() + "[label=\"" + destination.getFirst().getActionLabel() +"\"]\n");
 		}
 	}
-	@Override
-	protected CoreRebecaSystemState createSystemState() {
-		return new CoreRebecaSystemState();
-	}
 }

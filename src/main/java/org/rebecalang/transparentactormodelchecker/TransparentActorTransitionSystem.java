@@ -18,11 +18,11 @@ public abstract class TransparentActorTransitionSystem<T> {
 	public void setInitialState(TransparentActorTransitionSystemState<T> initialState) {
 		this.transitionSystemStates = new HashMap<Integer, ArrayList<TransparentActorTransitionSystemState<T>>>();
 		this.initialState = initialState;
-		int hashCode = initialState.hashCode();
+		int hashCode = initialState.getState().hashCode();
 		ArrayList<TransparentActorTransitionSystemState<T>> temp = 
 				new ArrayList<TransparentActorTransitionSystemState<T>>();
-		initialState.setNextStates(new ArrayList<TransparentActorTransitionSystemState<T>>());
-		initialState.setPreviousStates(new ArrayList<TransparentActorTransitionSystemState<T>>());
+		initialState.setNextStates(new ArrayList<TransparentActorTransitionSystemTransition>());
+		initialState.setPreviousStates(new ArrayList<TransparentActorTransitionSystemTransition>());
 
 		temp.add(initialState);
 		

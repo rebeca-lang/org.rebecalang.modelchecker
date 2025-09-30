@@ -85,9 +85,4 @@ public class TransparentActorCoreRebecaCoarseGrainedDFSModelChecker extends Tran
 				dfs(result.getSecond());
 		}
 	}
-
-	@Override
-	protected CoreRebecaSystemState createSystemState() {
-		return new CoreRebecaSystemState();
-	}
 }

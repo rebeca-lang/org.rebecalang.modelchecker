@@ -16,6 +16,7 @@ import org.rebecalang.transparentactormodelchecker.RuleIsDisabledException;
 import org.rebecalang.transparentactormodelchecker.TransparentActorModelCheckingResult;
 import org.rebecalang.transparentactormodelchecker.TransparentActorTransitionSystem;
 import org.rebecalang.transparentactormodelchecker.TransparentActorTransitionSystemState;
+import org.rebecalang.transparentactormodelchecker.TransparentActorTransitionSystemTransition;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractSystemState;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.Environment;
 import org.rebecalang.transparentactormodelchecker.corerebeca.sos.compositionlevelsosrule.CoreRebecaCompositionLevelExecuteStatementSOSRule;
@@ -55,8 +56,8 @@ public abstract class TransparentActorAbstractModelChecker<T extends AbstractSys
 				new TransparentActorTransitionSystemState<T>(0);
 		initialState.setState(systemState);
 		transitionSystem.setInitialState(initialState);
-		initialState.setNextStates(new ArrayList<TransparentActorTransitionSystemState<T>>());
-		initialState.setPreviousStates(new ArrayList<TransparentActorTransitionSystemState<T>>());
+		initialState.setNextStates(new ArrayList<TransparentActorTransitionSystemTransition>());
+		initialState.setPreviousStates(new ArrayList<TransparentActorTransitionSystemTransition>());
 		
 		initializeMethodBindingTable();
 		

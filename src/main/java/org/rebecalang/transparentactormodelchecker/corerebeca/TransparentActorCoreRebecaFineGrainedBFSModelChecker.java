@@ -58,9 +58,4 @@ public class TransparentActorCoreRebecaFineGrainedBFSModelChecker extends Transp
 		result.setTransitionSystem(transitionSystem);
 		return result;
 	}
-
-	@Override
-	protected CoreRebecaSystemState createSystemState() {
-		return new CoreRebecaSystemState();
-	}
 }

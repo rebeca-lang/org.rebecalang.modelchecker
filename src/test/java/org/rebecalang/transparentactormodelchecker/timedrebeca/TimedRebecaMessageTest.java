@@ -10,18 +10,18 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.rebecalang.compiler.utils.CodeCompilationException;
 import org.rebecalang.compiler.utils.Pair;
-import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaActorState;
+import org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.state.TimedRebecaActorState;
 import org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.state.TimedRebecaMessageState;
 
 public class TimedRebecaMessageTest {
 
-    CoreRebecaActorState coreRebecaActorState;
+    TimedRebecaActorState coreRebecaActorState;
     TimedRebecaMessageState message1;
     TimedRebecaMessageState message2;
     
     @BeforeEach
     public void setup() throws CodeCompilationException {
-    	coreRebecaActorState = new CoreRebecaActorState(0);
+    	coreRebecaActorState = new TimedRebecaActorState(0);
 		message1 = new TimedRebecaMessageState();
 		message1.setName("m1");
 		message1.setSender(coreRebecaActorState);

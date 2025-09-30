@@ -18,5 +18,9 @@ public abstract class TransparentActorCoreRebecaAbstractModelChecker extends Tra
 	public TransparentActorCoreRebecaAbstractModelChecker() {
 		super();
 	}
+	@Override
+	protected CoreRebecaSystemState createSystemState() {
+		return new CoreRebecaSystemState();
+	}
 
 }

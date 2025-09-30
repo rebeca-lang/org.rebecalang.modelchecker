@@ -109,7 +109,7 @@ public class TimedRebecaActorState extends AbstractActorState implements Seriali
 		int thisTime = (int) this.scope.getVariableValue(TIME_VARIABLE_NAME);
 		int otherTime = (int) other.scope.getVariableValue(TIME_VARIABLE_NAME);
 		int shift = otherTime - thisTime;
-		if(this.deepEquals(other))
+		if(!this.deepEquals(other))
 			return FALSE;
 		if(this.queue.size() != other.queue.size())
 			return FALSE;

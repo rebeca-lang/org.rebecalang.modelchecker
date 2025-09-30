@@ -3,13 +3,8 @@ package org.rebecalang.transparentactormodelchecker.timedrebeca;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.rebecalang.compiler.CompilerConfig;
 import org.rebecalang.compiler.modelcompiler.RebecaModelCompiler;
 import org.rebecalang.compiler.modelcompiler.SymbolTable;
@@ -19,18 +14,16 @@ import org.rebecalang.compiler.utils.CoreVersion;
 import org.rebecalang.compiler.utils.ExceptionContainer;
 import org.rebecalang.compiler.utils.FileUtils;
 import org.rebecalang.compiler.utils.Pair;
-import org.rebecalang.modelchecker.ModelCheckerConfig;
-import org.rebecalang.modelchecker.corerebeca.ModelCheckingException;
-import org.rebecalang.modelchecker.corerebeca.utils.Policy;
+
 import org.rebecalang.modeltransformer.ModelTransformerConfig;
 import org.rebecalang.modeltransformer.ril.RILModel;
 import org.rebecalang.modeltransformer.ril.Rebeca2RILModelTransformer;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.InstructionBean;
-import org.rebecalang.transparentactormodelchecker.corerebeca.TransparentActorCoreRebecaFineGrainedDFSModelChecker;
+
 import org.rebecalang.transparentactormodelchecker.TransparentActorModelCheckerConfig;
-import org.rebecalang.transparentactormodelchecker.TransparentActorModelCheckingResult;
-import org.rebecalang.transparentactormodelchecker.corerebeca.TransparentActorCoreRebecaCoarseGrainedDFSModelChecker;
-import org.rebecalang.transparentactormodelchecker.corerebeca.TransparentActorCoreRebecaFineGrainedBFSModelChecker;
+import org.rebecalang.modelchecker.ModelCheckerConfig;
+import org.rebecalang.modelchecker.corerebeca.ModelCheckingException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -53,14 +46,8 @@ public class TimedRebecaModelsTest {
     protected Rebeca2RILModelTransformer rebeca2RILModelTransformer;
     
     @Autowired
-    protected TransparentActorCoreRebecaFineGrainedDFSModelChecker dfsModelChecker;
-
-    @Autowired
-    protected TransparentActorCoreRebecaFineGrainedBFSModelChecker fineGrainedBFSModelChecker;
+    TransparentActorTimedRebecaFTTSModelChecker fttsModelChecker;
     
-    @Autowired
-    protected TransparentActorCoreRebecaCoarseGrainedDFSModelChecker coarseGrainedDFSModelChecker;
-
     @Test
     public void GIVEN_RebecaModel_WHEN_No_Error() throws ModelCheckingException, IOException {
 		String rebecaModel = 
@@ -123,7 +110,8 @@ public class TimedRebecaModelsTest {
         RILModel transformedRILModel = rebeca2RILModelTransformer.transformModel(
         		compiledRebecaFile, extention, CoreVersion.CORE_2_3);
         
-
+        fttsModelChecker.modelcheck(compiledRebecaFile, transformedRILModel);
+        
 		printRILModel(transformedRILModel);
 //		TransparentActorModelCheckingResult dfsResult = dfsModelChecker.modelcheck(compiledRebecaFile, transformedRILModel);
 //

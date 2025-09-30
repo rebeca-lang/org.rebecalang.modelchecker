@@ -7,8 +7,6 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaSystemState;
-
 
 @SuppressWarnings("serial")
 public abstract class AbstractSystemState implements Serializable, Cloneable {
@@ -99,7 +97,7 @@ public abstract class AbstractSystemState implements Serializable, Cloneable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		CoreRebecaSystemState other = (CoreRebecaSystemState) obj;
+		AbstractSystemState other = (AbstractSystemState) obj;
 		if (actorsState == null) {
 			if (other.actorsState != null)
 				return false;

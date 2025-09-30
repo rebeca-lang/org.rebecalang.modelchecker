@@ -61,37 +61,87 @@ public class TimedRebecaNetworkState extends AbstractNetworkState implements Ser
 		return result;
 	}
 
-	public Pair<Boolean, Integer> shiftEquals(TimedRebecaNetworkState other) {
+	private boolean basicEquality(Object other) {
 		if (this == other)
-			return TRUE;
+			return true;
 		if (other == null)
-			return FALSE;
+			return false;
 		if (getClass() != other.getClass())
-			return FALSE;
-		int shift = 0;
+			return false;
 		if (receivedMessages == null) {
-			if (other.receivedMessages != null)
-				return FALSE;
+			if (((TimedRebecaNetworkState)other).receivedMessages != null)
+				return false;
 		} else {
-			if(other.receivedMessages.size() != this.receivedMessages.size())
-				return FALSE;
-			if(this.receivedMessages.size() == 0)
-				return TRUE;
-			shift = other.receivedMessages.get(0).getTime() - 
-					       this.receivedMessages.get(0).getTime();
-			
-			for (int cnt = 0; cnt < this.receivedMessages.size(); cnt++) {
-				TimeBucket thisTimeBucket = this.receivedMessages.get(cnt);
-				TimeBucket otherTimeBucket = other.receivedMessages.get(cnt);
-				if(otherTimeBucket.getTime() - thisTimeBucket.getTime() != shift)
-					return FALSE;
-				Pair<Boolean, Integer> result = thisTimeBucket.shiftEquals(otherTimeBucket);
-				if(!result.getFirst())
-					return FALSE;
-				if(result.getSecond() != shift)
-					return FALSE;
-			}
+			if(((TimedRebecaNetworkState)other).receivedMessages.size() != this.receivedMessages.size())
+				return false;
 		}
+		return true;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(!basicEquality(obj))
+			return false;
+		TimedRebecaNetworkState other = (TimedRebecaNetworkState) obj;
+		for (int cnt = 0; cnt < this.receivedMessages.size(); cnt++) {
+			TimeBucket thisTimeBucket = this.receivedMessages.get(cnt);
+			TimeBucket otherTimeBucket = other.receivedMessages.get(cnt);
+			if(!thisTimeBucket.equals(otherTimeBucket))
+				return false;
+		}
+		return true;
+	}
+	
+	public Pair<Boolean, Integer> shiftEquals(TimedRebecaNetworkState other) {
+		if(!basicEquality(other))
+			return FALSE;
+		if(this.receivedMessages.size() == 0)
+			return TRUE;
+		int shift = other.receivedMessages.get(0).getTime() - 
+			       this.receivedMessages.get(0).getTime();
+	
+		for (int cnt = 0; cnt < this.receivedMessages.size(); cnt++) {
+			TimeBucket thisTimeBucket = this.receivedMessages.get(cnt);
+			TimeBucket otherTimeBucket = other.receivedMessages.get(cnt);
+			if(otherTimeBucket.getTime() - thisTimeBucket.getTime() != shift)
+				return FALSE;
+			Pair<Boolean, Integer> result = thisTimeBucket.shiftEquals(otherTimeBucket);
+			if(!result.getFirst())
+				return FALSE;
+			if(result.getSecond() != shift)
+				return FALSE;
+		}
+
+//		if (this == other)
+//			return TRUE;
+//		if (other == null)
+//			return FALSE;
+//		if (getClass() != other.getClass())
+//			return FALSE;
+//		int shift = 0;
+//		if (receivedMessages == null) {
+//			if (other.receivedMessages != null)
+//				return FALSE;
+//		} else {
+//			if(other.receivedMessages.size() != this.receivedMessages.size())
+//				return FALSE;
+//			if(this.receivedMessages.size() == 0)
+//				return TRUE;
+//			shift = other.receivedMessages.get(0).getTime() - 
+//					       this.receivedMessages.get(0).getTime();
+//			
+//			for (int cnt = 0; cnt < this.receivedMessages.size(); cnt++) {
+//				TimeBucket thisTimeBucket = this.receivedMessages.get(cnt);
+//				TimeBucket otherTimeBucket = other.receivedMessages.get(cnt);
+//				if(otherTimeBucket.getTime() - thisTimeBucket.getTime() != shift)
+//					return FALSE;
+//				Pair<Boolean, Integer> result = thisTimeBucket.shiftEquals(otherTimeBucket);
+//				if(!result.getFirst())
+//					return FALSE;
+//				if(result.getSecond() != shift)
+//					return FALSE;
+//			}
+//		}
 		return new Pair<Boolean, Integer>(true, shift);
 	}
 	

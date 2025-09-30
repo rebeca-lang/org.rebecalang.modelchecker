@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.rebecalang.compiler.utils.Pair;
 import org.rebecalang.transparentactormodelchecker.TransparentActorTransitionSystem;
 import org.rebecalang.transparentactormodelchecker.TransparentActorTransitionSystemState;
+import org.rebecalang.transparentactormodelchecker.TransparentActorTransitionSystemTransition;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaSystemState;
 
 public class CoreRebecaTransitionSystem extends TransparentActorTransitionSystem<CoreRebecaSystemState>{
@@ -31,8 +32,8 @@ public class CoreRebecaTransitionSystem extends TransparentActorTransitionSystem
 		
 		TransparentActorTransitionSystemState<CoreRebecaSystemState> newState = 
 				new TransparentActorTransitionSystemState<CoreRebecaSystemState>(size);
-		newState.setNextStates(new ArrayList<TransparentActorTransitionSystemState<CoreRebecaSystemState>>());
-		newState.setPreviousStates(new ArrayList<TransparentActorTransitionSystemState<CoreRebecaSystemState>>());
+		newState.setNextStates(new ArrayList<TransparentActorTransitionSystemTransition>());
+		newState.setPreviousStates(new ArrayList<TransparentActorTransitionSystemTransition>());
 		newState.setState(systemState);
 		previousSystemState.addNextState(newState);
 		newState.addPreviousState(previousSystemState);
