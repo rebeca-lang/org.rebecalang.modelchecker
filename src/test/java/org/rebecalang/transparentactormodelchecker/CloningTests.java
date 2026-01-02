@@ -12,12 +12,12 @@ import org.rebecalang.modeltransformer.ModelTransformerConfig;
 import org.rebecalang.modeltransformer.ril.RILModel;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.InstructionBean;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.PushARInstructionBean;
-import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.Environment;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.ActivationRecord;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.util.RebecaStateSerializationUtil;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaActorState;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaMessageState;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaNetworkState;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaSystemState;
-import org.rebecalang.transparentactormodelchecker.corerebeca.utils.RebecaStateSerializationUtil;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
@@ -31,14 +31,14 @@ public class CloningTests {
     @Test
     public void cloneSystemState() {
 		CoreRebecaSystemState coreRebecaSystemState = new CoreRebecaSystemState();
-    	coreRebecaSystemState.setEnvironment(new Environment());
+    	coreRebecaSystemState.setEnvironment(new ActivationRecord());
     	coreRebecaSystemState.setNetworkState(new CoreRebecaNetworkState());
     	coreRebecaSystemState.setActorState(ACTOR_1_ID, new CoreRebecaActorState(ACTOR_1_ID));
 
     	CoreRebecaMessageState message1 = new CoreRebecaMessageState("m1", new HashMap<String, Object>());
     	CoreRebecaActorState actor1 = (CoreRebecaActorState) coreRebecaSystemState.getActorState(ACTOR_1_ID);
-    	message1.setReceiver(actor1);
-    	message1.setSender(actor1);
+    	message1.setReceiverId(actor1.getId());
+    	message1.setSenderId(actor1.getId());
     	actor1.receiveMessage(message1);
 
 		PushARInstructionBean puib = new PushARInstructionBean();

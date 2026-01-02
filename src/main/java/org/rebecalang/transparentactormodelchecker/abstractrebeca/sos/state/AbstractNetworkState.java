@@ -1,5 +1,9 @@
 package org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state;
 
-public class AbstractNetworkState {
+public abstract class AbstractNetworkState {
+	
+	public abstract boolean hasMessage();
+	
+	public abstract void addMessage(AbstractMessageState message);
 
 }

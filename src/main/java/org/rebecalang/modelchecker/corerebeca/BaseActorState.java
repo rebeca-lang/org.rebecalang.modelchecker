@@ -152,6 +152,7 @@ public abstract class BaseActorState<T extends MessageSpecification> implements 
 		return result;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -212,16 +213,17 @@ public abstract class BaseActorState<T extends MessageSpecification> implements 
             String newMethodName = resolveDynamicBindingOfMethodCall(transformedRILModel, mcib);
             if(!mcib.getMethodName().equals(newMethodName)) {
                 instruction = new MethodCallInstructionBean(
-                        mcib.getBase(), newMethodName, mcib.getParameters(), mcib.getFunctionCallResult());
-                ((MethodCallInstructionBean)instruction).setParameters(
-                        mcib.getParameters());
+                        mcib.getBase(), newMethodName, mcib.getParameters());
+                
+                ((MethodCallInstructionBean)instruction).setFunctionCallResult(mcib.getFunctionCallResult());
             }
         }
 
         return instruction;
     }
 
-    protected String resolveDynamicBindingOfMethodCall(
+    @SuppressWarnings("unchecked")
+	protected String resolveDynamicBindingOfMethodCall(
             RILModel transformedRILModel,
             AbstractCallingInstructionBean instruction) {
         BaseActorState<T> baseActorState = (BaseActorState<T>) actorScopeStack.retrieveVariableValue(instruction.getBase().getVarName());

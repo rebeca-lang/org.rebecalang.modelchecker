@@ -9,11 +9,11 @@ import org.rebecalang.compiler.utils.Pair;
 import org.rebecalang.transparentactormodelchecker.ModelCheckingRuntimeException;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractActorState;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractMessageState;
-import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.Environment;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.ActivationRecord;
 
 public class CloningRepository {
 	private static HashMap<Integer, AbstractActorState> clonedActors = new HashMap<Integer, AbstractActorState>();
-	private static Environment clonedEnvironment;
+	private static ActivationRecord clonedEnvironment;
 	
 	public static void resetRepository() {
 		clonedActors.clear();
@@ -48,6 +48,13 @@ public class CloningRepository {
 			}
 			return retrievedActorState;
 		}
+		if(value instanceof Object[]) {
+			Object[] valueData = (Object[]) value;
+			Object[] cloned = new Object[valueData.length];
+			for(int cnt = 0; cnt < valueData.length; cnt++)
+				cloned[cnt] = cloneObject(valueData[cnt]);
+			return cloned;
+		}
 		throw new ModelCheckingRuntimeException("Unknown cloning strategy for " + value.getClass());
 	}
 
@@ -66,10 +73,10 @@ public class CloningRepository {
 		return clonedMessageQueue;
 	}
 
-	public static Environment cloneEnvironment(Environment environment) {
+	public static ActivationRecord cloneEnvironment(ActivationRecord environment) {
 		if(clonedEnvironment == null) {
-			clonedEnvironment = new Environment();
-			for(Entry<String, Object> entry : environment.getAllVariblesEntrySet()) {
+			clonedEnvironment = new ActivationRecord();
+			for(Entry<String, Object> entry : environment.getActivationRecord().entrySet()) {
 				clonedEnvironment.setVariableValue(entry.getKey(), 
 						CloningRepository.cloneObject(entry.getValue()));
 			}

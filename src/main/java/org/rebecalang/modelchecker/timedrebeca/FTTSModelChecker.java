@@ -1,19 +1,15 @@
 package org.rebecalang.modelchecker.timedrebeca;
 
-import org.rebecalang.compiler.modelcompiler.SymbolTable;
+import java.util.List;
+import java.util.PriorityQueue;
+
 import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.RebecaModel;
-import org.rebecalang.compiler.utils.Pair;
 import org.rebecalang.modelchecker.corerebeca.ModelCheckingException;
-import org.rebecalang.modelchecker.corerebeca.StatementInterpreterContainer;
-import org.rebecalang.modelchecker.corerebeca.rilinterpreter.InstructionUtilities;
 import org.rebecalang.modelchecker.corerebeca.utils.Policy;
 import org.rebecalang.modelchecker.setting.ModelCheckerSetting;
 import org.rebecalang.modeltransformer.ril.RILModel;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.PriorityQueue;
 
 @Component
 @Qualifier("FTTS_TIMED_REBECA")

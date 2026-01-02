@@ -1,9 +1,9 @@
 package org.rebecalang.modelchecker.corerebeca.rilinterpreter;
 
-import org.rebecalang.compiler.modelcompiler.SymbolTable;
+import java.util.Map;
+import java.util.TreeMap;
+
 import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.RebecaModel;
-import org.rebecalang.compiler.utils.Pair;
-import org.rebecalang.modelchecker.corerebeca.ActorState;
 import org.rebecalang.modelchecker.corerebeca.BaseActorState;
 import org.rebecalang.modelchecker.corerebeca.State;
 import org.rebecalang.modelchecker.corerebeca.StatementInterpreterContainer;
@@ -13,9 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-
-import java.util.Map;
-import java.util.TreeMap;
 
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)

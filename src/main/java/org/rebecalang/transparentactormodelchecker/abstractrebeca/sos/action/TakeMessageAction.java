@@ -1,27 +1,27 @@
 package org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.action;
 
-import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaMessageState;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractMessageState;
 
 public class TakeMessageAction extends Action {
 
-	private CoreRebecaMessageState message;
+	private AbstractMessageState message;
 	
-	public TakeMessageAction(CoreRebecaMessageState message) {
+	public TakeMessageAction(AbstractMessageState message) {
 		this.message = message;
 	}
-	public CoreRebecaMessageState getMessage() {
+	public AbstractMessageState getMessage() {
 		return message;
 	}
-	public void setMessage(CoreRebecaMessageState message) {
+	public void setMessage(AbstractMessageState message) {
 		this.message = message;
 	}
 	
 	@Override
 	public String getActionLabel() {
 		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append("(").append(message.getSender().getId()).
+		stringBuilder.append("(").append(message.getSenderId()).
 			append("->").
-			append(message.getReceiver().getId()).
+			append(message.getReceiverId()).
 			append(")::").
 			append(message.getName());
 		return stringBuilder.toString();

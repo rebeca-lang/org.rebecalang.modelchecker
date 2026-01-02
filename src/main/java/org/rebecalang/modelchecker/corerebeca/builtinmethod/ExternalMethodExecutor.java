@@ -1,6 +1,5 @@
 package org.rebecalang.modelchecker.corerebeca.builtinmethod;
 
-import org.rebecalang.modelchecker.corerebeca.ActorState;
 import org.rebecalang.modelchecker.corerebeca.BaseActorState;
 import org.rebecalang.modelchecker.corerebeca.State;
 import org.rebecalang.modelchecker.corerebeca.StatementInterpreterContainer;

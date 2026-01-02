@@ -1,9 +1,8 @@
 package org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state;
 
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map.Entry;
 
 import org.rebecalang.modelchecker.corerebeca.RebecaRuntimeInterpreterException;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.Variable;
@@ -11,75 +10,123 @@ import org.rebecalang.transparentactormodelchecker.abstractrebeca.util.CloningRe
 
 @SuppressWarnings("serial")
 public class ActorScope implements Serializable, Cloneable {
-	private Environment environment;
-	private ArrayList<HashMap<String, Object>> scope;
+	
+	public final static String RETURN_VALUE_VARIABLE_NAME = "$RETURN$";
+	
+	private ArrayList<ActivationRecord> scope;
 	
 	public ActorScope() {
-		scope = new ArrayList<HashMap<String,Object>>();
-		scope.add(new HashMap<String, Object>());
+		scope = new ArrayList<ActivationRecord>();
+		scope.add(null);
+		scope.add(new ActivationRecord());
 	}
 	
-	public void setVariableValue(Variable leftVar, Object value) {
-		String variableInScope = leftVar.getVarName();
-		boolean hasBase = leftVar.getBase() != null;
-		if(hasBase)
-			variableInScope = leftVar.getBase().getVarName();
-		for(int cnt = 0; cnt < scope.size(); cnt++) {
-			if(!scope.get(cnt).containsKey(variableInScope))
-				continue;
-			if(hasBase) {
-				Variable variable = new Variable(leftVar.getVarName());
-				//TODO check the scope in access 
-				((AbstractActorState)scope.get(cnt).get(variableInScope)).setVariableValue(variable, value);
-			} else
-				scope.get(cnt).put(variableInScope, value);
-			return;
-		}
-		throw new RebecaRuntimeInterpreterException("variable \"" + leftVar + "\" not found");
+	public void setEnvironment(ActivationRecord environment) {
+		scope.set(0, environment);
 	}
 
 	public void addVariableToScope(String varName, Object value) {
-		scope.get(scope.size() - 1).put(varName, value);
+		scope.get(scope.size() - 1).addVariableToActivationRecord(varName, value);
 	}
-
-
-	public Object getVariableValue(String varName) {
-		for(int cnt = scope.size(); cnt > 0; cnt--) {
-			if(scope.get(cnt - 1).containsKey(varName))
-				return scope.get(cnt - 1).get(varName);
+	
+	private int getIndexValue(Object indexObject) {
+		if (indexObject instanceof Variable) 
+			return ((Number)getVariableValue((Variable) indexObject)).intValue();
+		return ((Number)indexObject).intValue();
+	}
+	
+	private ActivationRecord getTargetVariableActivationRecord(Variable var) {
+		boolean hasBase = var.getBase() != null;
+		if(hasBase) {
+			ActivationRecord baseActivationRecord = 
+					getTargetVariableActivationRecord(var.getBase());
+			AbstractActorState baseActorState = 
+					(AbstractActorState)baseActivationRecord.getVariableValue(
+							var.getBase().getVarName());
+			return baseActorState.getScope().getTargetVariableActivationRecord(
+					new Variable(var.getVarName()));
 		}
-		return environment == null ? null : environment.getVariableValue(varName);
+		int index = scope.size() - 1;
+		do {
+			ActivationRecord cursor = scope.get(index);
+			if(cursor.containsVariable(var.getVarName()))
+				return cursor;
+			if(cursor instanceof MethodCallActivationRecord) {
+				index = ((MethodCallActivationRecord)cursor).getScopeIndex();
+			} else 
+				index--;
+		} while(index >= 0);
+		throw new RebecaRuntimeInterpreterException("variable \"" + var + "\" not found");
+	}
+	
+	public void setVariableValue(Variable var, Object value) {
+		
+		ActivationRecord activationRecord = 
+				getTargetVariableActivationRecord(var);
+		
+		if(var.getIndeces().isEmpty())
+			activationRecord.setVariableValue(var.getVarName(), value);
+		else {
+			Object object = activationRecord.getVariableValue(var.getVarName());
+			int cnt = 0;
+			for(; cnt < var.getIndeces().size() - 1; cnt++) {
+				Object index = var.getIndeces().get(cnt);
+				object = Array.get(object, getIndexValue(index));
+			}
+			Array.set(object, getIndexValue(var.getIndeces().get(cnt)), value);
+		}
 	}
 
+	public Object getVariableValue(Variable var) {
+		ActivationRecord activationRecord = 
+				getTargetVariableActivationRecord(var);
+
+		if(var.getIndeces().isEmpty())
+			return activationRecord.getVariableValue(var.getVarName());
+		else {
+			Object object = activationRecord.getVariableValue(var.getVarName());
+			int cnt = 0;
+			for(; cnt < var.getIndeces().size() - 1; cnt++) {
+				Object index = var.getIndeces().get(cnt);
+				object = Array.get(object, getIndexValue(index));
+			}
+			return Array.get(object, getIndexValue(var.getIndeces().get(cnt)));
+		}
+	}
+	
 	public boolean hasVariableInScope(String varName) {
-		for(int cnt = 0; cnt < scope.size(); cnt++) {
-			if(scope.get(cnt).containsKey(varName))
+		int index = scope.size() - 1;
+		do {
+			ActivationRecord cursor = scope.get(index);
+			if(cursor.containsVariable(varName))
 				return true;
-		}
-		return environment == null ? null : environment.hasVariableInScope(varName);
-	}
-
-	public void addVariableToScope(String varName) {
-		addVariableToScope(varName, null);
+			if(cursor instanceof MethodCallActivationRecord) {
+				index = ((MethodCallActivationRecord)cursor).getScopeIndex();
+			} else 
+				index--;
+		} while(index >= 0);
+		return false;
 	}
 
 	public void pushToScope() {
-		scope.add(new HashMap<String, Object>());
+		scope.add(new ActivationRecord());
 	}
 	
-	public void popFromScope() {
-		scope.remove(scope.size() - 1);
+	public void newCallPushToScope(Variable returnValueVariable) {
+		scope.add(new MethodCallActivationRecord(1));
+		if(returnValueVariable != null)
+			addVariableToScope(RETURN_VALUE_VARIABLE_NAME, returnValueVariable.getVarName());
 	}
 
-	public void setEnvironment(Environment environment) {
-		this.environment = environment;
+	public void popFromScope() {
+		scope.remove(scope.size() - 1);
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((environment == null) ? 0 : environment.hashCode());
+//		result = prime * result + ((environment == null) ? 0 : environment.hashCode());
 		result = prime * result + ((scope == null) ? 0 : scope.hashCode());
 		return result;
 	}
@@ -93,11 +140,11 @@ public class ActorScope implements Serializable, Cloneable {
 		if (getClass() != obj.getClass())
 			return false;
 		ActorScope other = (ActorScope) obj;
-		if (environment == null) {
-			if (other.environment != null)
-				return false;
-		} else if (!environment.equals(other.environment))
-			return false;
+//		if (environment == null) {
+//			if (other.environment != null)
+//				return false;
+//		} else if (!environment.equals(other.environment))
+//			return false;
 		if (scope == null) {
 			if (other.scope != null)
 				return false;
@@ -113,16 +160,26 @@ public class ActorScope implements Serializable, Cloneable {
 	
 	public ActorScope clone() {
 		ActorScope clonedActorScope = new ActorScope();
-		clonedActorScope.environment = CloningRepository.cloneEnvironment(this.environment);
-		clonedActorScope.scope = new ArrayList<HashMap<String,Object>>();
-		for(HashMap<String,Object> ar : this.scope) {
-			HashMap<String,Object> clonedAR = new HashMap<String, Object>();
-			for(Entry<String, Object> entry : ar.entrySet()) {
-				clonedAR.put(entry.getKey(), CloningRepository.cloneObject(entry.getValue()));
-			}
+		clonedActorScope.scope = new ArrayList<ActivationRecord>();
+		clonedActorScope.scope.add(CloningRepository.cloneEnvironment(this.scope.get(0)));
+		for(int cnt = 1; cnt < this.scope.size(); cnt++) {
+			ActivationRecord ar = this.scope.get(cnt);
+			ActivationRecord clonedAR = ar.clone();
 			clonedActorScope.scope.add(clonedAR);
 		}
 		return clonedActorScope;
 	}
-	
+
+	public void popToReturn(Object value) {
+		MethodCallActivationRecord mcar;
+		for(int cnt = scope.size() - 1; cnt > 0 ; cnt--)
+			if(scope.get(cnt) instanceof MethodCallActivationRecord) {
+				mcar = (MethodCallActivationRecord) scope.remove(cnt);
+				String returnResultValue = (String) mcar.getVariableValue(RETURN_VALUE_VARIABLE_NAME);
+				setVariableValue(new Variable(returnResultValue), value);
+				break;				
+			} else
+				scope.remove(cnt);
+		
+	}
 }

@@ -22,20 +22,20 @@ import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.Instruction
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.JumpIfNotInstructionBean;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.NonDetValue;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.RebecInstantiationInstructionBean;
+import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.ReturnInstructionBean;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.Variable;
 import org.rebecalang.transparentactormodelchecker.TransparentActorModelCheckerConfig;
-import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.action.Action;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.action.NewInstanceAction;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.actorlevelrule.statementlevelrule.AssignmentRule;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.actorlevelrule.statementlevelrule.ConditionalRule;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.actorlevelrule.statementlevelrule.RebecInstantiationRule;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.actorlevelrule.statementlevelrule.ReturnRule;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.actorlevelrule.statementlevelrule.VariableDeclarationRule;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractActorState;
-import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.Environment;
-import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.statementlevelrules.AssignmentSOSRule;
-import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.statementlevelrules.ConditionalSOSRule;
-import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.statementlevelrules.VariableDeclarationSOSRule;
-import org.rebecalang.transparentactormodelchecker.abstractrebeca.transitionsystem.DeterministicTransition;
-import org.rebecalang.transparentactormodelchecker.abstractrebeca.transitionsystem.NondeterministicTransition;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.ActivationRecord;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.util.CloningRepository;
-import org.rebecalang.transparentactormodelchecker.corerebeca.sos.statementlevelrule.CoreRebecaRebecInstantiationSOSRule;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaActorState;
+import org.rebecalang.transparentactormodelchecker.transitionsystem.Transition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -60,16 +60,19 @@ public class StatementsSOSRulesTest {
     protected Rebeca2RILModelTransformer rebeca2RILModelTransformer;
     
     @Autowired
-    protected AssignmentSOSRule assignmentSOSRule;
+    protected AssignmentRule assignmentSOSRule;
 
     @Autowired
-    protected CoreRebecaRebecInstantiationSOSRule rebecaRebecInstantiationSOSRule;
+    protected ReturnRule returnSOSRule;
+
+    @Autowired
+    protected RebecInstantiationRule rebecInstantiationSOSRule;
     
     @Autowired
-    protected VariableDeclarationSOSRule variableDeclarationSOSRule;
+    protected VariableDeclarationRule variableDeclarationSOSRule;
     
     @Autowired
-    protected ConditionalSOSRule conditionalSOSRule;
+    protected ConditionalRule conditionalSOSRule;
     
     protected CoreRebecaTypeSystem typeSystem;
     
@@ -78,7 +81,7 @@ public class StatementsSOSRulesTest {
     @BeforeEach
     public void setup() throws CodeCompilationException {
     	coreRebecaActorState = new CoreRebecaActorState(0);
-    	coreRebecaActorState.setEnvironment(new Environment());
+    	coreRebecaActorState.setEnvironment(new ActivationRecord());
     	typeSystem = new CoreRebecaTypeSystem();
     	typeSystem.clear();
     	ReactiveClassDeclaration rcd = new ReactiveClassDeclaration();
@@ -91,16 +94,15 @@ public class StatementsSOSRulesTest {
     public void GIVEN_ActorStateIsEmpty_WHEN_DeclarationInstructionIsExecuted_THEN_ANewVariableIsAddedToTheState() {
     	coreRebecaActorState.addVariableToScope(CoreRebecaActorState.PC, new Pair<String, Integer>("-", 0));
 
-    	DeclarationInstructionBean dib = new DeclarationInstructionBean("var1");
-    	Pair<CoreRebecaActorState, InstructionBean> state = new Pair<CoreRebecaActorState, InstructionBean>(coreRebecaActorState, dib);
-		variableDeclarationSOSRule.applyRule(state, state);
+    	DeclarationInstructionBean dib = new DeclarationInstructionBean("var1",
+    			CoreRebecaTypeSystem.INT_TYPE);
+		variableDeclarationSOSRule.applyRule(coreRebecaActorState, coreRebecaActorState, dib);
     	
 		Variable v = new Variable("var1");
     	AssignmentInstructionBean aib = new AssignmentInstructionBean(v, 10, null, null);
-		state.setSecond(aib);
-		assignmentSOSRule.applyRule(state, state);
+		assignmentSOSRule.applyRule(coreRebecaActorState, coreRebecaActorState, aib);
 		
-		Assertions.assertEquals(10, state.getFirst().getVariableValue("var1"));
+		Assertions.assertEquals(10, coreRebecaActorState.getVariableValue(v));
     }
     
     @Test
@@ -116,11 +118,27 @@ public class StatementsSOSRulesTest {
 		Variable v2 = new Variable("var2");
 		Variable v3 = new Variable("var3");
     	AssignmentInstructionBean aib = new AssignmentInstructionBean(v1, v2, v3, "-");
-    	Pair<CoreRebecaActorState, InstructionBean> state = new Pair<CoreRebecaActorState, InstructionBean>(coreRebecaActorState, aib);
-		state.setSecond(aib);
-		assignmentSOSRule.applyRule(state, state);
+		assignmentSOSRule.applyRule(coreRebecaActorState, coreRebecaActorState, aib);
 		
-		Assertions.assertEquals(state.getFirst().getVariableValue("var1"), -1);
+		Assertions.assertEquals(coreRebecaActorState.getVariableValue(v1), -1);
+    }
+    
+    @Test
+    public void GIVEN_ActorStateHasOneVariable_WHEN_ReturnInstructionIsExecuted_THEN_TheCorrectValueHasToBeStoredInTargetVariable() {
+
+    	coreRebecaActorState.addVariableToScope("var1", 1);
+		Variable v1 = new Variable("var1");
+    	coreRebecaActorState.newCallPushToScope(v1);
+    	coreRebecaActorState.pushToScope();
+    	coreRebecaActorState.addVariableToScope("var2", 12);
+		Variable v2 = new Variable("var2");
+    	coreRebecaActorState.addVariableToScope(CoreRebecaActorState.PC, new Pair<String, Integer>("-", 0));
+
+    	ReturnInstructionBean rib = new ReturnInstructionBean(v2);
+    	
+		returnSOSRule.applyRule(coreRebecaActorState, coreRebecaActorState, rib);
+		
+		Assertions.assertEquals(coreRebecaActorState.getVariableValue(v1), 12);
     }
     
     @Test
@@ -131,9 +149,9 @@ public class StatementsSOSRulesTest {
 		RebecInstantiationInstructionBean riib = new RebecInstantiationInstructionBean();
 		riib.setType(typeSystem.getType("A"));
 		riib.setResultTarget(v1);
-    	Pair<CoreRebecaActorState, InstructionBean> state = new Pair<CoreRebecaActorState, InstructionBean>(coreRebecaActorState, riib);
-		DeterministicTransition<Pair<? extends AbstractActorState, InstructionBean>> result = rebecaRebecInstantiationSOSRule.applyRule(state, state);
-		Assertions.assertEquals(result.getAction().getClass(), NewInstanceAction.class);
+		Transition<AbstractActorState> result = 
+				rebecInstantiationSOSRule.applyRule(coreRebecaActorState, coreRebecaActorState, riib);
+		Assertions.assertEquals(result.getDestinationsActions().get(0).getClass(), NewInstanceAction.class);
 
     }
 
@@ -148,11 +166,9 @@ public class StatementsSOSRulesTest {
     	Variable base = new Variable("self");
     	Variable v1 = new Variable(base, "var1");
     	AssignmentInstructionBean aib = new AssignmentInstructionBean(v1, 10, null, null);
-    	Pair<CoreRebecaActorState, InstructionBean> state = new Pair<CoreRebecaActorState, InstructionBean>(coreRebecaActorState, aib);
-		state.setSecond(aib);
-		assignmentSOSRule.applyRule(state, state);
+		assignmentSOSRule.applyRule(coreRebecaActorState, coreRebecaActorState, aib);
 		
-		Assertions.assertEquals(state.getFirst().getVariableValue("var1"), 10);
+		Assertions.assertEquals(coreRebecaActorState.getVariableValue(v1), 10);
     }
 
     @Test
@@ -163,12 +179,9 @@ public class StatementsSOSRulesTest {
 
     	Variable v1 = new Variable("var1");
     	JumpIfNotInstructionBean jinib = new JumpIfNotInstructionBean(v1, "m1", 1);
-    	Pair<CoreRebecaActorState, InstructionBean> state = new Pair<CoreRebecaActorState, InstructionBean>(coreRebecaActorState, jinib);
-		state.setSecond(jinib);
-		conditionalSOSRule.applyRule(state, state);
+		conditionalSOSRule.applyRule(coreRebecaActorState, coreRebecaActorState, jinib);
 		
-		@SuppressWarnings("unchecked")
-		Pair<String, Integer> pc = (Pair<String, Integer>) state.getFirst().getVariableValue(CoreRebecaActorState.PC);
+		Pair<String, Integer> pc = (Pair<String, Integer>) coreRebecaActorState.getPC();
 		Assertions.assertEquals(pc.getFirst(), "m1");
 		Assertions.assertEquals(pc.getSecond(), 1);
     }
@@ -184,18 +197,27 @@ public class StatementsSOSRulesTest {
 		ndv.addNonDetValue(var1);
     	AssignmentInstructionBean aib = new AssignmentInstructionBean(var1, ndv, null, null);
     	Pair<CoreRebecaActorState, InstructionBean> state = new Pair<CoreRebecaActorState, InstructionBean>(coreRebecaActorState, aib);
-    	NondeterministicTransition<Pair<? extends AbstractActorState, InstructionBean>> result = 
-    			(NondeterministicTransition<Pair<? extends AbstractActorState, InstructionBean>>) 
-    			assignmentSOSRule.applyRule(state, state);
-    	List<Pair<? extends Action,Pair<? extends AbstractActorState,InstructionBean>>> destinations = result.getDestinations();
-    	Iterator<Pair<? extends Action, Pair<? extends AbstractActorState, InstructionBean>>> iterator = destinations.iterator();
-    	AbstractActorState first = iterator.next().getSecond().getFirst();
-    	Assertions.assertEquals(3, first.getVariableValue("var1"));
-    	AbstractActorState second = iterator.next().getSecond().getFirst();
-    	Assertions.assertEquals(4, second.getVariableValue("var1"));
-    	AbstractActorState third = iterator.next().getSecond().getFirst();
-    	Assertions.assertEquals(5, third.getVariableValue("var1"));
+    	Transition<AbstractActorState> result = assignmentSOSRule.applyRule(
+    			coreRebecaActorState, coreRebecaActorState, aib);
+    	List<AbstractActorState> destinations = result.getDestinationsStates();
+    	Iterator<AbstractActorState> iterator = destinations.iterator();
+    	AbstractActorState first = iterator.next();
+    	Assertions.assertEquals(3, first.getVariableValue(var1));
+    	AbstractActorState second = iterator.next();
+    	Assertions.assertEquals(4, second.getVariableValue(var1));
+    	AbstractActorState third = iterator.next();
+    	Assertions.assertEquals(5, third.getVariableValue(var1));
     	state.getFirst();
     }
 
+    
+//    @Configuration
+//    @ComponentScan(basePackages = { 
+//    		"org.rebecalang.transparentactormodelchecker.abstractrebeca", 
+//    		"org.rebecalang.transparentactormodelchecker.corerebeca.sos.statementlevelrule", 
+//    		"org.rebecalang.transparentactormodelchecker.timedrebeca.sos.statementlevelrule"
+//    		})
+//    public static class Config {
+//    	
+//    }
 }

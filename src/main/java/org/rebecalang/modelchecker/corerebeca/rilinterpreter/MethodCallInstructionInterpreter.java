@@ -2,16 +2,12 @@ package org.rebecalang.modelchecker.corerebeca.rilinterpreter;
 
 import java.util.Map.Entry;
 
-import org.rebecalang.compiler.modelcompiler.SymbolTable;
 import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.RebecaModel;
-import org.rebecalang.compiler.utils.Pair;
-import org.rebecalang.modelchecker.corerebeca.ActorState;
 import org.rebecalang.modelchecker.corerebeca.BaseActorState;
 import org.rebecalang.modelchecker.corerebeca.State;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.InstructionBean;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.MethodCallInstructionBean;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.Variable;
-import org.rebecalang.modeltransformer.ril.corerebeca.translator.expressiontranslator.AbstractExpressionTranslator;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -34,7 +30,7 @@ public class MethodCallInstructionInterpreter extends InstructionInterpreter {
                 paramValue = baseActorState.retrieveVariableValue((Variable) paramValue);
 			baseActorState.addVariableToRecentScope(paramName, paramValue);
         }
-        baseActorState.addVariableToRecentScope(AbstractExpressionTranslator.RETURN_VALUE, 0);
+        baseActorState.addVariableToRecentScope(InstructionUtilities.RETURN_VALUE, 0);
         baseActorState.addVariableToRecentScope(CALL_RESULT, 
         		mcib.getFunctionCallResult() == null ? null : mcib.getFunctionCallResult().getVarName());
         baseActorState.initializePC(mcib.getMethodName(), 0);

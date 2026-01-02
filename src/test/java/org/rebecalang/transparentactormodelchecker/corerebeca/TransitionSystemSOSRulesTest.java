@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.rebecalang.compiler.CompilerConfig;
+import org.rebecalang.compiler.modelcompiler.corerebeca.CoreRebecaTypeSystem;
 import org.rebecalang.compiler.utils.Pair;
 import org.rebecalang.modelchecker.ModelCheckerConfig;
 import org.rebecalang.modeltransformer.ModelTransformerConfig;
@@ -20,16 +21,20 @@ import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.MsgsrvCallI
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.PopARInstructionBean;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.PushARInstructionBean;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.Variable;
-import org.rebecalang.transparentactormodelchecker.RuleIsDisabledException;
 import org.rebecalang.transparentactormodelchecker.TransparentActorModelCheckerConfig;
-import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.Environment;
-import org.rebecalang.transparentactormodelchecker.abstractrebeca.transitionsystem.NondeterministicTransition;
-import org.rebecalang.transparentactormodelchecker.corerebeca.sos.CoreRebecaSOSRule;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.compositionlevelrule.CompositionLevelExecuteStatementRule;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.compositionlevelrule.CompositionLevelNetworkDeliveryRule;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.compositionlevelrule.CompositionLevelTakeMessageRule;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractSystemState;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.ActivationRecord;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaActorState;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaMessageState;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaNetworkState;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaSystemState;
+import org.rebecalang.transparentactormodelchecker.transitionsystem.RuleIsDisabledException;
+import org.rebecalang.transparentactormodelchecker.transitionsystem.Transition;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
@@ -41,7 +46,15 @@ public class TransitionSystemSOSRulesTest {
 	
 	
 	@Autowired
-	CoreRebecaSOSRule sosRule;
+	@Qualifier("CORE_REBECA")
+	CompositionLevelExecuteStatementRule executeStatementRule;
+	
+	@Autowired
+	@Qualifier("CORE_REBECA")
+	CompositionLevelTakeMessageRule takeMessageRule;
+	
+	@Autowired
+	CompositionLevelNetworkDeliveryRule networkDeliveryRule;
 	
     CoreRebecaSystemState coreRebecaSystemState;
     
@@ -51,7 +64,7 @@ public class TransitionSystemSOSRulesTest {
     @BeforeEach
     public void setup() {
     	coreRebecaSystemState = new CoreRebecaSystemState();
-    	coreRebecaSystemState.setEnvironment(new Environment());
+    	coreRebecaSystemState.setEnvironment(new ActivationRecord());
     	coreRebecaSystemState.setNetworkState(new CoreRebecaNetworkState());
     	coreRebecaSystemState.setActorState(ACTOR_1_ID, new CoreRebecaActorState(ACTOR_1_ID));
     	coreRebecaSystemState.setActorState(ACTOR_2_ID, new CoreRebecaActorState(ACTOR_2_ID));
@@ -62,11 +75,11 @@ public class TransitionSystemSOSRulesTest {
     	
     	CoreRebecaMessageState message1 = new CoreRebecaMessageState("m1", new HashMap<String, Object>());
     	CoreRebecaActorState actor1 = (CoreRebecaActorState) coreRebecaSystemState.getActorState(ACTOR_1_ID);
-    	message1.setReceiver(actor1);
+    	message1.setReceiverId(actor1.getId());
     	actor1.receiveMessage(message1);
 
 		PushARInstructionBean puib = new PushARInstructionBean();
-    	DeclarationInstructionBean dib = new DeclarationInstructionBean("var1");
+    	DeclarationInstructionBean dib = new DeclarationInstructionBean("var1", CoreRebecaTypeSystem.INT_TYPE);
 		Variable v = new Variable("var1");
     	AssignmentInstructionBean aib = new AssignmentInstructionBean(v, 10, null, null);
     	PopARInstructionBean poib = new PopARInstructionBean();
@@ -77,7 +90,7 @@ public class TransitionSystemSOSRulesTest {
     	
     	CoreRebecaMessageState message2 = new CoreRebecaMessageState("m2", new HashMap<String, Object>());
     	CoreRebecaActorState actor2 = (CoreRebecaActorState) coreRebecaSystemState.getActorState(ACTOR_2_ID);
-    	message2.setReceiver(actor2);
+    	message2.setReceiverId(actor2.getId());
 		actor2.receiveMessage(message2);
     	aib = new AssignmentInstructionBean(v, 5, null, null);
     	rilModel.addMethod("m2", 
@@ -86,10 +99,12 @@ public class TransitionSystemSOSRulesTest {
     	actor1.setRILModel(rilModel);
     	actor2.setRILModel(rilModel);
     	
-    	NondeterministicTransition<CoreRebecaSystemState> transition = 
-    			(NondeterministicTransition<CoreRebecaSystemState>) sosRule.applyRule(coreRebecaSystemState, coreRebecaSystemState);
-    	transition = (NondeterministicTransition<CoreRebecaSystemState>) sosRule.applyRule(coreRebecaSystemState, coreRebecaSystemState);
-		Assertions.assertEquals(2, transition.getDestinations().size());
+    	Transition<AbstractSystemState> transition = 
+    			takeMessageRule.applyRule(coreRebecaSystemState, coreRebecaSystemState);
+		Assertions.assertEquals(2, transition.size());
+
+    	transition = executeStatementRule.applyRule(coreRebecaSystemState, coreRebecaSystemState);
+		Assertions.assertEquals(1, transition.size());
     }
    
     @Test
@@ -108,18 +123,26 @@ public class TransitionSystemSOSRulesTest {
 		rilModel.addMethod("m1", 
 				new ArrayList<InstructionBean>(Arrays.asList(puib, mcib, poib, emib)));
 
+		actor2.addVariableToScope("actor2", actor2);
+		rilModel.addMethod("m2", 
+				new ArrayList<InstructionBean>(Arrays.asList(puib, mcib, poib, emib)));
+
 		actor1.setRILModel(rilModel);
     	actor2.setRILModel(rilModel);
-    	NondeterministicTransition<CoreRebecaSystemState> transition = 
-    			(NondeterministicTransition<CoreRebecaSystemState>) sosRule.applyRule(coreRebecaSystemState, coreRebecaSystemState);
-    	transition = (NondeterministicTransition<CoreRebecaSystemState>) sosRule.applyRule(coreRebecaSystemState, coreRebecaSystemState);
-		Assertions.assertEquals(2, transition.getDestinations().size());
+    	Transition<AbstractSystemState> transition = 
+    			executeStatementRule.applyRule(coreRebecaSystemState, coreRebecaSystemState);
+    	
+    	transition = networkDeliveryRule.applyRule(coreRebecaSystemState, coreRebecaSystemState);
+		Assertions.assertEquals(1, transition.size());
 
-		transition = (NondeterministicTransition<CoreRebecaSystemState>) sosRule.applyRule(coreRebecaSystemState, coreRebecaSystemState);
-		Assertions.assertEquals(1, transition.getDestinations().size());
+		transition = takeMessageRule.applyRule(coreRebecaSystemState, coreRebecaSystemState);
+		Assertions.assertEquals(1, transition.size());
 
-		transition = (NondeterministicTransition<CoreRebecaSystemState>) sosRule.applyRule(coreRebecaSystemState, coreRebecaSystemState);
-		Assertions.assertEquals(1, transition.getDestinations().size());
+		transition = executeStatementRule.applyRule(coreRebecaSystemState, coreRebecaSystemState);
+		Assertions.assertEquals(2, transition.size());
+
+		transition = executeStatementRule.applyRule(coreRebecaSystemState, coreRebecaSystemState);
+		Assertions.assertEquals(1, transition.size());
 
 //		Gson gson = new GsonBuilder().setPrettyPrinting().create();
 //        System.out.println(gson.toJson(coreRebecaSystemState));

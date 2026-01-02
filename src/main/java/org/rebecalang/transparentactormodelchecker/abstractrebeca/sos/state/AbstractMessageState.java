@@ -2,12 +2,19 @@ package org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Map.Entry;
+
+import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.Variable;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.util.CloningRepository;
 
 @SuppressWarnings("serial")
 public abstract class AbstractMessageState implements Serializable, Cloneable {
 	
-	protected AbstractActorState sender;
-	protected AbstractActorState receiver;
+	public transient final static Variable SENDER = new Variable("sender"); 
+	public transient final static Variable SELF = new Variable("self"); 
+	
+	protected int senderId;
+	protected int receiverId;
 	
 	protected String name;
 	protected HashMap<String, Object> parameters;
@@ -35,21 +42,22 @@ public abstract class AbstractMessageState implements Serializable, Cloneable {
 	public void addParameter(String name, Object value) {
 		parameters.put(name, value);
 	}
-	public AbstractActorState getSender() {
-		return sender;
+
+	public int getSenderId() {
+		return senderId;
 	}
-	public void setSender(AbstractActorState sender) {
-		this.sender = sender;
+	public void setSenderId(int senderId) {
+		this.senderId = senderId;
 	}
-	public AbstractActorState getReceiver() {
-		return receiver;
+	public int getReceiverId() {
+		return receiverId;
 	}
-	public void setReceiver(AbstractActorState receiver) {
-		this.receiver = receiver;
+	public void setReceiverId(int receiverId) {
+		this.receiverId = receiverId;
 	}
-		
+	
 	public String toString() {
-		return (sender == null ? "main" : sender.getId()) + "->" + receiver.getId() + "." + name + "()"; 
+		return (senderId == AbstractActorState.NO_ACTOR_ID ? "main" : senderId) + "->" + receiverId + "." + name + "()"; 
 	}
 	
 	@Override
@@ -58,8 +66,8 @@ public abstract class AbstractMessageState implements Serializable, Cloneable {
 		int result = 1;
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((parameters == null) ? 0 : parameters.hashCode());
-		result = prime * result + ((receiver == null) ? 0 : receiver.hashCode());
-		result = prime * result + ((sender == null) ? 0 : sender.hashCode());
+		result = prime * result + receiverId;
+		result = prime * result + senderId;
 		return result;
 	}
 	@Override
@@ -81,18 +89,24 @@ public abstract class AbstractMessageState implements Serializable, Cloneable {
 				return false;
 		} else if (!parameters.equals(other.parameters))
 			return false;
-		if (receiver == null) {
-			if (other.receiver != null)
-				return false;
-		} else if (!receiver.equals(other.receiver))
+		if (receiverId != other.receiverId)
 			return false;
-		if (sender == null) {
-			if (other.sender != null)
-				return false;
-		} else if (!sender.equals(other.sender))
+		if (senderId != other.senderId)
 			return false;
 		return true;
 	}
 	
 	public abstract AbstractMessageState clone();
+	
+	protected <T extends AbstractMessageState> void clone(T clonedMessageState) {
+		clonedMessageState.senderId = this.senderId;
+		clonedMessageState.receiverId = this.receiverId;
+		clonedMessageState.name = this.name;
+		
+		HashMap<String, Object> parameters = new HashMap<String, Object>();
+		for(Entry<String, Object> entry : this.parameters.entrySet()) {
+			parameters.put(entry.getKey(), CloningRepository.cloneObject(entry.getValue()));
+		}
+		clonedMessageState.parameters = parameters;
+	}
 }

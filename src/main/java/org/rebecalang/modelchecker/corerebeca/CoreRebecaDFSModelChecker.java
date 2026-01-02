@@ -1,6 +1,5 @@
 package org.rebecalang.modelchecker.corerebeca;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import org.rebecalang.compiler.modelcompiler.ObjectModelUtils;
@@ -37,6 +36,7 @@ public class CoreRebecaDFSModelChecker extends ModelChecker {
 		return new ActorState();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected void doModelChecking(
 			RILModel transformedRILModel
@@ -80,6 +80,7 @@ public class CoreRebecaDFSModelChecker extends ModelChecker {
 		return initialState;
 	}
 
+	@SuppressWarnings("unchecked")
 	private State<ActorState> executeNewState(
 			State<ActorState> currentState,
 			ActorState actorState,

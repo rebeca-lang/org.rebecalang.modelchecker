@@ -7,6 +7,7 @@ import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.Variable;
 
 public class InstructionUtilities {
 	public static final String PC_STRING = "$PC$";
+	public static final String RETURN_VALUE = "$RETURN_VALUE$";
 
 	public static Object getValue(StatementInterpreterContainer statementInterpreterContainer,
 			Object operand, BaseActorState<?> baseActorState) {

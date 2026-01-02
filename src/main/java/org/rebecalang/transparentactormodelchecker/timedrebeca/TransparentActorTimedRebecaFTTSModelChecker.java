@@ -1,12 +1,21 @@
 package org.rebecalang.transparentactormodelchecker.timedrebeca;
 
+import java.util.Set;
+
 import org.rebecalang.compiler.modelcompiler.SymbolTable;
 import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.RebecaModel;
 import org.rebecalang.compiler.utils.Pair;
 import org.rebecalang.modeltransformer.ril.RILModel;
 import org.rebecalang.transparentactormodelchecker.TransparentActorModelCheckingResult;
-import org.rebecalang.transparentactormodelchecker.corerebeca.TransparentActorAbstractModelChecker;
-import org.rebecalang.transparentactormodelchecker.corerebeca.sos.compositionlevelsosrule.CoreRebecaCompositionLevelTakeMessageSOSRule;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.Feature;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.TransparentActorAbstractModelChecker;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.compositionlevelrule.CompositionLevelExecuteStatementRule;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.compositionlevelrule.CompositionLevelNetworkDeliveryRule;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.compositionlevelrule.CompositionLevelTakeMessageRule;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractActorState;
+import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaActorState;
+import org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.TimedRebecaTransitionSystem;
+import org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.state.TimedRebecaActorState;
 import org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.state.TimedRebecaSystemState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -17,19 +26,43 @@ import org.springframework.stereotype.Component;
 public class TransparentActorTimedRebecaFTTSModelChecker extends TransparentActorAbstractModelChecker<TimedRebecaSystemState> {
 
 	@Autowired
-	protected CoreRebecaCompositionLevelTakeMessageSOSRule compositionLevelTakeMessageSOSRule;
+	@Qualifier("TIMED_REBECA")
+	protected CompositionLevelTakeMessageRule compositionLevelTakeMessageSOSRule;
+
+	@Override
+	public TransparentActorModelCheckingResult modelcheck(Pair<RebecaModel, SymbolTable> compiledRebecaFile,
+			RILModel rilModel, Set<Feature> features) {
+		this.compiledRebecaFile = compiledRebecaFile;
+		this.rilModel = rilModel;
+		transitionSystem = new TimedRebecaTransitionSystem();
+//		setInitialState();
+//		
+//		TransparentActorTransitionSystemState<TimedRebecaSystemState> initialState = 
+//				transitionSystem.getInitialState();
+
+		return null;
+	}
 
 	@Override
 	protected TimedRebecaSystemState createSystemState() {
+		return new TimedRebecaSystemState();
+	}
+
+	@Override
+	protected CompositionLevelExecuteStatementRule getCompositionLevelExecuteStatementRule() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public TransparentActorModelCheckingResult modelcheck(Pair<RebecaModel, SymbolTable> compiledRebecaFile,
-			RILModel rilModel) {
+	protected CompositionLevelNetworkDeliveryRule getCompositionLevelNetworkDeliveryRule() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	protected AbstractActorState createAbstractActorState() {
+		return new TimedRebecaActorState(CoreRebecaActorState.NO_ACTOR_ID);
 	}
 
 //	public TransparentActorModelCheckingResult modelcheck(Pair<RebecaModel,SymbolTable> compiledRebecaFile, RILModel rilModel) {

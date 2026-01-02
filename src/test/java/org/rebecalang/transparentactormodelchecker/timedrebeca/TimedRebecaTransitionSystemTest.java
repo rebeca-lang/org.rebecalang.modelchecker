@@ -9,7 +9,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.rebecalang.compiler.utils.CodeCompilationException;
 import org.rebecalang.compiler.utils.Pair;
-import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.Variable;
 import org.rebecalang.transparentactormodelchecker.TransparentActorTransitionSystemState;
 import org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.TimedRebecaTransitionSystem;
 import org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.state.TimedActorScope;
@@ -34,8 +33,8 @@ public class TimedRebecaTransitionSystemTest {
     	
     	TimedRebecaMessageState message1 = new TimedRebecaMessageState();
 		message1.setName("m1");
-		message1.setSender(actor1);
-		message1.setReceiver(actor1);
+		message1.setSenderId(actor1.getId());
+		message1.setReceiverId(actor1.getId());
 		message1.setParameters(new HashMap<String, Object>());
 		message1.setArrival(10);
 		message1.setDeadline(20);
@@ -43,8 +42,8 @@ public class TimedRebecaTransitionSystemTest {
 		
 		TimedRebecaMessageState message2 = new TimedRebecaMessageState();
 		message2.setName("m2");
-		message2.setSender(actor2);
-		message2.setReceiver(actor2);
+		message2.setSenderId(actor2.getId());
+		message2.setReceiverId(actor2.getId());
 		message2.setParameters(new HashMap<String, Object>());
 		message2.setArrival(20);
 		message2.setDeadline(30);
@@ -64,8 +63,8 @@ public class TimedRebecaTransitionSystemTest {
     	
     	TimedRebecaMessageState message3 = new TimedRebecaMessageState();
 		message3.setName("m1");
-		message3.setSender(otherActor1);
-		message3.setReceiver(otherActor1);
+		message3.setSenderId(otherActor1.getId());
+		message3.setReceiverId(otherActor1.getId());
 		message3.setParameters(new HashMap<String, Object>());
 		message3.setArrival(10);
 		message3.setDeadline(20);
@@ -73,8 +72,8 @@ public class TimedRebecaTransitionSystemTest {
 		
 		TimedRebecaMessageState message4 = new TimedRebecaMessageState();
 		message4.setName("m2");
-		message4.setSender(otherActor2);
-		message4.setReceiver(otherActor2);
+		message4.setSenderId(otherActor2.getId());
+		message4.setReceiverId(otherActor2.getId());
 		message4.setParameters(new HashMap<String, Object>());
 		message4.setArrival(20);
 		message4.setDeadline(30);
@@ -102,17 +101,17 @@ public class TimedRebecaTransitionSystemTest {
     @Test
     public void testOneShiftEquivalent() {
     	
-    	TimedRebecaMessageState firstMessage = otherActor1.getFirstMessage();
+    	TimedRebecaMessageState firstMessage = otherActor1.getEnableMessage();
     	firstMessage.setArrival(11);
     	firstMessage.setDeadline(21);
     	otherActor1.receiveMessage(firstMessage);
-    	otherActor1.setVariableValue(new Variable(TimedActorScope.TIME_VARIABLE_NAME), 1);
+    	otherActor1.setVariableValue(TimedActorScope.TIME_VARIABLE_NAME, 1);
 
-    	firstMessage = otherActor2.getFirstMessage();
+    	firstMessage = otherActor2.getEnableMessage();
     	firstMessage.setArrival(21);
     	firstMessage.setDeadline(31);
     	otherActor2.receiveMessage(firstMessage);
-    	otherActor2.setVariableValue(new Variable(TimedActorScope.TIME_VARIABLE_NAME), 1);
+    	otherActor2.setVariableValue(TimedActorScope.TIME_VARIABLE_NAME, 1);
 
     	Pair<Boolean, Integer> result = initialState.shiftEquals(otherState);
     	
@@ -123,22 +122,22 @@ public class TimedRebecaTransitionSystemTest {
     @Test
 	public void testTwoShiftEquivalentSystemStates() {
     	TimedRebecaActorState actor1 = new TimedRebecaActorState(0);
-    	actor1.setVariableValue(new Variable(TimedActorScope.TIME_VARIABLE_NAME), 1);
+    	actor1.setVariableValue(TimedActorScope.TIME_VARIABLE_NAME, 1);
     	TimedRebecaActorState actor2 = new TimedRebecaActorState(1);
-    	actor2.setVariableValue(new Variable(TimedActorScope.TIME_VARIABLE_NAME), 1);
+    	actor2.setVariableValue(TimedActorScope.TIME_VARIABLE_NAME, 1);
     	
     	TimedRebecaMessageState message1 = new TimedRebecaMessageState();
 		message1.setName("m1");
-		message1.setSender(actor1);
-		message1.setReceiver(actor1);
+		message1.setSenderId(actor1.getId());
+		message1.setReceiverId(actor1.getId());
 		message1.setParameters(new HashMap<String, Object>());
 		message1.setArrival(11);
 		message1.setDeadline(21);
 		
 		TimedRebecaMessageState message2 = new TimedRebecaMessageState();
 		message2.setName("m2");
-		message2.setSender(actor2);
-		message2.setReceiver(actor2);
+		message2.setSenderId(actor2.getId());
+		message2.setReceiverId(actor2.getId());
 		message2.setParameters(new HashMap<String, Object>());
 		message2.setArrival(21);
 		message2.setDeadline(31);

@@ -7,8 +7,8 @@ import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.BaseClassDec
 import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.ReactiveClassDeclaration;
 import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.Type;
 import org.rebecalang.compiler.utils.CodeCompilationException;
-import org.rebecalang.compiler.utils.Pair;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractActorState;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractMessageState;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.ActorScope;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.util.CloningRepository;
 
@@ -22,12 +22,14 @@ public class CoreRebecaActorState extends AbstractActorState implements Serializ
 		queue = new ArrayList<CoreRebecaMessageState>();
 	}
 	
-	public CoreRebecaMessageState getFirstMessage() {
-		return queue.remove(0);
+	@Override
+	public CoreRebecaMessageState getEnableMessage() {
+		return queue.isEmpty() ? null : queue.remove(0);
 	}
 
-	public void receiveMessage(CoreRebecaMessageState newMessage) {
-		queue.add(newMessage);
+	@Override
+	public void receiveMessage(AbstractMessageState newMessage) {
+		queue.add((CoreRebecaMessageState) newMessage);
 	}
 
 	public String toString() {
@@ -39,23 +41,18 @@ public class CoreRebecaActorState extends AbstractActorState implements Serializ
 		return result + ",\n queue:(" + queue + ")]";
 	}
 
-	public void movePCtoTheNextInstruction() {
-		Pair<String, Integer> pc = getPC();
-		pc.setSecond(pc.getSecond() + 1);
-	}
-
-	public static CoreRebecaActorState createTempCoreRebecaActorState() {
+	private static CoreRebecaActorState createTempCoreRebecaActorState() {
 		return new CoreRebecaActorState(-1);
 	}
 
-	public static CoreRebecaActorState createTempCoreRebecaActorState(Type type) {
+	private static CoreRebecaActorState createTempCoreRebecaActorState(Type type) {
 		CoreRebecaActorState temp = createTempCoreRebecaActorState();
 		try {
 			BaseClassDeclaration metaData = type.getTypeSystem().getMetaData(type);
 			if(metaData instanceof ReactiveClassDeclaration) {
 				ReactiveClassDeclaration rcd = (ReactiveClassDeclaration) metaData;
-				temp.addVariablesToScope(rcd.getStatevars());
-				temp.addVariablesToScope(rcd.getKnownRebecs());
+				temp.addFieldsVariablesToScope(rcd.getStatevars());
+				temp.addFieldsVariablesToScope(rcd.getKnownRebecs());
 				temp.addVariableToScope("self", temp);
 			}
 		} catch (CodeCompilationException e) {
@@ -105,5 +102,20 @@ public class CoreRebecaActorState extends AbstractActorState implements Serializ
 	@Override
 	public ActorScope getNewActorScope() {
 		return new ActorScope();
+	}
+
+	@Override
+	public boolean isEnable() {
+		return hasVariableInScope(AbstractActorState.PC) || !queue.isEmpty();
+	}
+
+	@Override
+	public AbstractMessageState getNewMessageState() {
+		return new CoreRebecaMessageState();
+	}
+
+	@Override
+	public AbstractActorState createNewActorState(Type type) {
+		return createTempCoreRebecaActorState(type);
 	}
 }

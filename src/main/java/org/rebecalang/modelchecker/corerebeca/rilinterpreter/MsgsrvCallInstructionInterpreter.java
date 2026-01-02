@@ -2,9 +2,7 @@ package org.rebecalang.modelchecker.corerebeca.rilinterpreter;
 
 import java.util.Map;
 
-import org.rebecalang.compiler.modelcompiler.SymbolTable;
 import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.RebecaModel;
-import org.rebecalang.compiler.utils.Pair;
 import org.rebecalang.modelchecker.corerebeca.BaseActorState;
 import org.rebecalang.modelchecker.corerebeca.MessageSpecification;
 import org.rebecalang.modelchecker.corerebeca.State;
@@ -25,6 +23,7 @@ public class MsgsrvCallInstructionInterpreter extends InstructionInterpreter {
 
 		MessageSpecification msgSpec = new MessageSpecification(mcib.getMethodName(), parameters, baseActorState);
 
+		@SuppressWarnings("unchecked")
 		BaseActorState<MessageSpecification> receiverState = (BaseActorState<MessageSpecification>) baseActorState.retrieveVariableValue(mcib.getBase());
 		receiverState.addToQueue(msgSpec);
 		baseActorState.increasePC();

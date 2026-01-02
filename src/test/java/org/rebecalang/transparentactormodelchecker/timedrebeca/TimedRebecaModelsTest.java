@@ -21,6 +21,7 @@ import org.rebecalang.modeltransformer.ril.Rebeca2RILModelTransformer;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.InstructionBean;
 
 import org.rebecalang.transparentactormodelchecker.TransparentActorModelCheckerConfig;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.Feature;
 import org.rebecalang.modelchecker.ModelCheckerConfig;
 import org.rebecalang.modelchecker.corerebeca.ModelCheckingException;
 
@@ -110,7 +111,7 @@ public class TimedRebecaModelsTest {
         RILModel transformedRILModel = rebeca2RILModelTransformer.transformModel(
         		compiledRebecaFile, extention, CoreVersion.CORE_2_3);
         
-        fttsModelChecker.modelcheck(compiledRebecaFile, transformedRILModel);
+        fttsModelChecker.modelcheck(compiledRebecaFile, transformedRILModel, new HashSet<Feature>());
         
 		printRILModel(transformedRILModel);
 //		TransparentActorModelCheckingResult dfsResult = dfsModelChecker.modelcheck(compiledRebecaFile, transformedRILModel);

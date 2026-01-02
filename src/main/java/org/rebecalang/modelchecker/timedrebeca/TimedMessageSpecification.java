@@ -1,13 +1,11 @@
 package org.rebecalang.modelchecker.timedrebeca;
 
-import org.rebecalang.modelchecker.corerebeca.BaseActorState;
-import org.rebecalang.modelchecker.corerebeca.MessageSpecification;
-
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import org.rebecalang.modelchecker.corerebeca.BaseActorState;
+import org.rebecalang.modelchecker.corerebeca.MessageSpecification;
 
 @SuppressWarnings("serial")
 public class TimedMessageSpecification extends MessageSpecification {

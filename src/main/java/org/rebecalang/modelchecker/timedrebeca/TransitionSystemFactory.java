@@ -1,10 +1,6 @@
 package org.rebecalang.modelchecker.timedrebeca;
 
 import org.rebecalang.modelchecker.corerebeca.ModelCheckingException;
-import org.rebecalang.modelchecker.corerebeca.policy.AbstractPolicy;
-import org.rebecalang.modelchecker.corerebeca.policy.CoarseGrainedPolicy;
-import org.rebecalang.modelchecker.corerebeca.policy.FineGrainedPolicy;
-import org.rebecalang.modelchecker.corerebeca.utils.Policy;
 import org.rebecalang.modelchecker.timedrebeca.utils.TransitionSystem;
 
 public class TransitionSystemFactory {

@@ -5,7 +5,7 @@ import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.Acto
 
 @SuppressWarnings("serial")
 public class TimedActorScope extends ActorScope {
-	public static final String TIME_VARIABLE_NAME = "time";
+	public static final Variable TIME_VARIABLE_NAME = new Variable("time");
 
 	private int time;
 	
@@ -22,10 +22,10 @@ public class TimedActorScope extends ActorScope {
 			super.setVariableValue(leftVar, value);
 	}
 	
-	@Override
-	public Integer getVariableValue(String varName) {
-		return time;
-	}
+//	@Override
+//	public Integer getVariableValue(String varName) {
+//		return time;
+//	}
 	
 	@Override
 	public TimedActorScope clone() {

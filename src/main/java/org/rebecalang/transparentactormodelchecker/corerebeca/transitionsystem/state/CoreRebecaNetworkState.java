@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 
 import org.rebecalang.compiler.utils.Pair;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractMessageState;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractNetworkState;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.util.CloningRepository;
 
@@ -24,12 +25,12 @@ public class CoreRebecaNetworkState extends AbstractNetworkState implements Seri
 		this.receivedMessages = receivedMessages;
 	}
 	
-	public void addMessage(CoreRebecaMessageState message) {
+	public void addMessage(AbstractMessageState message) {
 		Pair<Integer, Integer> key = new Pair<Integer, Integer>(
-				message.getSender().getId(), message.getReceiver().getId());
+				message.getSenderId(), message.getReceiverId());
 		if(!receivedMessages.containsKey(key))
 			receivedMessages. put(key, new ArrayList<CoreRebecaMessageState>());
-		receivedMessages.get(key).add(message);
+		receivedMessages.get(key).add((CoreRebecaMessageState) message);
 	}
 
 	@Override
@@ -71,5 +72,14 @@ public class CoreRebecaNetworkState extends AbstractNetworkState implements Seri
 			clonedNetworkState.receivedMessages.put(key, messages);
 		}
 		return clonedNetworkState;
+	}
+
+	@Override
+	public boolean hasMessage() {
+		for(ArrayList<CoreRebecaMessageState> value : receivedMessages.values()) {
+			if(!value.isEmpty())
+				return true;
+		}
+		return false;
 	}
 }

@@ -2,10 +2,8 @@ package org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.
 
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.Map.Entry;
 
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractMessageState;
-import org.rebecalang.transparentactormodelchecker.abstractrebeca.util.CloningRepository;
 
 @SuppressWarnings("serial")
 public class CoreRebecaMessageState extends AbstractMessageState implements Serializable, Cloneable {
@@ -17,23 +15,9 @@ public class CoreRebecaMessageState extends AbstractMessageState implements Seri
 		super(name, parameters);
 	}
 	
-//	public String toString() {
-//		return (sender == null ? "main" : sender.getId()) + "->" + receiver.getId() + "." + name + "()"; 
-//	}
-	
-	public CoreRebecaMessageState clone() {
+	public AbstractMessageState clone() {
 		CoreRebecaMessageState clonedMessageState = new CoreRebecaMessageState();
-		if(this.sender != null)
-			clonedMessageState.sender = this.sender.clone();
-		clonedMessageState.receiver = this.receiver.clone();
-		clonedMessageState.name = this.name;
-		
-		HashMap<String, Object> parameters = new HashMap<String, Object>();
-		for(Entry<String, Object> entry : this.parameters.entrySet()) {
-			parameters.put(entry.getKey(), CloningRepository.cloneObject(entry.getValue()));
-		}
-		clonedMessageState.parameters = parameters;
-		
+		clone(clonedMessageState);
 		return clonedMessageState;
 	}
 }

@@ -1,24 +1,9 @@
 package org.rebecalang.modelchecker.corerebeca;
 
-import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.ReactiveClassDeclaration;
-import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.RebecaModel;
-import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.Type;
-import org.rebecalang.compiler.utils.CodeCompilationException;
-import org.rebecalang.modelchecker.corerebeca.policy.AbstractPolicy;
-import org.rebecalang.modelchecker.corerebeca.rilinterpreter.InstructionInterpreter;
-import org.rebecalang.modelchecker.corerebeca.rilinterpreter.InstructionUtilities;
-import org.rebecalang.modelchecker.corerebeca.rilinterpreter.ProgramCounter;
-import org.rebecalang.modelchecker.corerebeca.utils.RILUtils;
-import org.rebecalang.modeltransformer.ril.RILModel;
-import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.AbstractCallingInstructionBean;
-import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.InstructionBean;
-import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.MethodCallInstructionBean;
-import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.MsgsrvCallInstructionBean;
-
 import java.io.PrintStream;
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.Map.Entry;
+
+import org.rebecalang.modelchecker.corerebeca.utils.RILUtils;
 
 @SuppressWarnings("serial")
 public class ActorState extends BaseActorState<MessageSpecification> {

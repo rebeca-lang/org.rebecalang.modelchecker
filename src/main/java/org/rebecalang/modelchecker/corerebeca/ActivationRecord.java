@@ -5,7 +5,6 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 
 @SuppressWarnings("serial")
 public class ActivationRecord implements Serializable {
@@ -35,7 +34,8 @@ public class ActivationRecord implements Serializable {
     }
 
 
-    @Override
+    @SuppressWarnings("rawtypes")
+	@Override
     /**
      * There is no need to consider the values of previousScope
      * and relatedRebecType. Equal values for variables of the
@@ -63,7 +63,8 @@ public class ActivationRecord implements Serializable {
         return result;
     }    
 
-    @Override
+    @SuppressWarnings("rawtypes")
+	@Override
     public boolean equals(Object obj) {
         if (this == obj)
             return true;

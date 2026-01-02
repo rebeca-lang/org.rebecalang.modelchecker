@@ -11,7 +11,7 @@ import java.util.Map.Entry;
 @SuppressWarnings("serial")
 public abstract class AbstractSystemState implements Serializable, Cloneable {
 
-	protected volatile Environment environment;
+	protected volatile ActivationRecord environment;
 	protected HashMap<Integer, AbstractActorState> actorsState;
 
 	public AbstractSystemState() {
@@ -54,7 +54,7 @@ public abstract class AbstractSystemState implements Serializable, Cloneable {
 		return actorsState.get(id);
 	}
 
-	public void setEnvironment(Environment environment) {
+	public void setEnvironment(ActivationRecord environment) {
 		this.environment = environment;
 		for(AbstractActorState actorState : actorsState.values())
 			actorState.setEnvironment(environment);

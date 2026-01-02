@@ -1,10 +1,13 @@
 package org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state;
 
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.ArrayType;
 import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.FieldDeclaration;
+import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.Type;
 import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.VariableDeclarator;
 import org.rebecalang.compiler.utils.Pair;
 import org.rebecalang.modeltransformer.ril.RILModel;
@@ -17,6 +20,7 @@ public abstract class AbstractActorState implements Serializable, Cloneable {
 	public transient final static String PC = "$PC$";
 	protected transient final static Variable PC_VARIABLE = new Variable("$PC$");
 	public transient final static Integer MIN_PRIORITY = Integer.MAX_VALUE - 1;
+	public transient final static int NO_ACTOR_ID = -1;
 
 	protected transient RILModel rilModel;
 
@@ -66,27 +70,24 @@ public abstract class AbstractActorState implements Serializable, Cloneable {
 
 	@SuppressWarnings("unchecked")
 	public Pair<String, Integer> getPC() {
-		return (Pair<String, Integer>) scope.getVariableValue(PC);
+		return (Pair<String, Integer>) scope.getVariableValue(PC_VARIABLE);
 	}
 
 	public void setPC(Pair<String, Integer> pc) {
 		scope.setVariableValue(PC_VARIABLE, pc);
 	}
 
-	public void setEnvironment(Environment environment) {
-		scope.setEnvironment(environment);
-	}
-
-	public String toString() {
-		return "actor->" + id;
-	}
-	public String deepToString() {
-		return id + "->[scope:(" + scope + ")]";
-	}
-
 	public void movePCtoTheNextInstruction() {
 		Pair<String, Integer> pc = getPC();
 		pc.setSecond(pc.getSecond() + 1);
+	}
+
+	ActorScope getScope() {
+		return scope;
+	}
+	
+	public void setEnvironment(ActivationRecord environment) {
+		scope.setEnvironment(environment);
 	}
 
 	public boolean hasVariableInScope(String varName) {
@@ -97,55 +98,55 @@ public abstract class AbstractActorState implements Serializable, Cloneable {
 		scope.pushToScope();
 	}
 
+	public void popFromScope() {
+		scope.popFromScope();
+	}
+	
+	public void newCallPushToScope(Variable returnValueResultVariable) {
+		scope.newCallPushToScope(returnValueResultVariable);
+	}
+
+	public void popToReturn(Object returnValue) {
+		scope.popToReturn(returnValue);
+	}
+
+	public boolean isTempActorState() {
+		return id == -1;
+	}
+
 	public void addVariableToScope(String varName, Object varValue) {
 		scope.addVariableToScope(varName, varValue);
 	}
 
-	public Object getVariableValue(String varName) {
-		return varName.equals("self") ? this : scope.getVariableValue(varName);
+	public Object getVariableValue(Variable variable) {
+		return scope.getVariableValue(variable);
 	}
 
 	public void setVariableValue(Variable varName, Object varValue) {
 		scope.setVariableValue(varName, varValue);
 	}
 
-	public void popFromScope() {
-		scope.popFromScope();
+	protected void addFieldsVariablesToScope(List<FieldDeclaration> fields) {
+		for(FieldDeclaration fd : fields) {
+			for(VariableDeclarator vd : fd.getVariableDeclarators()) {
+				if(fd.getType() instanceof ArrayType) {
+					ArrayType type = (ArrayType) fd.getType();
+					int[] dimentions = new int[type.getDimensions().size()];
+					for(int cnt = 0; cnt < dimentions.length; cnt++)
+						dimentions[cnt] = type.getDimensions().get(cnt);
+					addVariableToScope(vd.getVariableName(), 
+							Array.newInstance(Object.class, dimentions));
+				} else
+					addVariableToScope(vd.getVariableName(), null);
+			}
+		}
 	}
 
-	public void addVariableToScope(String varName) {
-		scope.addVariableToScope(varName);
+	public String toString() {
+		return "actor->" + id;
 	}
-
-	public boolean isTempActorState() {
-		return id == -1;
-	}
-//
-//	public static AbstractActorState<? extends AbstractMessageState> createTempCoreRebecaActorState() {
-//		return new AbstractActorState(-1);
-//	}
-
-//	public static AbstractActorState<? extends AbstractMessageState> createTempCoreRebecaActorState(Type type) {
-//		AbstractActorState<? extends AbstractMessageState> temp = createTempCoreRebecaActorState();
-//		try {
-//			BaseClassDeclaration metaData = type.getTypeSystem().getMetaData(type);
-//			if(metaData instanceof ReactiveClassDeclaration) {
-//				ReactiveClassDeclaration rcd = (ReactiveClassDeclaration) metaData;
-//				temp.addVariablesToScope(rcd.getStatevars());
-//				temp.addVariablesToScope(rcd.getKnownRebecs());
-//				temp.addVariableToScope("self", temp);
-//			}
-//		} catch (CodeCompilationException e) {
-//			e.printStackTrace();
-//		}
-//		return temp;
-//	}
-
-
-	protected void addVariablesToScope(List<FieldDeclaration> fields) {
-		for(FieldDeclaration fd : fields)
-			for(VariableDeclarator vd : fd.getVariableDeclarators())
-				addVariableToScope(vd.getVariableName());
+	public String deepToString() {
+		return id + "->[scope:(" + scope + ")]";
 	}
 
 	@Override
@@ -197,4 +198,15 @@ public abstract class AbstractActorState implements Serializable, Cloneable {
 	public abstract AbstractActorState clone();
 	
 	public abstract ActorScope getNewActorScope();
+	
+	public abstract AbstractMessageState getEnableMessage();
+	
+	public abstract AbstractMessageState getNewMessageState();
+	
+	public abstract void receiveMessage(AbstractMessageState newMessage);
+	
+	public abstract boolean isEnable();
+
+	public abstract AbstractActorState createNewActorState(Type newInstanceType);
+
 }

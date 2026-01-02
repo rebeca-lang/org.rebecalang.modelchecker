@@ -21,16 +21,13 @@ import org.rebecalang.compiler.utils.FileUtils;
 import org.rebecalang.compiler.utils.Pair;
 import org.rebecalang.modelchecker.ModelCheckerConfig;
 import org.rebecalang.modelchecker.corerebeca.ModelCheckingException;
-import org.rebecalang.modelchecker.corerebeca.utils.Policy;
 import org.rebecalang.modeltransformer.ModelTransformerConfig;
 import org.rebecalang.modeltransformer.ril.RILModel;
 import org.rebecalang.modeltransformer.ril.Rebeca2RILModelTransformer;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.InstructionBean;
-import org.rebecalang.transparentactormodelchecker.corerebeca.TransparentActorCoreRebecaFineGrainedDFSModelChecker;
 import org.rebecalang.transparentactormodelchecker.TransparentActorModelCheckerConfig;
 import org.rebecalang.transparentactormodelchecker.TransparentActorModelCheckingResult;
-import org.rebecalang.transparentactormodelchecker.corerebeca.TransparentActorCoreRebecaCoarseGrainedDFSModelChecker;
-import org.rebecalang.transparentactormodelchecker.corerebeca.TransparentActorCoreRebecaFineGrainedBFSModelChecker;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.Feature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -53,15 +50,56 @@ public class CoreRebecaModelsTest {
     protected Rebeca2RILModelTransformer rebeca2RILModelTransformer;
     
     @Autowired
-    protected TransparentActorCoreRebecaFineGrainedDFSModelChecker dfsModelChecker;
+    protected TransparentActorCoreRebecaFineGrainedDFSModelChecker fineGrainedDFSModelChecker;
 
-    @Autowired
-    protected TransparentActorCoreRebecaFineGrainedBFSModelChecker fineGrainedBFSModelChecker;
-    
+//    @Autowired
+//    protected TransparentActorCoreRebecaFineGrainedBFSModelChecker fineGrainedBFSModelChecker;
+//    
     @Autowired
     protected TransparentActorCoreRebecaCoarseGrainedDFSModelChecker coarseGrainedDFSModelChecker;
 
-//	@Test
+	@Test
+    public void GIVEN_SELF_LOOP_RebecaModel_WHEN_No_Error() throws ModelCheckingException, IOException {
+		String rebecaModel = 
+				"""
+					reactiveclass Test(3) {
+						knownrebecs {}
+						statevars{int t;}
+						Test() {
+							t = 4;
+							self.m1(self, t);
+						}
+						msgsrv m1(Test t1, int value) {
+							t1.m1(self, value);
+						}
+					}
+					main {
+						Test t1():();
+					}				
+				""";
+		File rebecaFile = FileUtils.createTempFile(rebecaModel);
+		
+		Pair<RebecaModel, SymbolTable> compiledRebecaFile = 
+				rebecaModelCompiler.compileRebecaFile(rebecaFile, new HashSet<CompilerExtension>(), CoreVersion.CORE_2_3);
+		if(!exceptionContainer.exceptionsIsEmpty()) {
+			exceptionContainer.print(System.out);
+			return;
+		}
+        RILModel transformedRILModel = rebeca2RILModelTransformer.transformModel(
+        		compiledRebecaFile, new HashSet<CompilerExtension>(), CoreVersion.CORE_2_3);
+        
+
+		printRILModel(transformedRILModel);
+		
+		TransparentActorModelCheckingResult coarseDfsResult = coarseGrainedDFSModelChecker.modelcheck(compiledRebecaFile, transformedRILModel, new HashSet<Feature>());
+		Assertions.assertEquals(1, coarseDfsResult.getTransitionSystem().size());
+		System.out.println(coarseDfsResult.getTime());
+		System.out.print(coarseDfsResult.getTransitionSystem().size());
+		System.out.println("(" + coarseDfsResult.getCollisions() + ")");
+
+	}
+	
+	@Test
     public void GIVEN_RebecaModel_WHEN_No_Error() throws ModelCheckingException, IOException {
 		String rebecaModel = 
 				"""
@@ -78,15 +116,6 @@ public class CoreRebecaModelsTest {
 						}
 					
 						msgsrv ping() {
-							//self.t = -t + 7;
-							//boolean b;
-							//b = true == false;
-							//Pong p = po;
-							//assertion(false);
-							int b = 2;
-							b = ?(2, 4, 3+5) + 4;
-							if(true)
-								t = t;
 							po.pong();
 						}
 					}
@@ -95,7 +124,7 @@ public class CoreRebecaModelsTest {
 							Ping pi;
 						}
 						Pong(int j) {
-							pong();
+							//pong();
 						}
 						msgsrv pong() {
 							pi.ping();
@@ -120,27 +149,13 @@ public class CoreRebecaModelsTest {
         
 
 		printRILModel(transformedRILModel);
-//		TransparentActorModelCheckingResult dfsResult = dfsModelChecker.modelcheck(compiledRebecaFile, transformedRILModel);
-//
-//		TransparentActorModelCheckingResult bfsResult = fineGrainedBFSModelChecker.modelcheck(compiledRebecaFile, transformedRILModel);
-//
-//		Assertions.assertEquals(dfsResult.getTransitionSystem().size(),
-//				bfsResult.getTransitionSystem().size());
 		
-		TransparentActorModelCheckingResult coarseDfsResult = coarseGrainedDFSModelChecker.modelcheck(compiledRebecaFile, transformedRILModel);
-//		coreRebecaModelChecker.modelCheck(model, modelCheckerSetting);
-//
-//		if(!exceptionContainer.exceptionsIsEmpty())
-//			System.out.println(exceptionContainer);
-//
-//		Assertions.assertTrue(exceptionContainer.exceptionsIsEmpty());
-//
-//		StateSpace<State<? extends BaseActorState<?>>> stateSpace = coreRebecaModelChecker.getStateSpace();
-//		State<ActorState> initialState = (State<ActorState>) stateSpace.getInitialState();
-//		StateSpaceUtil.printStateSpace(initialState,
-//				new PrintStream(new FileOutputStream(new File(policy + filename))));
-//
-//		Assertions.assertEquals(statespaceSize, stateSpace.size());
+		TransparentActorModelCheckingResult coarseDfsResult = fineGrainedDFSModelChecker.modelcheck(compiledRebecaFile, transformedRILModel, new HashSet<Feature>());
+		Assertions.assertEquals(29, coarseDfsResult.getTransitionSystem().size());
+		System.out.println(coarseDfsResult.getTime());
+		System.out.print(coarseDfsResult.getTransitionSystem().size());
+		System.out.println("(" + coarseDfsResult.getCollisions() + ")");
+
 	}
 
 	@ParameterizedTest
@@ -160,7 +175,7 @@ public class CoreRebecaModelsTest {
 
 //		printRILModel(transformedRILModel);
 		
-		TransparentActorModelCheckingResult coarseDfsResult = coarseGrainedDFSModelChecker.modelcheck(compiledRebecaFile, transformedRILModel);
+		TransparentActorModelCheckingResult coarseDfsResult = coarseGrainedDFSModelChecker.modelcheck(compiledRebecaFile, transformedRILModel, new HashSet<Feature>());
 		Assertions.assertEquals(statespaceSize, coarseDfsResult.getTransitionSystem().size());
 		System.out.println(coarseDfsResult.getTime());
 		System.out.print(coarseDfsResult.getTransitionSystem().size());
@@ -180,9 +195,9 @@ public class CoreRebecaModelsTest {
 	
 	protected static Stream<Arguments> philosophers() {
 	    return Stream.of(
-	    		Arguments.arguments(DiningPhilosophersSourceCodes.TWO_PHILOSOPHERS, 106)
-	    		, Arguments.arguments(DiningPhilosophersSourceCodes.THREE_PHILOSOPHERS, 1472)
-	    		, Arguments.arguments(DiningPhilosophersSourceCodes.FOUR_PHILOSOPHERS, 18054)
+	    		Arguments.arguments(DiningPhilosophersSourceCodes.TWO_PHILOSOPHERS, 105)
+	    		, Arguments.arguments(DiningPhilosophersSourceCodes.THREE_PHILOSOPHERS, 1471)
+	    		, Arguments.arguments(DiningPhilosophersSourceCodes.FOUR_PHILOSOPHERS, 18053)
 //	    		, Arguments.arguments(DiningPhilosophersSourceCodes.FIVE_PHILOSOPHERS, 214108)
 	    );
 	}

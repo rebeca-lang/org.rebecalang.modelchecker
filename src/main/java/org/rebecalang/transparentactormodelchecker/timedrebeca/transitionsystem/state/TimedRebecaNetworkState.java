@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 
 import org.rebecalang.compiler.utils.Pair;
-import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractActorState;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractMessageState;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractNetworkState;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.util.CloningRepository;
 
@@ -49,7 +49,7 @@ public class TimedRebecaNetworkState extends AbstractNetworkState implements Ser
 			}			
 		}
 		ActorReceivingBucket receiverMessages = 
-				timeBucket.getReceiverMessages(message.getReceiver());
+				timeBucket.getReceiverMessages(message.getReceiverId());
 		receiverMessages.add(message);
 	}
 
@@ -157,6 +157,16 @@ public class TimedRebecaNetworkState extends AbstractNetworkState implements Ser
 		}
 		return clonedNetworkState;
 	}
+	@Override
+	public boolean hasMessage() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	@Override
+	public void addMessage(AbstractMessageState message) {
+		// TODO Auto-generated method stub
+		
+	}
 }
 
 class TimeBucket implements Cloneable {
@@ -168,12 +178,12 @@ class TimeBucket implements Cloneable {
 		messages = new HashMap<Integer, ActorReceivingBucket>();
 	}
 
-	public ActorReceivingBucket getReceiverMessages(AbstractActorState actor) {
-		if(messages.containsKey(actor.getId()))
-			return messages.get(actor.getId());
+	public ActorReceivingBucket getReceiverMessages(int actorID) {
+		if(messages.containsKey(actorID))
+			return messages.get(actorID);
 		else {
 			ActorReceivingBucket bucket = new ActorReceivingBucket();
-			messages.put(actor.getId(), bucket);
+			messages.put(actorID, bucket);
 			return bucket;
 		}
 	}
@@ -290,7 +300,7 @@ class ActorReceivingBucket implements Cloneable {
 		return new Pair<Boolean, Integer>(true, shift);
 	}
 	public void add(TimedRebecaMessageState message) {
-		int receiverID = message.getReceiver().getId();
+		int receiverID = message.getReceiverId();
 		if(!sentMessages.containsKey(receiverID))
 			sentMessages.put(receiverID, new ArrayList<TimedRebecaMessageState>());
 		sentMessages.get(receiverID).add(message);

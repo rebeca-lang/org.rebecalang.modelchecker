@@ -212,7 +212,8 @@ public abstract class ModelChecker {
         stateSpace.addInitialState(initialState);
     }
 
-    private void callConstructorsOfActors(
+    @SuppressWarnings("unused")
+	private void callConstructorsOfActors(
             RILModel transformedRILModel,
             State<? extends BaseActorState<?>> initialState,
             List<MainRebecDefinition> mainRebecDefinitions,
@@ -363,7 +364,8 @@ public abstract class ModelChecker {
         return baseActorState.getName() + "." + executingMessageName;
     }
 
-    protected State<? extends BaseActorState<?>> cloneState(State<? extends BaseActorState<?>> currentState) {
+    @SuppressWarnings("unchecked")
+	protected State<? extends BaseActorState<?>> cloneState(State<? extends BaseActorState<?>> currentState) {
         List<Pair<String, State<? extends BaseActorState<?>>>> childStates = (List<Pair<String, State<? extends BaseActorState<?>>>>) (List<?>) currentState.getChildStates();
         List<Pair<String, State<? extends BaseActorState<?>>>> parentStates = (List<Pair<String, State<? extends BaseActorState<?>>>>) (List<?>) currentState.getParentStates();
         currentState.clearLinks();

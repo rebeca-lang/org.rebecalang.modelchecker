@@ -33,6 +33,7 @@ public class CoreRebecaModelChecker extends ModelChecker {
 		return new ActorState();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected void doModelChecking(
 			RILModel transformedRILModel
@@ -73,6 +74,7 @@ public class CoreRebecaModelChecker extends ModelChecker {
 		return initialState;
 	}
 
+	@SuppressWarnings("unchecked")
 	private State<ActorState> executeNewState(
 			State<ActorState> currentState,
 			ActorState actorState,

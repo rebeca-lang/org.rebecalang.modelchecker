@@ -2,11 +2,9 @@ package org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem
 
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.Map.Entry;
 
 import org.rebecalang.compiler.utils.Pair;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractMessageState;
-import org.rebecalang.transparentactormodelchecker.abstractrebeca.util.CloningRepository;
 
 @SuppressWarnings("serial")
 public class TimedRebecaMessageState extends AbstractMessageState implements Serializable, Cloneable {
@@ -43,16 +41,9 @@ public class TimedRebecaMessageState extends AbstractMessageState implements Ser
 	
 	public TimedRebecaMessageState clone() {
 		TimedRebecaMessageState clonedMessageState = new TimedRebecaMessageState();
-		if(this.sender != null)
-			clonedMessageState.sender = this.sender.clone();
-		clonedMessageState.receiver = this.receiver.clone();
-		clonedMessageState.name = this.name;
-		
-		HashMap<String, Object> parameters = new HashMap<String, Object>();
-		for(Entry<String, Object> entry : this.parameters.entrySet()) {
-			parameters.put(entry.getKey(), CloningRepository.cloneObject(entry.getValue()));
-		}
-		clonedMessageState.parameters = parameters;
+		clone(clonedMessageState);
+		clonedMessageState.arrival = this.arrival;
+		clonedMessageState.deadline = this.deadline;
 		
 		return clonedMessageState;
 	}

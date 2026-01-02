@@ -1,5 +1,9 @@
 package org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.state;
 
+import static org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.state.TimedActorScope.TIME_VARIABLE_NAME;
+import static org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.state.TimedRebecaMessageState.FALSE;
+import static org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.state.TimedRebecaMessageState.TRUE;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -9,28 +13,27 @@ import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.Type;
 import org.rebecalang.compiler.utils.CodeCompilationException;
 import org.rebecalang.compiler.utils.Pair;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractActorState;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractMessageState;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.ActorScope;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.util.CloningRepository;
 
-import static org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.state.TimedRebecaMessageState.FALSE;
-import static org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.state.TimedRebecaMessageState.TRUE;
-import static org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.state.TimedActorScope.TIME_VARIABLE_NAME;
 @SuppressWarnings("serial")
 public class TimedRebecaActorState extends AbstractActorState implements Serializable, Cloneable {
 
-	protected ArrayList<TimedRebecaMessageState> queue;
+	protected ArrayList<TimedRebecaMessageState> bag;
 
 	public TimedRebecaActorState(int id) {
 		super(id);
-		queue = new ArrayList<TimedRebecaMessageState>();
+		bag = new ArrayList<TimedRebecaMessageState>();
 	}
 	
-	public TimedRebecaMessageState getFirstMessage() {
-		return queue.remove(0);
+	@Override
+	public TimedRebecaMessageState getEnableMessage() {
+		return bag.isEmpty() ? null : bag.remove(0);
 	}
 
-	public void receiveMessage(TimedRebecaMessageState newMessage) {
-		queue.add(newMessage);
+	public void receiveMessage(AbstractMessageState newMessage) {
+		bag.add((TimedRebecaMessageState) newMessage);
 	}
 
 	public String toString() {
@@ -39,26 +42,21 @@ public class TimedRebecaActorState extends AbstractActorState implements Seriali
 	public String deepToString() {
 		String result = super.deepToString();
 		result = result.substring(0, result.length() - 1);
-		return result + ",\n queue:(" + queue + ")]";
+		return result + ",\n bag:(" + bag + ")]";
 	}
 
-	public void movePCtoTheNextInstruction() {
-		Pair<String, Integer> pc = getPC();
-		pc.setSecond(pc.getSecond() + 1);
-	}
-
-	public static TimedRebecaActorState createTempTimedRebecaActorState() {
+	private static TimedRebecaActorState createTempTimedRebecaActorState() {
 		return new TimedRebecaActorState(-1);
 	}
 
-	public static TimedRebecaActorState createTempCoreRebecaActorState(Type type) {
+	private static TimedRebecaActorState createTempTimedRebecaActorState(Type type) {
 		TimedRebecaActorState temp = createTempTimedRebecaActorState();
 		try {
 			BaseClassDeclaration metaData = type.getTypeSystem().getMetaData(type);
 			if(metaData instanceof ReactiveClassDeclaration) {
 				ReactiveClassDeclaration rcd = (ReactiveClassDeclaration) metaData;
-				temp.addVariablesToScope(rcd.getStatevars());
-				temp.addVariablesToScope(rcd.getKnownRebecs());
+				temp.addFieldsVariablesToScope(rcd.getStatevars());
+				temp.addFieldsVariablesToScope(rcd.getKnownRebecs());
 				temp.addVariableToScope("self", temp);
 			}
 		} catch (CodeCompilationException e) {
@@ -70,7 +68,7 @@ public class TimedRebecaActorState extends AbstractActorState implements Seriali
 	public int deepHashCode() {
 		final int prime = 31;
 		int result = super.deepHashCode();
-		result = prime * result + ((queue == null) ? 0 : queue.hashCode());
+		result = prime * result + ((bag == null) ? 0 : bag.hashCode());
 		return result;
 	}
 	
@@ -80,10 +78,10 @@ public class TimedRebecaActorState extends AbstractActorState implements Seriali
 		if(!super.deepEquals(obj))
 			return false;
 		TimedRebecaActorState other = (TimedRebecaActorState) obj;
-		if (queue == null) {
-			if (other.queue != null)
+		if (bag == null) {
+			if (other.bag != null)
 				return false;
-		} else if (!queue.equals(other.queue))
+		} else if (!bag.equals(other.bag))
 			return false;
 		return true;
 	}
@@ -94,15 +92,15 @@ public class TimedRebecaActorState extends AbstractActorState implements Seriali
 			return actor;
 		TimedRebecaActorState clonedState = new TimedRebecaActorState(this.id);
 		CloningRepository.addActor(clonedState);
-		clonedState.queue = CloningRepository.cloneArrayList(this.queue);
+		clonedState.bag = CloningRepository.cloneArrayList(this.bag);
 		clonedState.priority = this.priority;
 		clonedState.rilModel = this.rilModel;
 		clonedState.scope = this.scope.clone();
 		return clonedState;
 	}
 
-	public boolean messageQueueIsEmpty() {
-		return queue.isEmpty();
+	public boolean bagIsEmpty() {
+		return bag.isEmpty();
 	}
 	
 	public Pair<Boolean, Integer> shiftEquals(TimedRebecaActorState other) {
@@ -111,14 +109,14 @@ public class TimedRebecaActorState extends AbstractActorState implements Seriali
 		int shift = otherTime - thisTime;
 		if(!this.deepEquals(other))
 			return FALSE;
-		if(this.queue.size() != other.queue.size())
+		if(this.bag.size() != other.bag.size())
 			return FALSE;
-		if(this.queue.size() == 0)
+		if(this.bag.size() == 0)
 			return TRUE;
 		
-		for(int cnt = 0; cnt < this.queue.size(); cnt++) {
+		for(int cnt = 0; cnt < this.bag.size(); cnt++) {
 			Pair<Boolean, Integer> result = 
-					this.queue.get(cnt).shiftEquals(other.queue.get(cnt));
+					this.bag.get(cnt).shiftEquals(other.bag.get(cnt));
 			if(!result.getFirst())
 				return FALSE;
 			if(shift != result.getSecond())
@@ -130,5 +128,24 @@ public class TimedRebecaActorState extends AbstractActorState implements Seriali
 	@Override
 	public ActorScope getNewActorScope() {
 		return new TimedActorScope();
+	}
+
+	@Override
+	public boolean isEnable() {
+		return hasVariableInScope(AbstractActorState.PC) || !bag.isEmpty();
+	}
+
+	@Override
+	public AbstractMessageState getNewMessageState() {
+		return new TimedRebecaMessageState();
+	}
+
+	@Override
+	public AbstractActorState createNewActorState(Type type) {
+		return createTempTimedRebecaActorState(type);
+	}
+
+	public boolean messageQueueIsEmpty() {
+		return bag.isEmpty();
 	}
 }

@@ -4,6 +4,7 @@ public class TransparentActorModelCheckingResult {
 
 	public static final String DEADLOCK = "Deadlock";
 	public static final String SATISFIED = "Satisfied";
+	public static final String INTERNAL_ERROR = "Internal Error";
 	
 	private long time;
 	private String message;
