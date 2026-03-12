@@ -13,12 +13,11 @@ import org.rebecalang.transparentactormodelchecker.TransparentActorTransitionSys
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.Feature;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.ModelCheckingException;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.TransparentActorAbstractModelChecker;
-import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.action.Action;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.compositionlevelrule.CompositionLevelExecuteStatementRule;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.compositionlevelrule.CompositionLevelNetworkDeliveryRule;
-import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.compositionlevelrule.CompositionLevelTakeMessageRule;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractActorState;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractSystemState;
+import org.rebecalang.transparentactormodelchecker.corerebeca.sos.compositionlevelrule.CoreRebecaCompositionLevelTakeMessageRule;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.CoreRebecaTransitionSystem;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaActorState;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaSystemState;
@@ -36,11 +35,11 @@ public class TransparentActorCoreRebecaCoarseGrainedDFSModelChecker extends Tran
 	CompositionLevelExecuteStatementRule executeStatementRule;
 	
 	@Autowired
+	@Qualifier("CORE_REBECA")
 	CompositionLevelNetworkDeliveryRule networkDeliveryRule;
 	
 	@Autowired
-	@Qualifier("CORE_REBECA")
-	CompositionLevelTakeMessageRule takeMessageSOSRule;
+	CoreRebecaCompositionLevelTakeMessageRule takeMessageSOSRule;
 
 	private boolean completeTransitionSystem;
 	
@@ -85,11 +84,11 @@ public class TransparentActorCoreRebecaCoarseGrainedDFSModelChecker extends Tran
 		
 		for(int cnt = 0; cnt < transitions.size(); cnt++) {
 			systemState = (CoreRebecaSystemState) transitions.getDestinationsStates().get(cnt);
-			Action action = transitions.getDestinationsActions().get(cnt);
+//			Action action = transitions.getDestinationsActions().get(cnt);
 			List<AbstractSystemState> destinations = new ArrayList<AbstractSystemState>();
 			destinations.add(systemState);
 			destinations.addAll(courseGraindExecuteMessageServer(systemState));
-			System.out.println(action.getActionLabel());
+//			System.out.println(action.getActionLabel());
 			deliverAllMessagesAndStore(state, destinations);
 //			if(transitionSystem.size() % 20 == 0)
 //				System.out.println(transitionSystem.size());
@@ -108,7 +107,7 @@ public class TransparentActorCoreRebecaCoarseGrainedDFSModelChecker extends Tran
 			} catch (RuleIsDisabledException exception) {}
 			Pair<Boolean, TransparentActorTransitionSystemState<CoreRebecaSystemState>> result = 
 					transitionSystem.addIfNotExists(state, systemState);
-			System.out.println("S" + state.getId() + " -> S" + result.getSecond().getId() + "[label=\"" + "\"]\n");//action.getActionLabel() +"\"]\n");
+//			System.out.println("S" + state.getId() + " -> S" + result.getSecond().getId() + "[label=\"" + "\"]\n");//action.getActionLabel() +"\"]\n");
 			if(result.getFirst())
 				dfs(result.getSecond());
 		}
@@ -151,6 +150,6 @@ public class TransparentActorCoreRebecaCoarseGrainedDFSModelChecker extends Tran
 
 	@Override
 	protected AbstractActorState createAbstractActorState() {
-		return new CoreRebecaActorState(CoreRebecaActorState.NO_ACTOR_ID);
+		return new CoreRebecaActorState(AbstractActorState.NO_ACTOR_ID);
 	}
 }

@@ -1,6 +1,6 @@
 package org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.state;
 
-import static org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.state.TimedActorScope.TIME_VARIABLE_NAME;
+import static org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.state.TimedActorScope.TIME_VARIABLE;
 import static org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.state.TimedRebecaMessageState.FALSE;
 import static org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.state.TimedRebecaMessageState.TRUE;
 
@@ -27,13 +27,19 @@ public class TimedRebecaActorState extends AbstractActorState implements Seriali
 		bag = new ArrayList<TimedRebecaMessageState>();
 	}
 	
-	@Override
-	public TimedRebecaMessageState getEnableMessage() {
-		return bag.isEmpty() ? null : bag.remove(0);
-	}
-
 	public void receiveMessage(AbstractMessageState newMessage) {
-		bag.add((TimedRebecaMessageState) newMessage);
+		TimedRebecaMessageState message = (TimedRebecaMessageState) newMessage;
+		bag.add(message);
+		for(int cnt = bag.size() - 2; cnt >= 0; cnt--) {
+			int arrival = bag.get(cnt).getArrival();
+			if(message.getArrival() > arrival)
+				break;
+			if(message.getArrival() == arrival)
+				if(message.getName().compareTo(bag.get(cnt).getName()) < 0)
+					break;
+			bag.set(cnt + 1, bag.get(cnt));
+			bag.set(cnt, message);
+		}
 	}
 
 	public String toString() {
@@ -57,7 +63,7 @@ public class TimedRebecaActorState extends AbstractActorState implements Seriali
 				ReactiveClassDeclaration rcd = (ReactiveClassDeclaration) metaData;
 				temp.addFieldsVariablesToScope(rcd.getStatevars());
 				temp.addFieldsVariablesToScope(rcd.getKnownRebecs());
-				temp.addVariableToScope("self", temp);
+				temp.addVariableToScope(AbstractActorState.SELF, temp);
 			}
 		} catch (CodeCompilationException e) {
 			e.printStackTrace();
@@ -104,15 +110,15 @@ public class TimedRebecaActorState extends AbstractActorState implements Seriali
 	}
 	
 	public Pair<Boolean, Integer> shiftEquals(TimedRebecaActorState other) {
-		int thisTime = (int) this.scope.getVariableValue(TIME_VARIABLE_NAME);
-		int otherTime = (int) other.scope.getVariableValue(TIME_VARIABLE_NAME);
+		int thisTime = (int) this.scope.getVariableValue(TIME_VARIABLE);
+		int otherTime = (int) other.scope.getVariableValue(TIME_VARIABLE);
 		int shift = otherTime - thisTime;
 		if(!this.deepEquals(other))
 			return FALSE;
 		if(this.bag.size() != other.bag.size())
 			return FALSE;
 		if(this.bag.size() == 0)
-			return TRUE;
+			return new Pair<Boolean, Integer>(true, shift);
 		
 		for(int cnt = 0; cnt < this.bag.size(); cnt++) {
 			Pair<Boolean, Integer> result = 
@@ -147,5 +153,31 @@ public class TimedRebecaActorState extends AbstractActorState implements Seriali
 
 	public boolean messageQueueIsEmpty() {
 		return bag.isEmpty();
+	}
+
+	public TimedRebecaMessageState getEnableMessage(int index) {
+		return bag.remove(index);
+	}
+	
+	public ArrayList<Integer> getEnableMessagesIndeces(int time) {
+		ArrayList<Integer> result = new ArrayList<Integer>();
+		for(int cnt = 0; cnt < bag.size(); cnt++) {
+			if(bag.get(cnt).getArrival() > time)
+				break;
+			boolean repeated = false;
+			for(int cnt2 = 0; cnt2 < cnt; cnt2++) {
+				if(bag.get(cnt2).getSenderId() == bag.get(cnt).getSenderId()) {
+					repeated = true;
+					break;
+				}
+			}
+			if(!repeated)
+				result.add(cnt);
+		}
+		return result;
+	}
+
+	public int getFirstMessageArrivalTime() {
+		return bag.get(0).arrival;
 	}
 }

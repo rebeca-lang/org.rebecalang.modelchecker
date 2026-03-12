@@ -100,18 +100,19 @@ public class TimedRebecaTransitionSystemTest {
     
     @Test
     public void testOneShiftEquivalent() {
-    	
-    	TimedRebecaMessageState firstMessage = otherActor1.getEnableMessage();
+    	Integer index = otherActor1.getEnableMessagesIndeces(10).get(0);
+    	TimedRebecaMessageState firstMessage = otherActor1.getEnableMessage(index);
     	firstMessage.setArrival(11);
     	firstMessage.setDeadline(21);
     	otherActor1.receiveMessage(firstMessage);
-    	otherActor1.setVariableValue(TimedActorScope.TIME_VARIABLE_NAME, 1);
+    	otherActor1.setVariableValue(TimedActorScope.TIME_VARIABLE, 1);
 
-    	firstMessage = otherActor2.getEnableMessage();
+    	index = otherActor2.getEnableMessagesIndeces(20).get(0);
+    	firstMessage = otherActor2.getEnableMessage(index);
     	firstMessage.setArrival(21);
     	firstMessage.setDeadline(31);
     	otherActor2.receiveMessage(firstMessage);
-    	otherActor2.setVariableValue(TimedActorScope.TIME_VARIABLE_NAME, 1);
+    	otherActor2.setVariableValue(TimedActorScope.TIME_VARIABLE, 1);
 
     	Pair<Boolean, Integer> result = initialState.shiftEquals(otherState);
     	
@@ -122,9 +123,9 @@ public class TimedRebecaTransitionSystemTest {
     @Test
 	public void testTwoShiftEquivalentSystemStates() {
     	TimedRebecaActorState actor1 = new TimedRebecaActorState(0);
-    	actor1.setVariableValue(TimedActorScope.TIME_VARIABLE_NAME, 1);
+    	actor1.setVariableValue(TimedActorScope.TIME_VARIABLE, 1);
     	TimedRebecaActorState actor2 = new TimedRebecaActorState(1);
-    	actor2.setVariableValue(TimedActorScope.TIME_VARIABLE_NAME, 1);
+    	actor2.setVariableValue(TimedActorScope.TIME_VARIABLE, 1);
     	
     	TimedRebecaMessageState message1 = new TimedRebecaMessageState();
 		message1.setName("m1");

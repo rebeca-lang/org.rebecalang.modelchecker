@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import org.rebecalang.compiler.utils.Pair;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.action.MessageAction;
-import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.networklevelrule.NetworkLevelDeliverMessage;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.networklevelrule.NetworkLevelDeliverMessageRule;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractNetworkState;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaMessageState;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaNetworkState;
@@ -13,7 +13,7 @@ import org.rebecalang.transparentactormodelchecker.transitionsystem.Transition;
 import org.springframework.stereotype.Component;
 
 @Component
-public class CoreRebecaNetworkLevelDeliverMessage extends NetworkLevelDeliverMessage {
+public class CoreRebecaNetworkLevelDeliverMessageRule extends NetworkLevelDeliverMessageRule {
 
 	@SuppressWarnings("unchecked")
 	@Override

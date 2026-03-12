@@ -22,8 +22,8 @@ public class CoreRebecaActorState extends AbstractActorState implements Serializ
 		queue = new ArrayList<CoreRebecaMessageState>();
 	}
 	
-	@Override
-	public CoreRebecaMessageState getEnableMessage() {
+//	@Override
+	public CoreRebecaMessageState getEnabledMessage() {
 		return queue.isEmpty() ? null : queue.remove(0);
 	}
 

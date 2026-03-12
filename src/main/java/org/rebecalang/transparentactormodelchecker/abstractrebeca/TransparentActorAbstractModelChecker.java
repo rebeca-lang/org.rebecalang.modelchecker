@@ -1,7 +1,6 @@
 package org.rebecalang.transparentactormodelchecker.abstractrebeca;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -29,7 +28,8 @@ import org.springframework.stereotype.Component;
 @Component
 public abstract class TransparentActorAbstractModelChecker<T extends AbstractSystemState> {
 
-	protected HashMap<String, String> methodLookupTable;
+//	protected HashMap<String, String> methodLookupTable;
+	protected MethodLookup methodLookup;
 	protected Pair<RebecaModel,SymbolTable> compiledRebecaFile;
 	protected RILModel rilModel;
 	
@@ -38,11 +38,6 @@ public abstract class TransparentActorAbstractModelChecker<T extends AbstractSys
 	protected abstract CompositionLevelExecuteStatementRule getCompositionLevelExecuteStatementRule();
 	
 	protected abstract CompositionLevelNetworkDeliveryRule getCompositionLevelNetworkDeliveryRule();
-
-	//	@Autowired
-//	protected CompositionLevelExecuteStatementRule compositionLevelExecuteStatementSOSRule;
-//	@Autowired
-//	protected CoreRebecaCompositionLevelNetworkDeliverySOSRule compositionLevelNetworkDeliverySOSRule;
 
 	protected abstract T createSystemState();
 
@@ -105,27 +100,27 @@ public abstract class TransparentActorAbstractModelChecker<T extends AbstractSys
 		instructions.add(instructions.size() - 1, lastStatement);
 	}
 
-	private void initializeMethodBindingTable() {
+	protected void initializeMethodBindingTable() {
 		RebecaModel rebecaModel = compiledRebecaFile.getFirst();
 		
-		methodLookupTable = new HashMap<String, String>();
+		methodLookup = new MethodLookup();
 		List<ReactiveClassDeclaration> rcds = rebecaModel.getRebecaCode().getReactiveClassDeclaration();
 		for(ReactiveClassDeclaration rcd : rcds) {
 			for(MethodDeclaration md : rcd.getSynchMethods()) {
 				String methodName = RILUtilities.computeMethodName(rcd, md);
-				methodLookupTable.put(methodName, methodName);
+				methodLookup.addMethod(methodName, methodName);
 			}
 			for(MethodDeclaration md : rcd.getMsgsrvs()) {
 				String methodName = RILUtilities.computeMethodName(rcd, md);
-				methodLookupTable.put(methodName, methodName);
+				methodLookup.addMethod(methodName, methodName);
 			}
 			for(MethodDeclaration md : rcd.getConstructors()) {
 				String methodName = RILUtilities.computeMethodName(rcd, md);
-				methodLookupTable.put(methodName, methodName);
+				methodLookup.addMethod(methodName, methodName);
 			}
 		}
 		CompositionLevelExecuteStatementRule compositionLevelExecuteStatementRule = getCompositionLevelExecuteStatementRule();
-		compositionLevelExecuteStatementRule.setMethodLookupTable(methodLookupTable);
+		compositionLevelExecuteStatementRule.setMethodLookup(methodLookup);
 	}
 
 	public abstract TransparentActorModelCheckingResult modelcheck(Pair<RebecaModel,SymbolTable> compiledRebecaFile, RILModel rilModel, Set<Feature> features);

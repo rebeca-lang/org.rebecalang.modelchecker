@@ -13,9 +13,9 @@ import org.rebecalang.transparentactormodelchecker.abstractrebeca.Feature;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.TransparentActorAbstractModelChecker;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.compositionlevelrule.CompositionLevelExecuteStatementRule;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.compositionlevelrule.CompositionLevelNetworkDeliveryRule;
-import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.compositionlevelrule.CompositionLevelTakeMessageRule;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractActorState;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractSystemState;
+import org.rebecalang.transparentactormodelchecker.corerebeca.sos.compositionlevelrule.CoreRebecaCompositionLevelTakeMessageRule;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.CoreRebecaTransitionSystem;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaActorState;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaSystemState;
@@ -33,11 +33,11 @@ public class TransparentActorCoreRebecaFineGrainedDFSModelChecker extends Transp
 	CompositionLevelExecuteStatementRule executeStatementRule;
 	
 	@Autowired
+	@Qualifier("CORE_REBECA")
 	CompositionLevelNetworkDeliveryRule networkDeliveryRule;
 	
 	@Autowired
-	@Qualifier("CORE_REBECA")
-	CompositionLevelTakeMessageRule takeMessageSOSRule;
+	CoreRebecaCompositionLevelTakeMessageRule takeMessageSOSRule;
 	
 	public TransparentActorModelCheckingResult modelcheck(Pair<RebecaModel,SymbolTable> compiledRebecaFile, RILModel rilModel, Set<Feature> features) {
 		this.compiledRebecaFile = compiledRebecaFile;

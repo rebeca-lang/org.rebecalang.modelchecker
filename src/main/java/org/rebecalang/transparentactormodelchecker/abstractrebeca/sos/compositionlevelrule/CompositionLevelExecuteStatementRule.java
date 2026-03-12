@@ -1,10 +1,10 @@
 package org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.compositionlevelrule;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.MethodLookup;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.action.Action;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.action.MessageAction;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.action.NewInstanceAction;
@@ -100,8 +100,8 @@ public class CompositionLevelExecuteStatementRule extends AbstractSOSRule<Abstra
 		return (transition.getDestinationsActions().get(0) instanceof MessageAction);
 	}
 
-	public void setMethodLookupTable(HashMap<String, String> methodLookupTable) {
-		executeStatementSOSRule.setMethodLookupTable(methodLookupTable);
+	public void setMethodLookup(MethodLookup methodLookup) {
+		executeStatementSOSRule.setMethodLookup(methodLookup);
 		
 	}
 }

@@ -18,7 +18,9 @@ import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.Variable;
 public abstract class AbstractActorState implements Serializable, Cloneable {
 
 	public transient final static String PC = "$PC$";
-	protected transient final static Variable PC_VARIABLE = new Variable("$PC$");
+	protected transient final static Variable PC_VARIABLE = new Variable(PC);
+	public transient final static String SELF = "self";
+	public transient final static Variable SELF_VARIABLE = new Variable(SELF);
 	public transient final static Integer MIN_PRIORITY = Integer.MAX_VALUE - 1;
 	public transient final static int NO_ACTOR_ID = -1;
 
@@ -73,6 +75,9 @@ public abstract class AbstractActorState implements Serializable, Cloneable {
 		return (Pair<String, Integer>) scope.getVariableValue(PC_VARIABLE);
 	}
 
+	public boolean hasPC() {
+		return scope.hasVariableInScope(PC);
+	}
 	public void setPC(Pair<String, Integer> pc) {
 		scope.setVariableValue(PC_VARIABLE, pc);
 	}
@@ -199,7 +204,7 @@ public abstract class AbstractActorState implements Serializable, Cloneable {
 	
 	public abstract ActorScope getNewActorScope();
 	
-	public abstract AbstractMessageState getEnableMessage();
+//	public abstract AbstractMessageState getEnableMessage();
 	
 	public abstract AbstractMessageState getNewMessageState();
 	

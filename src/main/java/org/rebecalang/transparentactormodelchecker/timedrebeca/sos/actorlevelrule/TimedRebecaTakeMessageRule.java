@@ -1,8 +1,12 @@
 package org.rebecalang.transparentactormodelchecker.timedrebeca.sos.actorlevelrule;
 
+import java.util.ArrayList;
+
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.action.TakeMessageAction;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.actorlevelrule.TakeMessageRule;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractActorState;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.util.CloningRepository;
+import org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.state.TimedActorScope;
 import org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.state.TimedRebecaActorState;
 import org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.state.TimedRebecaMessageState;
 import org.rebecalang.transparentactormodelchecker.transitionsystem.RuleIsDisabledException;
@@ -17,15 +21,23 @@ public class TimedRebecaTakeMessageRule extends TakeMessageRule {
 		TimedRebecaActorState timedRebecaActorState = (TimedRebecaActorState)state;
 		if(timedRebecaActorState.messageQueueIsEmpty())
 			throw new RuleIsDisabledException();
-		TimedRebecaMessageState message = timedRebecaActorState.getEnableMessage();
+		Transition<AbstractActorState> transition = new Transition<AbstractActorState>();
 		
-		prepareScope(state, message);
-
-		return Transition.createDeterministicTransition(new TakeMessageAction(message), state);
-	}
-	
-	@Override
-	public boolean isEnabled(AbstractActorState source) {
-		return !((TimedRebecaActorState)source).messageQueueIsEmpty();
+		int time = (int) timedRebecaActorState.getVariableValue(TimedActorScope.TIME_VARIABLE);
+		ArrayList<Integer> indeces = timedRebecaActorState.getEnableMessagesIndeces(time);
+		
+		for(int cnt = 0; cnt < indeces.size(); cnt++) {
+			Integer index = indeces.get(cnt);
+			TimedRebecaMessageState message = timedRebecaActorState.getEnableMessage(index);
+			prepareScope(timedRebecaActorState, message);
+			transition.addDestination(new TakeMessageAction(message), timedRebecaActorState);
+			if(cnt != indeces.size() - 1) {
+				CloningRepository.resetRepository();
+				timedRebecaActorState = (TimedRebecaActorState) base.clone();
+			}
+		}
+		if(transition.isEmpty())
+			throw new RuleIsDisabledException();
+		return transition;
 	}
 }

@@ -7,9 +7,12 @@ import org.rebecalang.compiler.utils.Pair;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractActorState;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractMessageState;
 import org.rebecalang.transparentactormodelchecker.transitionsystem.AbstractSOSRule;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Component
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public abstract class TakeMessageRule extends AbstractSOSRule<AbstractActorState> {
 
 	protected void prepareScope(AbstractActorState state, AbstractMessageState message){
@@ -23,5 +26,4 @@ public abstract class TakeMessageRule extends AbstractSOSRule<AbstractActorState
 		state.addVariableToScope(AbstractActorState.PC, pc);
 	}
 
-	public abstract boolean isEnabled(AbstractActorState source);
 }

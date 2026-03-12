@@ -5,6 +5,6 @@ import org.rebecalang.transparentactormodelchecker.transitionsystem.AbstractSOSR
 import org.springframework.stereotype.Component;
 
 @Component
-public abstract class NetworkLevelDeliverMessage extends AbstractSOSRule<AbstractNetworkState> {
+public abstract class NetworkLevelDeliverMessageRule extends AbstractSOSRule<AbstractNetworkState> {
 
 }

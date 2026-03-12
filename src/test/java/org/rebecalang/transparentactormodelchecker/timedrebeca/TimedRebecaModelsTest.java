@@ -3,8 +3,11 @@ package org.rebecalang.transparentactormodelchecker.timedrebeca;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.rebecalang.compiler.CompilerConfig;
 import org.rebecalang.compiler.modelcompiler.RebecaModelCompiler;
 import org.rebecalang.compiler.modelcompiler.SymbolTable;
@@ -14,17 +17,15 @@ import org.rebecalang.compiler.utils.CoreVersion;
 import org.rebecalang.compiler.utils.ExceptionContainer;
 import org.rebecalang.compiler.utils.FileUtils;
 import org.rebecalang.compiler.utils.Pair;
-
+import org.rebecalang.modelchecker.ModelCheckerConfig;
+import org.rebecalang.modelchecker.corerebeca.ModelCheckingException;
 import org.rebecalang.modeltransformer.ModelTransformerConfig;
 import org.rebecalang.modeltransformer.ril.RILModel;
 import org.rebecalang.modeltransformer.ril.Rebeca2RILModelTransformer;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.InstructionBean;
-
 import org.rebecalang.transparentactormodelchecker.TransparentActorModelCheckerConfig;
+import org.rebecalang.transparentactormodelchecker.TransparentActorModelCheckingResult;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.Feature;
-import org.rebecalang.modelchecker.ModelCheckerConfig;
-import org.rebecalang.modelchecker.corerebeca.ModelCheckingException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -49,56 +50,10 @@ public class TimedRebecaModelsTest {
     @Autowired
     TransparentActorTimedRebecaFTTSModelChecker fttsModelChecker;
     
-    @Test
-    public void GIVEN_RebecaModel_WHEN_No_Error() throws ModelCheckingException, IOException {
-		String rebecaModel = 
-				"""
-					reactiveclass Customer(3) {
-					    knownrebecs { Agent a; }
-					    statevars {
-							byte id;
-					    }
-					    Customer(byte myId) {
-					        id = myId;
-							self.try();
-					    }
-					    msgsrv try() {
-					    	a.requestTicket();
-					    }
-					    msgsrv ticketIssued() {
-					        self.try() after(30);
-					    }
-					}
-					reactiveclass Agent(10) {
-					    knownrebecs { TicketService ts; }
-					    msgsrv requestTicket() {
-					        ts.requestTicket((Customer)sender) deadline(24);
-					    }
-					    msgsrv ticketIssued(Customer customer) {
-							customer.ticketIssued();
-					    }
-					}
-					reactiveclass TicketService(10) {
-					    knownrebecs { Agent a; }
-					    statevars {
-					        int issueDelay;
-					    }
-					    TicketService(int myIssueDelay) {
-					        issueDelay = myIssueDelay;
-					    }
-					    msgsrv requestTicket(Customer customer) {
-					        delay(issueDelay);
-					        a.ticketIssued(customer);
-					    }
-					}
-					main {
-					    Agent a(ts):();
-					    TicketService ts(a):(2);
-					    Customer c1(a):(1);
-//					    Customer c2(a):(2);
-					}				
-				""";
-		File rebecaFile = FileUtils.createTempFile(rebecaModel);
+	@ParameterizedTest
+	@MethodSource("customers")
+    public void ticketService(String model, int statespaceSize) throws ModelCheckingException, IOException {
+		File rebecaFile = FileUtils.createTempFile(model);
 		
 		HashSet<CompilerExtension> extention = new HashSet<CompilerExtension>();
 		extention.add(CompilerExtension.TIMED_REBECA);
@@ -111,30 +66,19 @@ public class TimedRebecaModelsTest {
         RILModel transformedRILModel = rebeca2RILModelTransformer.transformModel(
         		compiledRebecaFile, extention, CoreVersion.CORE_2_3);
         
-        fttsModelChecker.modelcheck(compiledRebecaFile, transformedRILModel, new HashSet<Feature>());
+        TransparentActorModelCheckingResult result = 
+        		fttsModelChecker.modelcheck(compiledRebecaFile, transformedRILModel, new HashSet<Feature>());
+        System.out.println(result.getTransitionSystem().size());
         
-		printRILModel(transformedRILModel);
-//		TransparentActorModelCheckingResult dfsResult = dfsModelChecker.modelcheck(compiledRebecaFile, transformedRILModel);
-//
-//		TransparentActorModelCheckingResult bfsResult = fineGrainedBFSModelChecker.modelcheck(compiledRebecaFile, transformedRILModel);
-//
-//		Assertions.assertEquals(dfsResult.getTransitionSystem().size(),
-//				bfsResult.getTransitionSystem().size());
-		
-//		TransparentActorModelCheckingResult coarseDfsResult = coarseGrainedDFSModelChecker.modelcheck(compiledRebecaFile, transformedRILModel);
-//		coreRebecaModelChecker.modelCheck(model, modelCheckerSetting);
-//
-//		if(!exceptionContainer.exceptionsIsEmpty())
-//			System.out.println(exceptionContainer);
-//
-//		Assertions.assertTrue(exceptionContainer.exceptionsIsEmpty());
-//
-//		StateSpace<State<? extends BaseActorState<?>>> stateSpace = coreRebecaModelChecker.getStateSpace();
-//		State<ActorState> initialState = (State<ActorState>) stateSpace.getInitialState();
-//		StateSpaceUtil.printStateSpace(initialState,
-//				new PrintStream(new FileOutputStream(new File(policy + filename))));
-//
-//		Assertions.assertEquals(statespaceSize, stateSpace.size());
+//		printRILModel(transformedRILModel);
+	}
+	
+	protected static Stream<Arguments> customers() {
+	    return Stream.of(
+	    		Arguments.arguments(TicketServiceSourceCodes.ONE_CUSTOMER, 105)
+	    		, Arguments.arguments(TicketServiceSourceCodes.TWO_CUSTOMERS, 105)
+//	    		, Arguments.arguments(TicketServiceSourceCodes.THREE_CUSTOMERS, 105)
+	    );
 	}
 
 //	@ParameterizedTest

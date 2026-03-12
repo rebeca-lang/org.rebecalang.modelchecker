@@ -5,9 +5,12 @@ import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.Abst
 import org.rebecalang.transparentactormodelchecker.transitionsystem.AbstractSOSRule;
 import org.rebecalang.transparentactormodelchecker.transitionsystem.RuleIsDisabledException;
 import org.rebecalang.transparentactormodelchecker.transitionsystem.Transition;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Component
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ReceiveMessageRule extends AbstractSOSRule<AbstractActorState> {
 
 	@Override

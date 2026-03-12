@@ -24,9 +24,9 @@ import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.Variable;
 import org.rebecalang.transparentactormodelchecker.TransparentActorModelCheckerConfig;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.compositionlevelrule.CompositionLevelExecuteStatementRule;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.compositionlevelrule.CompositionLevelNetworkDeliveryRule;
-import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.compositionlevelrule.CompositionLevelTakeMessageRule;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractSystemState;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.ActivationRecord;
+import org.rebecalang.transparentactormodelchecker.corerebeca.sos.compositionlevelrule.CoreRebecaCompositionLevelTakeMessageRule;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaActorState;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaMessageState;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaNetworkState;
@@ -51,7 +51,7 @@ public class TransitionSystemSOSRulesTest {
 	
 	@Autowired
 	@Qualifier("CORE_REBECA")
-	CompositionLevelTakeMessageRule takeMessageRule;
+	CoreRebecaCompositionLevelTakeMessageRule takeMessageRule;
 	
 	@Autowired
 	CompositionLevelNetworkDeliveryRule networkDeliveryRule;

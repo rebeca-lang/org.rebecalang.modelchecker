@@ -1,7 +1,5 @@
 package org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.actorlevelrule;
 
-import java.util.HashMap;
-
 import org.rebecalang.modelchecker.corerebeca.RebecaRuntimeInterpreterException;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.AssignmentInstructionBean;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.DeclarationInstructionBean;
@@ -15,6 +13,7 @@ import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.PopARInstru
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.PushARInstructionBean;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.RebecInstantiationInstructionBean;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.ReturnInstructionBean;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.MethodLookup;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.actorlevelrule.statementlevelrule.AssignmentRule;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.actorlevelrule.statementlevelrule.ConditionalRule;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.actorlevelrule.statementlevelrule.EndMSGSrvRule;
@@ -31,9 +30,12 @@ import org.rebecalang.transparentactormodelchecker.transitionsystem.AbstractSOSR
 import org.rebecalang.transparentactormodelchecker.transitionsystem.RuleIsDisabledException;
 import org.rebecalang.transparentactormodelchecker.transitionsystem.Transition;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Component
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ExecuteStatementRule extends AbstractSOSRule<AbstractActorState> {
 
 	@Autowired
@@ -126,8 +128,8 @@ public class ExecuteStatementRule extends AbstractSOSRule<AbstractActorState> {
 		return source.hasVariableInScope(AbstractActorState.PC);
 	}
 
-	public void setMethodLookupTable(HashMap<String, String> methodLookupTable) {
-		methodCallSOSRule.setMethodLookupTable(methodLookupTable);
+	public void setMethodLookup(MethodLookup methodLookup) {
+		methodCallSOSRule.setMethodLookup(methodLookup);
 		
 	}
 

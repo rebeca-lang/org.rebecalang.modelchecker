@@ -17,14 +17,13 @@ public class CoreRebecaTakeMessageRule extends TakeMessageRule {
 		CoreRebecaActorState coreRebecaActorState = (CoreRebecaActorState)state;
 		if(coreRebecaActorState.messageQueueIsEmpty())
 			throw new RuleIsDisabledException();
-		CoreRebecaMessageState message = coreRebecaActorState.getEnableMessage();
+		CoreRebecaMessageState message = coreRebecaActorState.getEnabledMessage();
 		
 		prepareScope(state, message);
 
 		return Transition.createDeterministicTransition(new TakeMessageAction(message), state);
 	}
 	
-	@Override
 	public boolean isEnabled(AbstractActorState source) {
 		return !((CoreRebecaActorState)source).messageQueueIsEmpty() && !source.hasVariableInScope(AbstractActorState.PC);
 	}

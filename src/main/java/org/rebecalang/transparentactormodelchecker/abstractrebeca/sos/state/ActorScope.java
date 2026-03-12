@@ -159,7 +159,7 @@ public class ActorScope implements Serializable, Cloneable {
 	}
 	
 	public ActorScope clone() {
-		ActorScope clonedActorScope = new ActorScope();
+		ActorScope clonedActorScope = newActorScope();
 		clonedActorScope.scope = new ArrayList<ActivationRecord>();
 		clonedActorScope.scope.add(CloningRepository.cloneEnvironment(this.scope.get(0)));
 		for(int cnt = 1; cnt < this.scope.size(); cnt++) {
@@ -168,6 +168,10 @@ public class ActorScope implements Serializable, Cloneable {
 			clonedActorScope.scope.add(clonedAR);
 		}
 		return clonedActorScope;
+	}
+
+	protected ActorScope newActorScope() {
+		return new ActorScope();
 	}
 
 	public void popToReturn(Object value) {

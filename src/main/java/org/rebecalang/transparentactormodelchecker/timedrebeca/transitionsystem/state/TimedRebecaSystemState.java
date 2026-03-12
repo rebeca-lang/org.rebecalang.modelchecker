@@ -11,6 +11,7 @@ import org.rebecalang.compiler.utils.Pair;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractActorState;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractSystemState;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.util.CloningRepository;
+import org.rebecalang.transparentactormodelchecker.transitionsystem.RuleIsDisabledException;
 
 @SuppressWarnings("serial")
 public class TimedRebecaSystemState extends AbstractSystemState implements Serializable, Cloneable {
@@ -21,6 +22,29 @@ public class TimedRebecaSystemState extends AbstractSystemState implements Seria
 		super();
 		networkState = new TimedRebecaNetworkState();
 	}
+	
+	public int getEnablingTime() throws RuleIsDisabledException {
+		int executionTime = Integer.MAX_VALUE;
+		for(int actorId : this.getActorsIds()) {
+			executionTime = Math.min(executionTime, 
+//					takeMessageRule.getEnablingTime((TimedRebecaActorState) base.getActorState(actorId)));
+					getEnablingTime((TimedRebecaActorState)this.getActorState(actorId)));
+		}
+		if(executionTime == Integer.MAX_VALUE)
+			throw new RuleIsDisabledException();
+		return executionTime;
+	}
+	
+	public int getEnablingTime(TimedRebecaActorState source) {
+		if(source.bagIsEmpty() && !source.hasPC())
+			return Integer.MAX_VALUE;
+		int now = (int) source.getVariableValue(TimedActorScope.TIME_VARIABLE);
+		if(!source.hasPC())
+			return Math.max(source.getFirstMessageArrivalTime(), now);
+		else 
+			return now;
+	}
+
 
 	public Pair<Boolean, Integer> shiftEquals(Object obj) {
 		if(!super.equals(obj))

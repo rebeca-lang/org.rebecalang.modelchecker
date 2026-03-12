@@ -1,41 +1,42 @@
-package org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.compositionlevelrule;
+package org.rebecalang.transparentactormodelchecker.timedrebeca.sos.compositionlevel;
 
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.action.TakeMessageAction;
-import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.actorlevelrule.TakeMessageRule;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractActorState;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractMessageState;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractSystemState;
+import org.rebecalang.transparentactormodelchecker.timedrebeca.sos.actorlevelrule.TimedRebecaTakeMessageRule;
 import org.rebecalang.transparentactormodelchecker.transitionsystem.AbstractSOSRule;
 import org.rebecalang.transparentactormodelchecker.transitionsystem.RuleIsDisabledException;
 import org.rebecalang.transparentactormodelchecker.transitionsystem.Transition;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-public class CompositionLevelTakeMessageRule extends AbstractSOSRule<AbstractSystemState> {
+@Component
+public class TimedRebecaCompositionLevelTakeMessageRule extends AbstractSOSRule<AbstractSystemState> {
 
-	TakeMessageRule actorLevelTakeMessageRule;
+	@Autowired
+	TimedRebecaTakeMessageRule takeMessageRule;
 
-	public void setActorLevelTakeMessageRule(TakeMessageRule actorLevelTakeMessageRule) {
-		this.actorLevelTakeMessageRule = actorLevelTakeMessageRule;
-	}
-	
 	@Override
 	public Transition<AbstractSystemState> applyRule(AbstractSystemState base, AbstractSystemState state, Object... additional) throws RuleIsDisabledException {
 		Transition<AbstractSystemState> transitions = new Transition<AbstractSystemState>();
 
-		boolean firstRound = true;
+//		int executionTime = getEnablingTime(base);
+		
 		for(int actorId : base.getActorsIds()) {
-			if (actorLevelTakeMessageRule.isEnabled(base.getActorState(actorId))) {
-				if(!firstRound)
-					state = base.clone();
-				firstRound = false;
+			try {
 				AbstractActorState actorState = state.getActorState(actorId);
 				Transition<? extends AbstractActorState> result = 
-						actorLevelTakeMessageRule.applyRule(
+						takeMessageRule.applyRule(
 								base.getActorState(actorId), 
+//								actorState, executionTime);
 								actorState);
 				TakeMessageAction action = (TakeMessageAction) result.getDestinationsActions().get(0);
 				actorState.setVariableValue(AbstractMessageState.SENDER, 
 						state.getActorState(action.getMessage().getSenderId()));
 				transitions.addDestination(result.getDestinationsActions().get(0), state);
+				state = base.clone();
+			} catch(RuleIsDisabledException ride) {
 			}
 		}
 		
@@ -44,5 +45,6 @@ public class CompositionLevelTakeMessageRule extends AbstractSOSRule<AbstractSys
 		
 		return transitions;
 	}
+
 
 }

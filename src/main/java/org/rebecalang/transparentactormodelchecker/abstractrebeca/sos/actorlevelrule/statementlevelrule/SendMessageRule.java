@@ -11,7 +11,7 @@ import org.rebecalang.transparentactormodelchecker.transitionsystem.AbstractSOSR
 import org.rebecalang.transparentactormodelchecker.transitionsystem.Transition;
 import org.springframework.stereotype.Component;
 
-@Component
+//@Component
 public class SendMessageRule extends AbstractSOSRule<AbstractActorState>  {
 
 	@Override

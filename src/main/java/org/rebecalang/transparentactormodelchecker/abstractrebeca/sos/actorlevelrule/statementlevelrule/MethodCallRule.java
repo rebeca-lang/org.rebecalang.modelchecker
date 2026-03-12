@@ -1,11 +1,11 @@
 package org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.actorlevelrule.statementlevelrule;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import org.rebecalang.compiler.utils.Pair;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.MethodCallInstructionBean;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.Variable;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.MethodLookup;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.action.MethodCallAction;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractActorState;
 import org.rebecalang.transparentactormodelchecker.transitionsystem.AbstractSOSRule;
@@ -15,7 +15,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class MethodCallRule extends AbstractSOSRule<AbstractActorState> {
 
-	private HashMap<String, String> methodLookupTable;
+//	private HashMap<String, String> methodLookupTable;
+	private MethodLookup methodLookup;
 
 	@Override
 	public Transition<AbstractActorState> applyRule(
@@ -39,15 +40,15 @@ public class MethodCallRule extends AbstractSOSRule<AbstractActorState> {
 		for(Pair<String, Object>paramValue : paramValues) {
 			state.addVariableToScope(paramValue.getFirst(), paramValue.getSecond());
 		}
-		String methodName = methodLookupTable.get(mcib.getMethodName());
+		String methodName = methodLookup.resolveName(mcib.getMethodName());
 		state.addVariableToScope(AbstractActorState.PC, 
 				new Pair<String, Integer>(methodName, 0));
 		
 		return Transition.createDeterministicTransition(new MethodCallAction(methodName), state);
 	}
 
-	public void setMethodLookupTable(HashMap<String, String> methodLookupTable) {
-		this.methodLookupTable = methodLookupTable;
+	public void setMethodLookup(MethodLookup methodLookup) {
+		this.methodLookup = methodLookup;
 	}
 
 }
