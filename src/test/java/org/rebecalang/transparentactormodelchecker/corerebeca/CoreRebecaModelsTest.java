@@ -95,8 +95,7 @@ public class CoreRebecaModelsTest {
 		Assertions.assertEquals(1, coarseDfsResult.getTransitionSystem().size());
 		System.out.println(coarseDfsResult.getTime());
 		System.out.print(coarseDfsResult.getTransitionSystem().size());
-		System.out.println("(" + coarseDfsResult.getCollisions() + ")");
-
+		System.out.println("(" + coarseDfsResult.getTransitionSystem().getCollisions() + ")");
 	}
 	
 	@Test
@@ -154,7 +153,7 @@ public class CoreRebecaModelsTest {
 		Assertions.assertEquals(29, coarseDfsResult.getTransitionSystem().size());
 		System.out.println(coarseDfsResult.getTime());
 		System.out.print(coarseDfsResult.getTransitionSystem().size());
-		System.out.println("(" + coarseDfsResult.getCollisions() + ")");
+		System.out.println("(" + coarseDfsResult.getTransitionSystem().getCollisions() + ")");
 
 	}
 
@@ -174,12 +173,15 @@ public class CoreRebecaModelsTest {
         
 
 //		printRILModel(transformedRILModel);
-		
+//		CoreRebecaActorState.counter = 0;
+//		CoreRebecaSystemState.time = 0;
 		TransparentActorModelCheckingResult coarseDfsResult = coarseGrainedDFSModelChecker.modelcheck(compiledRebecaFile, transformedRILModel, new HashSet<Feature>());
 		Assertions.assertEquals(statespaceSize, coarseDfsResult.getTransitionSystem().size());
-		System.out.println(coarseDfsResult.getTime());
-		System.out.print(coarseDfsResult.getTransitionSystem().size());
-		System.out.println("(" + coarseDfsResult.getCollisions() + ")");
+		System.out.println("time: " + coarseDfsResult.getTime());
+		System.out.print("size: " + coarseDfsResult.getTransitionSystem().size());
+		System.out.println("(" + coarseDfsResult.getTransitionSystem().getCollisions() + ")");
+//		System.out.println(CoreRebecaSystemState.time);
+		System.out.println(".....................");
 	}
 	
 	private void printRILModel(RILModel transformedRILModel) {
@@ -198,7 +200,7 @@ public class CoreRebecaModelsTest {
 	    		Arguments.arguments(DiningPhilosophersSourceCodes.TWO_PHILOSOPHERS, 105)
 	    		, Arguments.arguments(DiningPhilosophersSourceCodes.THREE_PHILOSOPHERS, 1471)
 	    		, Arguments.arguments(DiningPhilosophersSourceCodes.FOUR_PHILOSOPHERS, 18053)
-//	    		, Arguments.arguments(DiningPhilosophersSourceCodes.FIVE_PHILOSOPHERS, 214108)
+	    		, Arguments.arguments(DiningPhilosophersSourceCodes.FIVE_PHILOSOPHERS, 214107)
 	    );
 	}
 }

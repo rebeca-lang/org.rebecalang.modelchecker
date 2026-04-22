@@ -50,10 +50,10 @@ public class TransitionSystemSOSRulesTest {
 	CompositionLevelExecuteStatementRule executeStatementRule;
 	
 	@Autowired
-	@Qualifier("CORE_REBECA")
 	CoreRebecaCompositionLevelTakeMessageRule takeMessageRule;
 	
 	@Autowired
+	@Qualifier("CORE_REBECA")
 	CompositionLevelNetworkDeliveryRule networkDeliveryRule;
 	
     CoreRebecaSystemState coreRebecaSystemState;

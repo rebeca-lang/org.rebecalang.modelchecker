@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.action.TakeMessageAction;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.actorlevelrule.TakeMessageRule;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractActorState;
-import org.rebecalang.transparentactormodelchecker.abstractrebeca.util.CloningRepository;
 import org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.state.TimedActorScope;
 import org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.state.TimedRebecaActorState;
 import org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.state.TimedRebecaMessageState;
@@ -32,7 +31,6 @@ public class TimedRebecaTakeMessageRule extends TakeMessageRule {
 			prepareScope(timedRebecaActorState, message);
 			transition.addDestination(new TakeMessageAction(message), timedRebecaActorState);
 			if(cnt != indeces.size() - 1) {
-				CloningRepository.resetRepository();
 				timedRebecaActorState = (TimedRebecaActorState) base.clone();
 			}
 		}

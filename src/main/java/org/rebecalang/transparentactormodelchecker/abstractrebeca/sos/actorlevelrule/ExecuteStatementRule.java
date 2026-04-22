@@ -1,5 +1,7 @@
 package org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.actorlevelrule;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.rebecalang.modelchecker.corerebeca.RebecaRuntimeInterpreterException;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.AssignmentInstructionBean;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.DeclarationInstructionBean;
@@ -70,6 +72,12 @@ public class ExecuteStatementRule extends AbstractSOSRule<AbstractActorState> {
 	@Autowired
 	ReturnRule returnRule;
 
+	Logger logger;
+	
+	public ExecuteStatementRule() {
+		logger = LogManager.getRootLogger();
+	}
+	
 	public void setSendMessageRule(SendMessageRule sendMessageSOSRule) {
 		this.sendMessageSOSRule = sendMessageSOSRule;
 	}
@@ -119,6 +127,8 @@ public class ExecuteStatementRule extends AbstractSOSRule<AbstractActorState> {
 					instruction instanceof PushARInstructionBean ||
 					instruction instanceof PopARInstructionBean;
 			AbstractSOSRule<AbstractActorState> rule = getRule(instruction);
+
+//			logger.debug("Executing instruction " + instruction);
 			destinations = rule.applyRule(state, state, instruction);
 		} while(ignorableInstructionIsExecuted);
 		return destinations;

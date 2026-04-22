@@ -16,13 +16,12 @@ import org.rebecalang.transparentactormodelchecker.abstractrebeca.util.CloningRe
 public class CoreRebecaActorState extends AbstractActorState implements Serializable, Cloneable {
 
 	protected ArrayList<CoreRebecaMessageState> queue;
-
+	
 	public CoreRebecaActorState(int id) {
 		super(id);
 		queue = new ArrayList<CoreRebecaMessageState>();
 	}
 	
-//	@Override
 	public CoreRebecaMessageState getEnabledMessage() {
 		return queue.isEmpty() ? null : queue.remove(0);
 	}
@@ -32,13 +31,10 @@ public class CoreRebecaActorState extends AbstractActorState implements Serializ
 		queue.add((CoreRebecaMessageState) newMessage);
 	}
 
-	public String toString() {
-		return "actor->" + id;
-	}
 	public String deepToString() {
 		String result = super.deepToString();
 		result = result.substring(0, result.length() - 1);
-		return result + ",\n queue:(" + queue + ")]";
+		return result + ",\nqueue:(" + queue + ")]";
 	}
 
 	private static CoreRebecaActorState createTempCoreRebecaActorState() {
@@ -53,7 +49,6 @@ public class CoreRebecaActorState extends AbstractActorState implements Serializ
 				ReactiveClassDeclaration rcd = (ReactiveClassDeclaration) metaData;
 				temp.addFieldsVariablesToScope(rcd.getStatevars());
 				temp.addFieldsVariablesToScope(rcd.getKnownRebecs());
-				temp.addVariableToScope("self", temp);
 			}
 		} catch (CodeCompilationException e) {
 			e.printStackTrace();
@@ -82,7 +77,7 @@ public class CoreRebecaActorState extends AbstractActorState implements Serializ
 		return true;
 	}
 
-	public CoreRebecaActorState clone() {
+	public CoreRebecaActorState memoizedClone() {
 		CoreRebecaActorState actor = (CoreRebecaActorState) CloningRepository.getActor(this.id);
 		if(actor != null)
 			return actor;

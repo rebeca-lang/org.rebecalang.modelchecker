@@ -25,7 +25,7 @@ public class TimedRebecaTransitionSystem extends TransparentActorTransitionSyste
 				if(shiftEquivalency.getFirst()) {
 					previousSystemState.addNextState(state);
 					state.addPreviousState(previousSystemState);
-					System.out.println(state.getId() + "->" + previousSystemState.getId() + " >>" + shiftEquivalency.getSecond());
+//					System.out.println(state.getId() + "->" + previousSystemState.getId() + " >>" + shiftEquivalency.getSecond());
 					return new Pair<Boolean, TransparentActorTransitionSystemState<TimedRebecaSystemState>>(false, state);
 				}
 			}

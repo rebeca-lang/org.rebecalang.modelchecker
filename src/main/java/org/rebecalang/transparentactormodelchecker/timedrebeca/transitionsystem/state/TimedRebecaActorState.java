@@ -2,7 +2,6 @@ package org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem
 
 import static org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.state.TimedActorScope.TIME_VARIABLE;
 import static org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.state.TimedRebecaMessageState.FALSE;
-import static org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.state.TimedRebecaMessageState.TRUE;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -42,13 +41,10 @@ public class TimedRebecaActorState extends AbstractActorState implements Seriali
 		}
 	}
 
-	public String toString() {
-		return "actor->" + id;
-	}
 	public String deepToString() {
 		String result = super.deepToString();
 		result = result.substring(0, result.length() - 1);
-		return result + ",\n bag:(" + bag + ")]";
+		return result + ",\nbag:(" + bag + ")]";
 	}
 
 	private static TimedRebecaActorState createTempTimedRebecaActorState() {
@@ -63,7 +59,6 @@ public class TimedRebecaActorState extends AbstractActorState implements Seriali
 				ReactiveClassDeclaration rcd = (ReactiveClassDeclaration) metaData;
 				temp.addFieldsVariablesToScope(rcd.getStatevars());
 				temp.addFieldsVariablesToScope(rcd.getKnownRebecs());
-				temp.addVariableToScope(AbstractActorState.SELF, temp);
 			}
 		} catch (CodeCompilationException e) {
 			e.printStackTrace();
@@ -92,7 +87,7 @@ public class TimedRebecaActorState extends AbstractActorState implements Seriali
 		return true;
 	}
 
-	public TimedRebecaActorState clone() {
+	public TimedRebecaActorState memoizedClone() {
 		TimedRebecaActorState actor = (TimedRebecaActorState) CloningRepository.getActor(this.id);
 		if(actor != null)
 			return actor;

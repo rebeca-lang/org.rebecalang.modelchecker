@@ -2,69 +2,67 @@ package org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Set;
-import java.util.Map.Entry;
+
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.util.CloningRepository;
 
 
 @SuppressWarnings("serial")
 public abstract class AbstractSystemState implements Serializable, Cloneable {
 
 	protected volatile ActivationRecord environment;
-	protected HashMap<Integer, AbstractActorState> actorsState;
+
+	protected ActorsContainer actorsContainer;
 
 	public AbstractSystemState() {
-		actorsState = new HashMap<Integer, AbstractActorState>();
+		actorsContainer = new ActorsContainer();
 	}
 	
 	public Collection<? extends AbstractActorState> getActorsStatesValues() {
-		return actorsState.values();
+		return actorsContainer.getActorsStates();
 	}
 	
 	public Set<Integer> getActorsIds() {
-		return actorsState.keySet();
+		return actorsContainer.getActorsIds();
 	}
 	
-	public HashMap<Integer, ? extends AbstractActorState> getActorsState() {
-		return actorsState;
+//	public HashMap<Integer, ? extends AbstractActorState> getActorsState() {
+//		return actorsState;
+//	}
+
+
+	public AbstractActorState getActorState(int id) {
+		return actorsContainer.getActorState(id);
 	}
-	
+
 	public void setActorState(int id, AbstractActorState newState) {
 		newState.setEnvironment(environment);
-		actorsState.put(id, newState);
+		actorsContainer.setActor(id, newState);
 	}
 
 	public void setActorState(AbstractActorState newState) {
-		newState.setEnvironment(environment);
-		actorsState.put(newState.getId(), newState);
+		setActorState(newState.getId(), newState);
 	}
 	
 	public void destroyActorState(AbstractActorState newState) {
-		actorsState.remove(newState.getId());
+		actorsContainer.destroyActorState(newState.getId());
 	}
 	
-	public void addNewActorState(AbstractActorState newState) {
-		Integer max = Collections.max(getActorsIds());
-		newState.setId(max + 1);
-		setActorState(newState);
-	}
-
-	public AbstractActorState getActorState(int id) {
-		return actorsState.get(id);
-	}
+//	public void addNewActorState(AbstractActorState newState) {
+//		int max = Collections.max(getActorsIds());
+//		newState.setId(max + 1);
+//		setActorState(newState);
+//	}
 
 	public void setEnvironment(ActivationRecord environment) {
 		this.environment = environment;
-		for(AbstractActorState actorState : actorsState.values())
-			actorState.setEnvironment(environment);
+		actorsContainer.setEnvironment(environment);
+		environment.setVariableValue(ActorScope.ACTORS_IN_ENVIRONMENT_VARIABLE_NAME, actorsContainer);
 	}
 	
 	public String toString() {
 		String result = "{\nEnv:" + environment + "|\n";
-		for(AbstractActorState actorState : actorsState.values())
-			result += actorState.deepToString() + "|\n";
-		result += "}";
+		result += actorsContainer.deepToString() + "}";
 		return result;
 	}
 	
@@ -79,12 +77,9 @@ public abstract class AbstractSystemState implements Serializable, Cloneable {
 		 */
 		final int prime = 31;
 		int result = prime;
-		for(Entry<Integer, AbstractActorState> entry : actorsState.entrySet()) {
-			result += entry.getKey().hashCode() ^ entry.getValue().deepHashCode();
-		}
-		
-		AbstractNetworkState networkState = getNetworkState();
+//		result = prime * result + ((actorsContainer == null) ? 0 : actorsContainer.hashCode());		
 		result = prime * result + ((environment == null) ? 0 : environment.hashCode());
+		AbstractNetworkState networkState = getNetworkState();
 		result = prime * result + ((networkState == null) ? 0 : networkState.hashCode());
 		return result;
 	}
@@ -98,24 +93,12 @@ public abstract class AbstractSystemState implements Serializable, Cloneable {
 		if (getClass() != obj.getClass())
 			return false;
 		AbstractSystemState other = (AbstractSystemState) obj;
-		if (actorsState == null) {
-			if (other.actorsState != null)
-				return false;
-		} else {
-	        if (actorsState.size() != other.actorsState.size())
-	            return false;
-            for (Entry<Integer, AbstractActorState> entry : actorsState.entrySet()) {
-                Integer key = entry.getKey();
-                AbstractActorState value = entry.getValue();
-                if (value == null) {
-                    if (!(other.actorsState.get(key) == null && other.actorsState.containsKey(key)))
-                        return false;
-                } else {
-                    if (!value.deepEquals(other.actorsState.get(key)))
-                        return false;
-                }
-            }
-		}
+//		if (actorsContainer == null) {
+//			if (other.actorsContainer != null)
+//				return false;
+//		} else if (!actorsContainer.equals(other.actorsContainer)) {
+//			return false;
+//		}
 			
 		if (environment == null) {
 			if (other.environment != null)
@@ -135,4 +118,15 @@ public abstract class AbstractSystemState implements Serializable, Cloneable {
 	public abstract AbstractNetworkState getNetworkState();
 	
 	public abstract AbstractSystemState clone();
+	
+	protected void clone(AbstractSystemState clonedState) {
+		CloningRepository.resetRepository();
+		clonedState.environment = environment.clone();
+		clonedState.actorsContainer = 
+				(ActorsContainer) clonedState.environment.getVariableValue(
+						ActorScope.ACTORS_IN_ENVIRONMENT_VARIABLE_NAME);
+		for(AbstractActorState actorState : clonedState.actorsContainer.getActorsStates()) {
+			actorState.setEnvironment(clonedState.environment);
+		}
+	}
 }

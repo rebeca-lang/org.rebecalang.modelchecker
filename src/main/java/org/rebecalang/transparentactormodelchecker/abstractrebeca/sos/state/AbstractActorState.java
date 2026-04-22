@@ -13,6 +13,7 @@ import org.rebecalang.compiler.utils.Pair;
 import org.rebecalang.modeltransformer.ril.RILModel;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.InstructionBean;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.Variable;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.util.CloningRepository;
 
 @SuppressWarnings("serial")
 public abstract class AbstractActorState implements Serializable, Cloneable {
@@ -95,6 +96,10 @@ public abstract class AbstractActorState implements Serializable, Cloneable {
 		scope.setEnvironment(environment);
 	}
 
+	public ActivationRecord getEnvironment() {
+		return scope.getEnvironment();
+	}
+
 	public boolean hasVariableInScope(String varName) {
 		return scope.hasVariableInScope(varName);
 	}
@@ -131,7 +136,7 @@ public abstract class AbstractActorState implements Serializable, Cloneable {
 		scope.setVariableValue(varName, varValue);
 	}
 
-	protected void addFieldsVariablesToScope(List<FieldDeclaration> fields) {
+	public void addFieldsVariablesToScope(List<FieldDeclaration> fields) {
 		for(FieldDeclaration fd : fields) {
 			for(VariableDeclarator vd : fd.getVariableDeclarators()) {
 				if(fd.getType() instanceof ArrayType) {
@@ -151,7 +156,7 @@ public abstract class AbstractActorState implements Serializable, Cloneable {
 		return "actor->" + id;
 	}
 	public String deepToString() {
-		return id + "->[scope:(" + scope + ")]";
+		return id + "->[\nscope:(" + scope + ")]";
 	}
 
 	@Override
@@ -200,11 +205,14 @@ public abstract class AbstractActorState implements Serializable, Cloneable {
 		return true;
 	}
 
-	public abstract AbstractActorState clone();
+	public AbstractActorState clone() {
+		CloningRepository.resetRepository();
+		return this.memoizedClone();
+	}
+
+	public abstract AbstractActorState memoizedClone();
 	
 	public abstract ActorScope getNewActorScope();
-	
-//	public abstract AbstractMessageState getEnableMessage();
 	
 	public abstract AbstractMessageState getNewMessageState();
 	
@@ -213,5 +221,6 @@ public abstract class AbstractActorState implements Serializable, Cloneable {
 	public abstract boolean isEnable();
 
 	public abstract AbstractActorState createNewActorState(Type newInstanceType);
+
 
 }

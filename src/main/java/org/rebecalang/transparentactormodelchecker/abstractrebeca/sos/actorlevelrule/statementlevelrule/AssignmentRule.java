@@ -8,7 +8,6 @@ import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.Variable;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.action.Action;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.action.TauAction;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractActorState;
-import org.rebecalang.transparentactormodelchecker.abstractrebeca.util.CloningRepository;
 import org.rebecalang.transparentactormodelchecker.transitionsystem.AbstractSOSRule;
 import org.rebecalang.transparentactormodelchecker.transitionsystem.Transition;
 import org.springframework.stereotype.Component;
@@ -34,12 +33,10 @@ public class AssignmentRule extends AbstractSOSRule<AbstractActorState> {
 			AbstractActorState base, AbstractActorState state, Object... additional) {
 		Action resultAction = TauAction.TAU;
 
-
 		AssignmentInstructionBean aib = (AssignmentInstructionBean) additional[0];
 		Object valueFirst = getValue(aib.getFirstOperand(), state);
 		Object rightSideResult = valueFirst;
 
-//		System.out.println(valueFirst + " ... " + rightSideResult);
 		if(rightSideResult instanceof NonDetValue) {
 			Transition<AbstractActorState> result = new Transition<AbstractActorState>();
 			NonDetValue ndv = (NonDetValue) rightSideResult;
@@ -54,7 +51,6 @@ public class AssignmentRule extends AbstractSOSRule<AbstractActorState> {
 						getValue(values[cnt], state));
 				result.addDestination(resultAction, state);
 				if(cnt != values.length - 1) {
-					CloningRepository.resetRepository();
 					state.movePCtoTheNextInstruction();
 					state = base.clone();
 				}

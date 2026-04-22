@@ -33,6 +33,8 @@ import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.actorlevel
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.actorlevelrule.statementlevelrule.VariableDeclarationRule;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractActorState;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.ActivationRecord;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.ActorScope;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.ActorsContainer;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.util.CloningRepository;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaActorState;
 import org.rebecalang.transparentactormodelchecker.transitionsystem.Transition;
@@ -81,7 +83,14 @@ public class StatementsSOSRulesTest {
     @BeforeEach
     public void setup() throws CodeCompilationException {
     	coreRebecaActorState = new CoreRebecaActorState(0);
-    	coreRebecaActorState.setEnvironment(new ActivationRecord());
+    	ActivationRecord environment = new ActivationRecord();
+    	ActorsContainer actorsContainer = new ActorsContainer();
+    	coreRebecaActorState.setEnvironment(environment);
+    	actorsContainer.setActor(0, coreRebecaActorState);
+    	environment.setVariableValue(ActorScope.ACTORS_IN_ENVIRONMENT_VARIABLE_NAME,
+    			actorsContainer);
+
+    	
     	typeSystem = new CoreRebecaTypeSystem();
     	typeSystem.clear();
     	ReactiveClassDeclaration rcd = new ReactiveClassDeclaration();
@@ -156,12 +165,12 @@ public class StatementsSOSRulesTest {
     }
 
     @Test
-    public void GIVEN_ActorStateHasAVariable_WHEN_AssignmentInstructionIsExecutedAndAccessedBySelfKeyword_THEN_ValueHasToBeUpdated() {
-
+    public void GIVEN_ActorStateHasAVariable_WHEN_AssignmentInstructionIsExecutedAndAccessedBySelfKeyword_THEN_ValueHasToBeUpdated() {    	
+    	
     	coreRebecaActorState.addVariableToScope("var1", 1);
     	coreRebecaActorState.addVariableToScope("self", coreRebecaActorState);
     	coreRebecaActorState.addVariableToScope(CoreRebecaActorState.PC, new Pair<String, Integer>("-", 0));
-
+//    	coreRebecaActorState.setEnvironment(environment);
     	
     	Variable base = new Variable("self");
     	Variable v1 = new Variable(base, "var1");

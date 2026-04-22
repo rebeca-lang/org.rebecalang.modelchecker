@@ -46,7 +46,6 @@ public class NetworkAndActorSOSRulesTest {
 	
 	
 	@Autowired
-	@Qualifier("CORE_REBECA")
 	CoreRebecaCompositionLevelTakeMessageRule takeMessageRule;
 	
 	@Autowired
@@ -54,6 +53,7 @@ public class NetworkAndActorSOSRulesTest {
 	CompositionLevelExecuteStatementRule executeStatementRule;
 	
 	@Autowired
+	@Qualifier("CORE_REBECA")
 	CompositionLevelNetworkDeliveryRule networkDeliveryRule;
 	
     CoreRebecaSystemState coreRebecaSystemState;

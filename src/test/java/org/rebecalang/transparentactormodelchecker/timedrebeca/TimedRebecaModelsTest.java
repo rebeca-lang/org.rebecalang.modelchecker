@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -68,16 +69,20 @@ public class TimedRebecaModelsTest {
         
         TransparentActorModelCheckingResult result = 
         		fttsModelChecker.modelcheck(compiledRebecaFile, transformedRILModel, new HashSet<Feature>());
-        System.out.println(result.getTransitionSystem().size());
+		Assertions.assertEquals(statespaceSize, result.getTransitionSystem().size());
+		System.out.println("time: " + result.getTime());
+		System.out.print("size: " + result.getTransitionSystem().size());
+		System.out.println("(" + result.getTransitionSystem().getCollisions() + ")");
+		System.out.println(".....................");
         
-//		printRILModel(transformedRILModel);
+		printRILModel(transformedRILModel);
 	}
 	
 	protected static Stream<Arguments> customers() {
 	    return Stream.of(
-	    		Arguments.arguments(TicketServiceSourceCodes.ONE_CUSTOMER, 105)
-	    		, Arguments.arguments(TicketServiceSourceCodes.TWO_CUSTOMERS, 105)
-//	    		, Arguments.arguments(TicketServiceSourceCodes.THREE_CUSTOMERS, 105)
+	    		Arguments.arguments(TicketServiceSourceCodes.ONE_CUSTOMER, 5)
+	    		, Arguments.arguments(TicketServiceSourceCodes.TWO_CUSTOMERS, 345)
+	    		, Arguments.arguments(TicketServiceSourceCodes.THREE_CUSTOMERS, 13723)
 	    );
 	}
 
@@ -112,13 +117,4 @@ public class TimedRebecaModelsTest {
 			System.out.println("...............................................");
 		}
 	}
-//	
-//	protected static Stream<Arguments> philosophers() {
-//	    return Stream.of(
-//	    		Arguments.arguments(DiningPhilosophersSourceCodes.TWO_PHILOSOPHERS, 106),
-//	    		Arguments.arguments(DiningPhilosophersSourceCodes.THREE_PHILOSOPHERS, 1472),
-//	    		Arguments.arguments(DiningPhilosophersSourceCodes.FOUR_PHILOSOPHERS, 18054),
-//	    		Arguments.arguments(DiningPhilosophersSourceCodes.FIVE_PHILOSOPHERS, 214108)
-//	    );
-//	}
 }

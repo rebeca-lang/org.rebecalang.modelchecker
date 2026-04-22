@@ -21,15 +21,12 @@ public class TimedRebecaCompositionLevelTakeMessageRule extends AbstractSOSRule<
 	public Transition<AbstractSystemState> applyRule(AbstractSystemState base, AbstractSystemState state, Object... additional) throws RuleIsDisabledException {
 		Transition<AbstractSystemState> transitions = new Transition<AbstractSystemState>();
 
-//		int executionTime = getEnablingTime(base);
-		
 		for(int actorId : base.getActorsIds()) {
 			try {
 				AbstractActorState actorState = state.getActorState(actorId);
 				Transition<? extends AbstractActorState> result = 
 						takeMessageRule.applyRule(
 								base.getActorState(actorId), 
-//								actorState, executionTime);
 								actorState);
 				TakeMessageAction action = (TakeMessageAction) result.getDestinationsActions().get(0);
 				actorState.setVariableValue(AbstractMessageState.SENDER, 

@@ -1,25 +1,21 @@
 package org.rebecalang.transparentactormodelchecker.abstractrebeca.util;
 
-import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaActorState;
-import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaNetworkState;
-import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaSystemState;
-
 public class RebecaStateSerializationUtil {
 
- 	public static CoreRebecaNetworkState clone(CoreRebecaNetworkState object) {
- 		CloningRepository.resetRepository();
- 		return object.clone();
- 	}
- 	
-	public static CoreRebecaActorState clone(CoreRebecaActorState object) {
- 		CloningRepository.resetRepository();
-		return object.clone();
-	}
- 	
-	public static CoreRebecaSystemState clone(CoreRebecaSystemState object) {
- 		CloningRepository.resetRepository();
-		return object.clone();
-	}
+// 	public static CoreRebecaNetworkState clone(CoreRebecaNetworkState object) {
+// 		CloningRepository.resetRepository();
+// 		return object.clone();
+// 	}
+// 	
+//	public static CoreRebecaActorState clone(CoreRebecaActorState object) {
+// 		CloningRepository.resetRepository();
+//		return object.clone();
+//	}
+// 	
+//	public static CoreRebecaSystemState clone(CoreRebecaSystemState object) {
+// 		CloningRepository.resetRepository();
+//		return object.clone();
+//	}
 
 
 //	public static CoreRebecaNetworkState clone(CoreRebecaNetworkState object) {

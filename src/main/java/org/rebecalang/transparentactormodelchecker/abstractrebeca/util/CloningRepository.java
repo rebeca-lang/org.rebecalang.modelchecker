@@ -10,6 +10,8 @@ import org.rebecalang.transparentactormodelchecker.ModelCheckingRuntimeException
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractActorState;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractMessageState;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.ActivationRecord;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.ActorStateRepresentor;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.ActorsContainer;
 
 public class CloningRepository {
 	private static HashMap<Integer, AbstractActorState> clonedActors = new HashMap<Integer, AbstractActorState>();
@@ -42,12 +44,19 @@ public class CloningRepository {
 		}
 		if(value instanceof AbstractActorState) {
 			AbstractActorState actorState = (AbstractActorState) value;
-			AbstractActorState retrievedActorState = clonedActors.get(actorState.getId());
-			if(retrievedActorState == null) {
-				retrievedActorState = actorState.clone();
-			}
-			return retrievedActorState;
+//			AbstractActorState retrievedActorState = clonedActors.get(actorState.getId());
+//			if(retrievedActorState == null) {
+//				retrievedActorState = actorState.memoizedClone();
+//			}
+//			return retrievedActorState;
+			return actorState.memoizedClone();
 		}
+		if(value instanceof ActorsContainer)
+			return ((ActorsContainer) value).clone();
+
+		if(value instanceof ActorStateRepresentor)
+			return ((ActorStateRepresentor)value).clone();
+		
 		if(value instanceof Object[]) {
 			Object[] valueData = (Object[]) value;
 			Object[] cloned = new Object[valueData.length];

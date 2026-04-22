@@ -1,6 +1,8 @@
 package org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state;
 
+import java.lang.reflect.Array;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.util.CloningRepository;
@@ -17,9 +19,14 @@ public class ActivationRecord implements Cloneable {
 		return activationRecord;
 	}
 	
-	public void addVariableToActivationRecord(String varName, Object value) {
-		activationRecord.put(varName, value);
-	}
+//	public void addVariableToActivationRecord(String varName, Object value) {
+//		if(value instanceof AbstractActorState) {
+//			AbstractActorStateRepresentor aasr = 
+//					new AbstractActorStateRepresentor(((AbstractActorState)value).getId());
+//			activationRecord.put(varName, aasr);
+//		} else
+//			activationRecord.put(varName, value);
+//	}
 	
 	public boolean containsVariable(String varName) {
 		return activationRecord.containsKey(varName);
@@ -38,6 +45,7 @@ public class ActivationRecord implements Cloneable {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((activationRecord == null) ? 0 : activationRecord.hashCode());
+		System.out.println("\t" + result);
 		return result;
 	}
 
@@ -70,7 +78,39 @@ public class ActivationRecord implements Cloneable {
 	
 	@Override
 	public String toString() {
-		return "ac=[data:" + activationRecord.toString() + "]";
+		StringBuilder result = new StringBuilder("ac={");
+		for (Entry<String, Object> entry : activationRecord.entrySet()) {
+			result.append(entry.getKey());
+			result.append("=");
+			objectValue(entry.getValue(), result);
+			result.append(", ");
+		}
+		result.append("}");
+		return result.toString();
 	}
-	
+
+	private void objectValue(Object value, StringBuilder result) {
+		if(value == null)
+			result.append("null");
+		else if(value instanceof Map) {
+			Map<?, ?> valueMap = (Map<?, ?>) value;
+			result.append("{");
+			for (Object key : valueMap.keySet()) {
+				result.append(key + "=");
+				objectValue(valueMap.get(key), result);
+				result.append(", ");
+			}
+			result.append("}");
+		} else if(value.getClass().isArray()) {
+			result.append("[");
+			int length = Array.getLength(value);
+			for(int cnt = 0; cnt < length; cnt++) {
+				objectValue(Array.get(value, cnt), result);
+				result.append(", ");
+			}
+			result.append("]");			
+		} else {
+			result.append(value);
+		}
+	}
 }

@@ -36,18 +36,20 @@ public class TimedRebecaNetworkState extends AbstractNetworkState implements Ser
 			receivedMessages.add(timeBucket);
 		} else {
 			int arrivalTime = message.getArrival();
-			for(int cnt = 0; cnt < receivedMessages.size(); cnt++) {
+			int cnt = 0;
+			for(; cnt < receivedMessages.size(); cnt++) {
 				int time = receivedMessages.get(cnt).getTime();
 				if(time < arrivalTime)
 					continue;
-				if(time == arrivalTime) {
-					timeBucket = receivedMessages.get(cnt);
-	 			} else {
-	 				timeBucket = new TimeBucket(arrivalTime);
-	 				receivedMessages.add(cnt, timeBucket);
-	 			}
-				break;
+				if(time == arrivalTime)
+					break;
 			}			
+			if(cnt != receivedMessages.size()) {
+				timeBucket = receivedMessages.get(cnt);
+ 			} else {
+ 				timeBucket = new TimeBucket(arrivalTime);
+ 				receivedMessages.add(cnt, timeBucket);
+ 			}
 		}
 		ActorReceivingBucket receiverMessages = 
 				timeBucket.getReceiverMessages(message.getReceiverId());
@@ -120,6 +122,7 @@ public class TimedRebecaNetworkState extends AbstractNetworkState implements Ser
 		return receivedMessages.toString();
 	}
 	
+	@Override
 	public TimedRebecaNetworkState clone() {
 		TimedRebecaNetworkState clonedNetworkState = new TimedRebecaNetworkState();
 		for (TimeBucket timeBucket : receivedMessages) {
@@ -127,6 +130,7 @@ public class TimedRebecaNetworkState extends AbstractNetworkState implements Ser
 		}
 		return clonedNetworkState;
 	}
+	
 	@Override
 	public boolean hasMessage() {
 		return !receivedMessages.isEmpty();

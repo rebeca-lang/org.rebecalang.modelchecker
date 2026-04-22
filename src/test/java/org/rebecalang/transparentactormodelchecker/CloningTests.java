@@ -13,7 +13,6 @@ import org.rebecalang.modeltransformer.ril.RILModel;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.InstructionBean;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.PushARInstructionBean;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.ActivationRecord;
-import org.rebecalang.transparentactormodelchecker.abstractrebeca.util.RebecaStateSerializationUtil;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaActorState;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaMessageState;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaNetworkState;
@@ -26,8 +25,35 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 @SpringJUnitConfig
 @TestPropertySource(properties = {"log4j.configurationFile='log4j2.xml'"})
 public class CloningTests {
-    public final static int ACTOR_1_ID = 0;
+	
+    public final static int ACTOR_0_ID = 0;
+    public final static int ACTOR_1_ID = 1;
 
+    public static CoreRebecaSystemState createEmptySystemState() {
+    	ActivationRecord environment = new ActivationRecord();
+		CoreRebecaSystemState systemState = new CoreRebecaSystemState();
+    	systemState.setEnvironment(environment);
+    	systemState.setNetworkState(new CoreRebecaNetworkState());
+    	return systemState;
+    }
+    
+    @Test
+    public void GIVEN_TwoActorsWhichAreKnownToEachOther_WHEN_cloning_THEN_KnownActorsReferencesAreConsistent() {
+    	CoreRebecaSystemState systemState = createEmptySystemState();
+
+    	CoreRebecaActorState actor0State = new CoreRebecaActorState(ACTOR_0_ID);
+		systemState.setActorState(ACTOR_0_ID, actor0State);
+    	
+    	CoreRebecaActorState actor1State = new CoreRebecaActorState(ACTOR_1_ID);
+		systemState.setActorState(ACTOR_1_ID, actor1State);
+    	
+		actor0State.addVariableToScope("ac1", actor1State);
+		actor1State.addVariableToScope("ac0", actor0State);
+
+		CoreRebecaSystemState cloned = systemState.clone();
+		cloned.getActorsIds();
+    }
+    
     @Test
     public void cloneSystemState() {
 		CoreRebecaSystemState coreRebecaSystemState = new CoreRebecaSystemState();
@@ -48,7 +74,7 @@ public class CloningTests {
     	
     	actor1.setRILModel(rilModel);
     	
-    	RebecaStateSerializationUtil.clone(coreRebecaSystemState);
+    	coreRebecaSystemState.clone();
     	
 	}
 //    @Test

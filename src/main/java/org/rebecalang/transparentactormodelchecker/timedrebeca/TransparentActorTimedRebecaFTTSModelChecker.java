@@ -1,9 +1,12 @@
 package org.rebecalang.transparentactormodelchecker.timedrebeca;
 
+import java.nio.MappedByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.rebecalang.compiler.modelcompiler.SymbolTable;
 import org.rebecalang.compiler.modelcompiler.corerebeca.CoreRebecaTypeSystem;
 import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.RebecaModel;
@@ -54,6 +57,27 @@ public class TransparentActorTimedRebecaFTTSModelChecker extends TransparentActo
 	CompositionLevelNetworkDeliveryRule networkDeliveryRule;
 	
 	private boolean completeTransitionSystem;
+	
+	private Logger logger;
+	
+	public TransparentActorTimedRebecaFTTSModelChecker() {
+		logger = LogManager.getRootLogger();
+	}
+
+
+	private StringBuilder toStringRILModel(RILModel transformedRILModel) {
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append("RIL-MODEL\n========================================================\n");
+		for(String methodName : transformedRILModel.getMethodNames()) {
+			stringBuilder.append(methodName + "\n");
+			int counter = 0;
+			for(InstructionBean instruction : transformedRILModel.getInstructionList(methodName)) {
+				stringBuilder.append("" + counter++ +":" + instruction + "\n");
+			}
+			stringBuilder.append("...............................................\n");
+		}
+		return stringBuilder;
+	}
 
 	@Override
 	public TransparentActorModelCheckingResult modelcheck(Pair<RebecaModel, SymbolTable> compiledRebecaFile,
@@ -64,10 +88,20 @@ public class TransparentActorTimedRebecaFTTSModelChecker extends TransparentActo
 		if(features.contains(Feature.CompleteTransitionSystem))
 			this.completeTransitionSystem = true;
 		
+		logger.debug("{}", toStringRILModel(rilModel));
+
 		setInitialState();
+		
 		
 		TransparentActorTransitionSystemState<TimedRebecaSystemState> initialState = 
 				transitionSystem.getInitialState();
+		logger.debug("The initial state is: {}", initialState.getState());
+//		long time = System.currentTimeMillis();
+//		for(int cnt = 0; cnt < 100000; cnt++)
+//			logger.debug("State is {}", initialState.getState());
+//			initialState.getState().toString();
+//		System.out.println(System.currentTimeMillis() - time);
+		
 		try {
 			dfs(initialState);
 		} catch (Exception e) {
@@ -88,15 +122,19 @@ public class TransparentActorTimedRebecaFTTSModelChecker extends TransparentActo
 		TimedRebecaSystemState systemState = state.getState().clone();
 		Transition<AbstractSystemState> transitions = null;
 
+		if(state.getId() > 99) {
+			state.getId();
+		}
 		try {
 			transitions = takeMessageSOSRule.applyRule(state.getState(), systemState);
 			for(int cnt = 0; cnt < transitions.size(); cnt++) {
 				systemState = (TimedRebecaSystemState) transitions.getDestinationsStates().get(cnt);
+				logger.debug("Taking action {} resulted in the state: {}", 
+						transitions.getDestinationsActions().get(cnt), systemState);
 				Action action = transitions.getDestinationsActions().get(cnt);
 				List<AbstractSystemState> destinations = new ArrayList<AbstractSystemState>();
 				destinations.addAll(courseGraindExecuteMessageServer(systemState));
-				System.out.println(action.getActionLabel());
-				deliverAllMessagesAndExpand(state, destinations);
+				deliverAllMessagesAndExpand(state, destinations, action);
 			}
 		} catch (RuleIsDisabledException e) {
 			if(completeTransitionSystem)
@@ -108,7 +146,7 @@ public class TransparentActorTimedRebecaFTTSModelChecker extends TransparentActo
 	}
 
 	private void deliverAllMessagesAndExpand(TransparentActorTransitionSystemState<TimedRebecaSystemState> state,
-			List<AbstractSystemState> destinations) throws ModelCheckingException, RuleIsDisabledException {
+			List<AbstractSystemState> destinations, Action action) throws ModelCheckingException, RuleIsDisabledException {
 		TimedRebecaSystemState systemState;
 		for(int stateCounter = 0; stateCounter < destinations.size(); stateCounter++) {
 			systemState = (TimedRebecaSystemState) destinations.get(stateCounter);
@@ -127,9 +165,10 @@ public class TransparentActorTimedRebecaFTTSModelChecker extends TransparentActo
 
 			Pair<Boolean, TransparentActorTransitionSystemState<TimedRebecaSystemState>> result = 
 					transitionSystem.addIfNotExists(state, systemState);
-			if(result.getSecond().getId() == 18)
-				result.getSecond().getId();
-			System.out.println("S" + state.getId() + " -> S" + result.getSecond().getId() + "[label=\"" + "\"]\n");//action.getActionLabel() +"\"]\n");
+			logger.info("S{} -> S{} [label=\"{}@{}\"]", state.getId(), 
+					result.getSecond().getId(), action.getActionLabel(), 
+					state.getState().getEnablingTime());
+//			outputStatespace.
 			if(result.getFirst())
 				dfs(result.getSecond());
 		}
@@ -178,9 +217,7 @@ public class TransparentActorTimedRebecaFTTSModelChecker extends TransparentActo
 	@Override
 	protected void initializeMethodBindingTable() {
 		super.initializeMethodBindingTable();
-//		RebecaModel rebecaModel = compiledRebecaFile.getFirst();
 		
-//		List<ReactiveClassDeclaration> rcds = rebecaModel.getRebecaCode().getReactiveClassDeclaration();
 		List<Type> delayMethodInputType = new ArrayList<Type>();
 		delayMethodInputType.add(CoreRebecaTypeSystem.INT_TYPE);
 		ArrayList<InstructionBean> delayMehodBody = new ArrayList<InstructionBean>();
@@ -194,55 +231,4 @@ public class TransparentActorTimedRebecaFTTSModelChecker extends TransparentActo
 		this.rilModel.addMethod(methodName, delayMehodBody);
 	}
 
-//	public TransparentActorModelCheckingResult modelcheck(Pair<RebecaModel,SymbolTable> compiledRebecaFile, RILModel rilModel) {
-//		this.compiledRebecaFile = compiledRebecaFile;
-//		this.rilModel = rilModel;
-//		transitionSystem = new TransparentActorCoreRebecaTransitionSystem();
-//		setInitialState();
-//		
-//		TransparentActorCoreRebecaTransitionSystemState initialState = 
-//				transitionSystem.getInitialState();
-//
-//		try {
-//			dfs(initialState);
-//		} catch (RuleIsDisabledException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//
-//		TransparentActorModelCheckingResult result = 
-//				new TransparentActorModelCheckingResult(TransparentActorModelCheckingResult.SATISFIED);
-//		result.setTransitionSystem(transitionSystem);
-//		return result;
-//	}
-//
-//	private void dfs(TransparentActorCoreRebecaTransitionSystemState state) throws RuleIsDisabledException {
-//		NondeterministicTransition<CoreRebecaSystemState> transitions = 
-//				(NondeterministicTransition<CoreRebecaSystemState>) compositionLevelTakeMessageSOSRule.applyRule(
-//						RebecaStateSerializationUtils.clone(state.getState()));
-//		List<Pair<? extends Action, CoreRebecaSystemState>> destinations = 
-//				transitions.getDestinations();
-//		for(Pair<? extends Action, CoreRebecaSystemState> destination : destinations) {
-//			CoreRebecaSystemState newState = destination.getSecond();
-//			try {
-//				while (true) {
-//					NondeterministicTransition<CoreRebecaSystemState> stmtExecResult = 
-//							compositionLevelExecuteStatementSOSRule.applyRule(newState);
-//				}
-//			} catch(RuleIsDisabledException exception) {}
-//			try {
-//				while(true) {
-//					compositionLevelNetworkDeliverySOSRule.applyRule(newState);
-//				}
-//			} catch(RuleIsDisabledException exception) {}
-//
-//			Pair<Boolean, TransparentActorCoreRebecaTransitionSystemState> result = 
-//					transitionSystem.addIfNotExists(state, destination.getSecond());
-////			System.out.println("S" + state.getId() + " -> S" + result.getSecond().getId() + "[label=\"" + destination.getFirst().getActionLabel() +"\"]\n");
-////			System.out.println(result.getSecond());
-////			System.out.println("........................");
-//			if(result.getFirst())
-//				dfs(result.getSecond());
-//		}
-//	}
 }

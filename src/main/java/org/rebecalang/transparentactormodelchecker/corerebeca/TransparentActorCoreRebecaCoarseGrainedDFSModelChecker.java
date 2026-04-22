@@ -54,17 +54,20 @@ public class TransparentActorCoreRebecaCoarseGrainedDFSModelChecker extends Tran
 		
 		TransparentActorTransitionSystemState<CoreRebecaSystemState> initialState = 
 				transitionSystem.getInitialState();
+		long start = System.currentTimeMillis();
 		try {
 			dfs(initialState);
 		} catch (Exception e) {
 			TransparentActorModelCheckingResult result = 
 					new TransparentActorModelCheckingResult(TransparentActorModelCheckingResult.INTERNAL_ERROR);
 			result.setTransitionSystem(transitionSystem);
+			result.setTime(System.currentTimeMillis() - start);
 			return result;
 		}
 
 		TransparentActorModelCheckingResult result = 
 				new TransparentActorModelCheckingResult(TransparentActorModelCheckingResult.SATISFIED);
+		result.setTime(System.currentTimeMillis() - start);
 		result.setTransitionSystem(transitionSystem);
 		return result;
 	}
@@ -72,7 +75,6 @@ public class TransparentActorCoreRebecaCoarseGrainedDFSModelChecker extends Tran
 	private void dfs(TransparentActorTransitionSystemState<CoreRebecaSystemState> state) throws ModelCheckingException {
 		CoreRebecaSystemState systemState = state.getState().clone();
 		Transition<AbstractSystemState> transitions = null;
-
 		try {
 			transitions = takeMessageSOSRule.applyRule(state.getState(), systemState);
 		} catch (RuleIsDisabledException e) {
@@ -105,9 +107,11 @@ public class TransparentActorCoreRebecaCoarseGrainedDFSModelChecker extends Tran
 					networkDeliveryRule.applyRule(systemState, systemState);
 				}
 			} catch (RuleIsDisabledException exception) {}
+//			long temp = System.nanoTime();
 			Pair<Boolean, TransparentActorTransitionSystemState<CoreRebecaSystemState>> result = 
 					transitionSystem.addIfNotExists(state, systemState);
 //			System.out.println("S" + state.getId() + " -> S" + result.getSecond().getId() + "[label=\"" + "\"]\n");//action.getActionLabel() +"\"]\n");
+//			System.out.println(System.nanoTime() - temp);
 			if(result.getFirst())
 				dfs(result.getSecond());
 		}

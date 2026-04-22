@@ -4,13 +4,9 @@ import static org.rebecalang.transparentactormodelchecker.timedrebeca.transition
 import static org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.state.TimedRebecaMessageState.INF;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map.Entry;
 
 import org.rebecalang.compiler.utils.Pair;
-import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractActorState;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractSystemState;
-import org.rebecalang.transparentactormodelchecker.abstractrebeca.util.CloningRepository;
 import org.rebecalang.transparentactormodelchecker.transitionsystem.RuleIsDisabledException;
 
 @SuppressWarnings("serial")
@@ -27,7 +23,6 @@ public class TimedRebecaSystemState extends AbstractSystemState implements Seria
 		int executionTime = Integer.MAX_VALUE;
 		for(int actorId : this.getActorsIds()) {
 			executionTime = Math.min(executionTime, 
-//					takeMessageRule.getEnablingTime((TimedRebecaActorState) base.getActorState(actorId)));
 					getEnablingTime((TimedRebecaActorState)this.getActorState(actorId)));
 		}
 		if(executionTime == Integer.MAX_VALUE)
@@ -67,14 +62,9 @@ public class TimedRebecaSystemState extends AbstractSystemState implements Seria
 	}
 	
 	public TimedRebecaSystemState clone() {
-		CloningRepository.resetRepository();
 		TimedRebecaSystemState clonedState = new TimedRebecaSystemState();
-		clonedState.environment = environment.clone();
+		clone(clonedState);
 		clonedState.networkState = networkState.clone();
-		clonedState.actorsState = (HashMap<Integer, AbstractActorState>) new HashMap<Integer, AbstractActorState>();
-		for(Entry<Integer, AbstractActorState> entry : actorsState.entrySet()) {
-			clonedState.actorsState.put(entry.getKey(), entry.getValue().clone());
-		}
 		return clonedState;
 	}
 	

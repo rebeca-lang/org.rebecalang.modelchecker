@@ -1,5 +1,6 @@
 package org.rebecalang.transparentactormodelchecker.abstractrebeca;
 
+import java.nio.MappedByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -21,6 +22,8 @@ import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.compositio
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractActorState;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractSystemState;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.ActivationRecord;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.ActorScope;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.ActorsContainer;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.util.StateGenerationUtils;
 import org.rebecalang.transparentactormodelchecker.transitionsystem.RuleIsDisabledException;
 import org.springframework.stereotype.Component;
@@ -28,7 +31,6 @@ import org.springframework.stereotype.Component;
 @Component
 public abstract class TransparentActorAbstractModelChecker<T extends AbstractSystemState> {
 
-//	protected HashMap<String, String> methodLookupTable;
 	protected MethodLookup methodLookup;
 	protected Pair<RebecaModel,SymbolTable> compiledRebecaFile;
 	protected RILModel rilModel;
@@ -43,9 +45,15 @@ public abstract class TransparentActorAbstractModelChecker<T extends AbstractSys
 
 	protected abstract AbstractActorState createAbstractActorState();
 	
+	protected MappedByteBuffer outputStatespace;
+
 	protected void setInitialState() {
 		ActivationRecord environment = 
-				StateGenerationUtils.getEnvironment(compiledRebecaFile.getFirst());		
+				StateGenerationUtils.getEnvironment(compiledRebecaFile.getFirst());
+		ActorsContainer actorsContainer = new ActorsContainer();
+		actorsContainer.setEnvironment(environment);
+		environment.setVariableValue(
+				ActorScope.ACTORS_IN_ENVIRONMENT_VARIABLE_NAME, actorsContainer);
 		
 		T systemState = createSystemState();
 		systemState.setEnvironment(environment);
@@ -123,6 +131,9 @@ public abstract class TransparentActorAbstractModelChecker<T extends AbstractSys
 		compositionLevelExecuteStatementRule.setMethodLookup(methodLookup);
 	}
 
+	public void exportStateSpaceToFile(String fileName) {
+//		outputStatespace = new MappedByteBuffer();
+	}
 	public abstract TransparentActorModelCheckingResult modelcheck(Pair<RebecaModel,SymbolTable> compiledRebecaFile, RILModel rilModel, Set<Feature> features);
 
 }
