@@ -25,7 +25,7 @@ public class HashCodeAndEqualsTest {
     @BeforeEach
     public void setup() {
     	coreRebecaActorState1 = new CoreRebecaActorState(1);
-    	coreRebecaActorState2 = new CoreRebecaActorState(2);
+    	coreRebecaActorState2 = new CoreRebecaActorState(1);
     }
 
     @Test
@@ -40,7 +40,7 @@ public class HashCodeAndEqualsTest {
     	coreRebecaActorState2.addVariableToScope("var2", coreRebecaActorState1);
     	coreRebecaActorState2.addVariableToScope(CoreRebecaActorState.PC, new Pair<String, Integer>("-", 0));
     	
-    	assertEquals(coreRebecaActorState1.deepHashCode(),coreRebecaActorState2.deepHashCode());
+    	assertEquals(coreRebecaActorState1.hashCode(),coreRebecaActorState2.hashCode());
     	assertTrue(coreRebecaActorState1.deepEquals(coreRebecaActorState2));
     	assertTrue(coreRebecaActorState2.deepEquals(coreRebecaActorState1));
 	}

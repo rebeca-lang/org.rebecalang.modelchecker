@@ -10,6 +10,10 @@ public class ActorStateRepresentor implements Serializable {
 		actorID = id;
 	}
 
+	public ActorStateRepresentor(AbstractActorState value) {
+		this(value.getId());
+	}
+
 	public int getActorID() {
 		return actorID;
 	}

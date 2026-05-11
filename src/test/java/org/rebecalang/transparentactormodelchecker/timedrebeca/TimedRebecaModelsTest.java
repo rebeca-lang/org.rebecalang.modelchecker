@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -50,6 +51,49 @@ public class TimedRebecaModelsTest {
     
     @Autowired
     TransparentActorTimedRebecaFTTSModelChecker fttsModelChecker;
+    
+	@Test
+    public void GIVEN_ArrayVariable_RebecaModel_WHEN_No_Error() throws ModelCheckingException, IOException {
+		String rebecaModel = 
+				"""
+					reactiveclass Test(3) {
+						knownrebecs {}
+						statevars{int[2] t;}
+						Test() {
+							t[0] = 4;
+							t[1] = 3;
+							self.m1();
+						}
+						msgsrv m1() {
+							self.m1();
+						}
+					}
+					main {
+						Test t1():();
+					}				
+				""";
+		File rebecaFile = FileUtils.createTempFile(rebecaModel);
+		
+		HashSet<CompilerExtension> extention = new HashSet<CompilerExtension>();
+		extention.add(CompilerExtension.TIMED_REBECA);
+		Pair<RebecaModel, SymbolTable> compiledRebecaFile = 
+				rebecaModelCompiler.compileRebecaFile(rebecaFile, extention, CoreVersion.CORE_2_3);
+		if(!exceptionContainer.exceptionsIsEmpty()) {
+			exceptionContainer.print(System.out);
+			return;
+		}
+        RILModel transformedRILModel = rebeca2RILModelTransformer.transformModel(
+        		compiledRebecaFile, extention, CoreVersion.CORE_2_3);
+        
+
+		printRILModel(transformedRILModel);
+		
+		TransparentActorModelCheckingResult coarseDfsResult = fttsModelChecker.modelcheck(compiledRebecaFile, transformedRILModel, new HashSet<Feature>());
+		Assertions.assertEquals(1, coarseDfsResult.getTransitionSystem().size());
+		System.out.println(coarseDfsResult.getTime());
+		System.out.print(coarseDfsResult.getTransitionSystem().size());
+		System.out.println("(" + coarseDfsResult.getTransitionSystem().getCollisions() + ")");
+	}
     
 	@ParameterizedTest
 	@MethodSource("customers")

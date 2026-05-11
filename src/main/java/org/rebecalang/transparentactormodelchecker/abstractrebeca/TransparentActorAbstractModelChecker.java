@@ -78,7 +78,7 @@ public abstract class TransparentActorAbstractModelChecker<T extends AbstractSys
 		tempState.setRILModel(rilModel);
 	
 		ArrayList<InstructionBean> instructions = rilModel.getInstructionList("main");
-		InstructionBean lastStatement = instructions.remove(instructions.size() - 2);
+//		InstructionBean lastStatement = instructions.remove(instructions.size() - 2);
 	
 		tempState.addVariableToScope(AbstractActorState.PC, 
 				new Pair<String, Integer>("main", 0));
@@ -105,7 +105,7 @@ public abstract class TransparentActorAbstractModelChecker<T extends AbstractSys
 		
 		state.destroyActorState(tempState);
 		
-		instructions.add(instructions.size() - 1, lastStatement);
+//		instructions.add(instructions.size() - 1, lastStatement);
 	}
 
 	protected void initializeMethodBindingTable() {

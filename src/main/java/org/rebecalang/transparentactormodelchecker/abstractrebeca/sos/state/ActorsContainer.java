@@ -54,12 +54,12 @@ public class ActorsContainer implements Serializable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = prime;
-		for(Entry<Integer, AbstractActorState> entry : actorsState.entrySet()) {
-			result += entry.getKey().hashCode() ^ entry.getValue().deepHashCode();
-			System.out.println(entry.getValue().deepHashCode());
-		}
-		System.out.println("..............");
-//		result = prime * result + ((actorsState == null) ? 0 : actorsState.hashCode());
+//		for(Entry<Integer, AbstractActorState> entry : actorsState.entrySet()) {
+//			result += entry.getKey().hashCode() ^ entry.getValue().deepHashCode();
+//			System.out.println(entry.getValue().deepHashCode());
+//		}
+//		System.out.println("..............");
+		result = prime * result + ((actorsState == null) ? 0 : actorsState.hashCode());
 		return result;
 	}
 

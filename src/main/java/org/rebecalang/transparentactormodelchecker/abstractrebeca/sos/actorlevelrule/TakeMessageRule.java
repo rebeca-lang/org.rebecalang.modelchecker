@@ -20,7 +20,8 @@ public abstract class TakeMessageRule extends AbstractSOSRule<AbstractActorState
 		state.addVariableToScope(AbstractMessageState.SENDER.getVarName(), message.getSenderId());
 		HashMap<String,Object> parameters = message.getParameters();
 		for(Entry<String, Object> entry : parameters.entrySet()) {
-			state.addVariableToScope(entry.getKey(), entry.getValue());
+			Object value = entry.getValue();
+			state.addVariableToScope(entry.getKey(), value);
 		}
 		Pair<String, Integer> pc = new Pair<String, Integer>(message.getName(), 0);
 		state.addVariableToScope(AbstractActorState.PC, pc);

@@ -7,6 +7,7 @@ import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.Variable;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.action.MessageAction;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractActorState;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractMessageState;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.ActorStateRepresentor;
 import org.rebecalang.transparentactormodelchecker.transitionsystem.AbstractSOSRule;
 import org.rebecalang.transparentactormodelchecker.transitionsystem.Transition;
 
@@ -28,7 +29,11 @@ public class SendMessageRule extends AbstractSOSRule<AbstractActorState>  {
 			if(value instanceof Variable) {
 				value = state.getVariableValue((Variable) value);
 			}
-			message.addParameter(entry.getKey(), value);
+			if(value instanceof AbstractActorState) {
+				ActorStateRepresentor asr = new ActorStateRepresentor((AbstractActorState)value);
+				message.addParameter(entry.getKey(), asr);
+			} else
+				message.addParameter(entry.getKey(), value);
 		}
 		MessageAction action = new MessageAction(message);
 		state.movePCtoTheNextInstruction();

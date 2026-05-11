@@ -1,6 +1,7 @@
 package org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state;
 
 import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -44,8 +45,15 @@ public class ActivationRecord implements Cloneable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((activationRecord == null) ? 0 : activationRecord.hashCode());
-		System.out.println("\t" + result);
+//		result = prime * result + ((activationRecord == null) ? 0 : activationRecord.hashCode());
+		for (Entry<String, Object> entry : activationRecord.entrySet()) {
+			Object value = entry.getValue();
+			if(value.getClass().isArray())
+				result += entry.getKey().hashCode() ^ Arrays.deepHashCode((Object[]) value);
+			else
+				result += entry.getKey().hashCode() ^ value.hashCode();
+		}
+//		System.out.println("\t" + result);
 		return result;
 	}
 
@@ -61,8 +69,26 @@ public class ActivationRecord implements Cloneable {
 		if (activationRecord == null) {
 			if (other.activationRecord != null)
 				return false;
-		} else if (!activationRecord.equals(other.activationRecord))
-			return false;
+		} else {// if (!activationRecord.equals(other.activationRecord)) {
+            for (Entry<String, Object> e : activationRecord.entrySet()) {
+                String key = e.getKey();
+                Object value = e.getValue();
+                if (value == null) {
+                    if (!(other.activationRecord.get(key) == null && 
+                    		other.activationRecord.containsKey(key)))
+                        return false;
+                } else {
+                	Object otherValue = other.activationRecord.get(key);
+                	if(value.getClass().isArray()) {
+                		if(!otherValue.getClass().isArray())
+                			return false;
+                		if(!Arrays.deepEquals((Object[])value, (Object[])other.activationRecord.get(key)))
+                			return false;
+                	} else if (!value.equals(other.activationRecord.get(key)))
+                        return false;
+                }
+            }
+		}
 		return true;
 	}
 

@@ -56,13 +56,20 @@ public class CoreRebecaActorState extends AbstractActorState implements Serializ
 		return temp;
 	}
 
-	public int deepHashCode() {
+	public int hashCode() {
 		final int prime = 31;
-		int result = super.deepHashCode();
+		int result = super.hashCode();
 		result = prime * result + ((queue == null) ? 0 : queue.hashCode());
 		return result;
 	}
 	
+//	public int deepHashCode() {
+//		final int prime = 31;
+//		int result = super.deepHashCode();
+//		result = prime * result + ((queue == null) ? 0 : queue.hashCode());
+//		return result;
+//	}
+//	
 	public boolean deepEquals(Object obj) {
 		if (this == obj)
 			return true;

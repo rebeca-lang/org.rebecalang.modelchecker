@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.rebecalang.compiler.modelcompiler.SymbolTable;
 import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.RebecaModel;
 import org.rebecalang.compiler.utils.Pair;
@@ -13,6 +15,7 @@ import org.rebecalang.transparentactormodelchecker.TransparentActorTransitionSys
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.Feature;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.ModelCheckingException;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.TransparentActorAbstractModelChecker;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.action.Action;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.compositionlevelrule.CompositionLevelExecuteStatementRule;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.compositionlevelrule.CompositionLevelNetworkDeliveryRule;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractActorState;
@@ -43,6 +46,12 @@ public class TransparentActorCoreRebecaCoarseGrainedDFSModelChecker extends Tran
 
 	private boolean completeTransitionSystem;
 	
+	private Logger logger;
+
+	public TransparentActorCoreRebecaCoarseGrainedDFSModelChecker() {
+		logger = LogManager.getRootLogger();
+	}
+	
 	public TransparentActorModelCheckingResult modelcheck(Pair<RebecaModel,SymbolTable> compiledRebecaFile, RILModel rilModel, Set<Feature> features) {
 		this.compiledRebecaFile = compiledRebecaFile;
 		this.rilModel = rilModel;
@@ -54,6 +63,9 @@ public class TransparentActorCoreRebecaCoarseGrainedDFSModelChecker extends Tran
 		
 		TransparentActorTransitionSystemState<CoreRebecaSystemState> initialState = 
 				transitionSystem.getInitialState();
+		
+		logger.debug("The initial state is: {}", initialState.getState());
+
 		long start = System.currentTimeMillis();
 		try {
 			dfs(initialState);
@@ -86,19 +98,19 @@ public class TransparentActorCoreRebecaCoarseGrainedDFSModelChecker extends Tran
 		
 		for(int cnt = 0; cnt < transitions.size(); cnt++) {
 			systemState = (CoreRebecaSystemState) transitions.getDestinationsStates().get(cnt);
-//			Action action = transitions.getDestinationsActions().get(cnt);
 			List<AbstractSystemState> destinations = new ArrayList<AbstractSystemState>();
+
+			Action action = transitions.getDestinationsActions().get(cnt);
 			destinations.add(systemState);
 			destinations.addAll(courseGraindExecuteMessageServer(systemState));
-//			System.out.println(action.getActionLabel());
-			deliverAllMessagesAndStore(state, destinations);
-//			if(transitionSystem.size() % 20 == 0)
-//				System.out.println(transitionSystem.size());
+			if(transitionSystem.size() == 3)
+				System.out.println(transitionSystem.size());
+			deliverAllMessagesAndStore(state, destinations, action);
 		}
 	}
 
 	private void deliverAllMessagesAndStore(TransparentActorTransitionSystemState<CoreRebecaSystemState> state,
-			List<AbstractSystemState> destinations) throws ModelCheckingException {
+			List<AbstractSystemState> destinations, Action action) throws ModelCheckingException {
 		CoreRebecaSystemState systemState;
 		for(int stateCounter = 0; stateCounter < destinations.size(); stateCounter++) {
 			systemState = (CoreRebecaSystemState) destinations.get(stateCounter);
@@ -108,8 +120,12 @@ public class TransparentActorCoreRebecaCoarseGrainedDFSModelChecker extends Tran
 				}
 			} catch (RuleIsDisabledException exception) {}
 //			long temp = System.nanoTime();
+			logger.debug("Taking action {} resulted in the state: {}", 
+					action, systemState);
 			Pair<Boolean, TransparentActorTransitionSystemState<CoreRebecaSystemState>> result = 
 					transitionSystem.addIfNotExists(state, systemState);
+			logger.info("S{} -> S{} [label=\"{}\"]", state.getId(), 
+					result.getSecond().getId(), action.getActionLabel());
 //			System.out.println("S" + state.getId() + " -> S" + result.getSecond().getId() + "[label=\"" + "\"]\n");//action.getActionLabel() +"\"]\n");
 //			System.out.println(System.nanoTime() - temp);
 			if(result.getFirst())

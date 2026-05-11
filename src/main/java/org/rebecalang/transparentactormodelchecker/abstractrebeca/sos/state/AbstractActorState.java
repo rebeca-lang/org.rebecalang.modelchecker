@@ -5,6 +5,8 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.ArrayType;
 import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.FieldDeclaration;
 import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.Type;
@@ -31,6 +33,8 @@ public abstract class AbstractActorState implements Serializable, Cloneable {
 	protected int priority;
 	protected ActorScope scope;
 
+	private static Logger logger = LogManager.getRootLogger();
+	
 	public AbstractActorState(int id) {
 		this.id = id;
 		this.priority = MIN_PRIORITY;
@@ -161,15 +165,16 @@ public abstract class AbstractActorState implements Serializable, Cloneable {
 
 	@Override
 	public int hashCode() {
-		return id;
-	}
-
-	public int deepHashCode() {
+//		return id;
+//	}
+//
+//	public int deepHashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + id;
 		result = prime * result + priority;
 		result = prime * result + ((scope == null) ? 0 : scope.hashCode());
+		logger.debug("hashcode for {} is {}", id, result);
 		return result;
 	}
 
