@@ -48,7 +48,11 @@ public class ActivationRecord implements Cloneable {
 //		result = prime * result + ((activationRecord == null) ? 0 : activationRecord.hashCode());
 		for (Entry<String, Object> entry : activationRecord.entrySet()) {
 			Object value = entry.getValue();
-			if(value.getClass().isArray())
+			// equals() treats a null value as a value in its own right, so hashing has
+			// to accept one too rather than dereferencing it
+			if(value == null)
+				result += entry.getKey().hashCode();
+			else if(value.getClass().isArray())
 				result += entry.getKey().hashCode() ^ Arrays.deepHashCode((Object[]) value);
 			else
 				result += entry.getKey().hashCode() ^ value.hashCode();

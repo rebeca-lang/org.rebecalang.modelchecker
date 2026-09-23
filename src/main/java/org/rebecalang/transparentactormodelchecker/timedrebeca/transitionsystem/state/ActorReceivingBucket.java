@@ -37,7 +37,7 @@ public class ActorReceivingBucket implements Cloneable {
 				return FALSE;
 			if(this.sentMessages.size() == 0)
 				return TRUE;
-			for(int cnt = 0; cnt < this.sentMessages.size(); cnt++) {
+			for(int cnt = 0; cnt < thisMessages.size(); cnt++) {
 				Pair<Boolean, Integer> result = thisMessages.get(cnt).shiftEquals(otherMessages.get(cnt));
 				if(!result.getFirst())
 					return FALSE;

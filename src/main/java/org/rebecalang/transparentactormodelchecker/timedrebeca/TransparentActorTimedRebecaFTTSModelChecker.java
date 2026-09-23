@@ -104,9 +104,11 @@ public class TransparentActorTimedRebecaFTTSModelChecker extends TransparentActo
 		
 		try {
 			dfs(initialState);
-		} catch (Exception e) {
-			e.printStackTrace();;
-			TransparentActorModelCheckingResult result = 
+		} catch (ModelCheckingException e) {
+			// only the search reaching a state with no applicable rule is reported as a
+			// result; anything else is a defect in the checker and must not be returned
+			// as though it were an answer
+			TransparentActorModelCheckingResult result =
 					new TransparentActorModelCheckingResult(TransparentActorModelCheckingResult.INTERNAL_ERROR);
 			result.setTransitionSystem(transitionSystem);
 			return result;
@@ -225,8 +227,12 @@ public class TransparentActorTimedRebecaFTTSModelChecker extends TransparentActo
 		delayMehodBody.add(new AssignmentInstructionBean(new Variable("now"), new Variable("now"), new Variable("arg0"), "+"));
 		delayMehodBody.add(new PopARInstructionBean());
 		delayMehodBody.add(new EndMethodInstructionBean());
-		String methodName = RILUtilities.computeMethodName(
+		// computeMethodName renders a null class name as the literal "null.", while the
+		// RIL emits a base-less call as plain "delay$int". Keep only the part after the
+		// separator so the registered name is the one the instruction actually asks for.
+		String canonicalName = RILUtilities.computeMethodName(
 				null, "delay", delayMethodInputType);
+		String methodName = canonicalName.substring(canonicalName.indexOf('.') + 1);
 		methodLookup.addMethod(methodName, methodName);
 		this.rilModel.addMethod(methodName, delayMehodBody);
 	}

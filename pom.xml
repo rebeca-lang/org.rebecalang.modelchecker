@@ -149,6 +149,11 @@
 			<plugin>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>${org.apache.maven.plugins.surefire.version}</version>
+				<configuration>
+					<!-- The depth-first search recurses once per explored state, so the
+					     larger models need more than the default thread stack. -->
+					<argLine>-Xss64m</argLine>
+				</configuration>
 			</plugin>
 			<plugin>
 				<artifactId>maven-failsafe-plugin</artifactId>

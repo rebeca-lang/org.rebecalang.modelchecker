@@ -1,7 +1,9 @@
 package org.rebecalang.transparentactormodelchecker.corerebeca;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,20 +22,35 @@ import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.AssignmentI
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.DeclarationInstructionBean;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.InstructionBean;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.JumpIfNotInstructionBean;
+import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.MethodCallInstructionBean;
+import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.MsgsrvCallInstructionBean;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.NonDetValue;
+import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.PopARInstructionBean;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.RebecInstantiationInstructionBean;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.ReturnInstructionBean;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.Variable;
 import org.rebecalang.transparentactormodelchecker.TransparentActorModelCheckerConfig;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.MethodLookup;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.action.MessageAction;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.action.MethodCallAction;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.action.NewInstanceAction;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.action.TauAction;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.actorlevelrule.statementlevelrule.AssignmentRule;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.actorlevelrule.statementlevelrule.ConditionalRule;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.actorlevelrule.statementlevelrule.EndMSGSrvRule;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.actorlevelrule.statementlevelrule.EndMethodCallRule;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.actorlevelrule.statementlevelrule.MethodCallRule;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.actorlevelrule.statementlevelrule.PopRule;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.actorlevelrule.statementlevelrule.PushRule;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.actorlevelrule.statementlevelrule.RebecInstantiationRule;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.actorlevelrule.statementlevelrule.ReturnRule;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.actorlevelrule.statementlevelrule.SendMessageRule;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.actorlevelrule.statementlevelrule.VariableDeclarationRule;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractActorState;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractMessageState;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.ActivationRecord;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.ActorScope;
+import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.ActorStateRepresentor;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.ActorsContainer;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.util.CloningRepository;
 import org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state.CoreRebecaActorState;
@@ -75,7 +92,26 @@ public class StatementsSOSRulesTest {
     
     @Autowired
     protected ConditionalRule conditionalSOSRule;
-    
+
+    @Autowired
+    protected PushRule pushSOSRule;
+
+    @Autowired
+    protected PopRule popSOSRule;
+
+    @Autowired
+    protected MethodCallRule methodCallSOSRule;
+
+    @Autowired
+    protected EndMethodCallRule endMethodCallSOSRule;
+
+    @Autowired
+    protected EndMSGSrvRule endMsgSrvSOSRule;
+
+    // SendMessageRule is the only statement-level rule without @Component, so it is
+    // not a Spring bean and has to be constructed directly.
+    protected SendMessageRule sendMessageSOSRule = new SendMessageRule();
+
     protected CoreRebecaTypeSystem typeSystem;
     
     CoreRebecaActorState coreRebecaActorState;
@@ -90,7 +126,6 @@ public class StatementsSOSRulesTest {
     	environment.setVariableValue(ActorScope.ACTORS_IN_ENVIRONMENT_VARIABLE_NAME,
     			actorsContainer);
 
-    	
     	typeSystem = new CoreRebecaTypeSystem();
     	typeSystem.clear();
     	ReactiveClassDeclaration rcd = new ReactiveClassDeclaration();
@@ -122,7 +157,6 @@ public class StatementsSOSRulesTest {
     	coreRebecaActorState.addVariableToScope("var3", 3);
     	coreRebecaActorState.addVariableToScope(CoreRebecaActorState.PC, new Pair<String, Integer>("-", 0));
 
-    	
 		Variable v1 = new Variable("var1");
 		Variable v2 = new Variable("var2");
 		Variable v3 = new Variable("var3");
@@ -219,7 +253,193 @@ public class StatementsSOSRulesTest {
     	state.getFirst();
     }
 
-    
+    @Test
+    public void GIVEN_ActorStateHasAVariable_WHEN_PushInstructionIsExecuted_THEN_ANewFrameIsOpened() {
+    	coreRebecaActorState.addVariableToScope("outer", 1);
+    	coreRebecaActorState.addVariableToScope(CoreRebecaActorState.PC, new Pair<String, Integer>("-", 0));
+
+    	Transition<AbstractActorState> result = pushSOSRule.applyRule(
+    			coreRebecaActorState, coreRebecaActorState);
+
+    	coreRebecaActorState.addVariableToScope("inner", 2);
+    	Assertions.assertTrue(coreRebecaActorState.hasVariableInScope("inner"));
+    	coreRebecaActorState.popFromScope();
+    	Assertions.assertFalse(coreRebecaActorState.hasVariableInScope("inner"));
+    	Assertions.assertTrue(coreRebecaActorState.hasVariableInScope("outer"));
+
+    	Assertions.assertEquals(1, coreRebecaActorState.getPC().getSecond());
+    	Assertions.assertEquals(TauAction.TAU, result.getDestinationsActions().get(0));
+    }
+
+    @Test
+    public void GIVEN_TwoNestedFrames_WHEN_PopInstructionRequestsTwoPops_THEN_BothFramesAreDropped() {
+    	coreRebecaActorState.addVariableToScope("outer", 1);
+    	coreRebecaActorState.addVariableToScope(CoreRebecaActorState.PC, new Pair<String, Integer>("-", 0));
+    	coreRebecaActorState.pushToScope();
+    	coreRebecaActorState.addVariableToScope("first", 2);
+    	coreRebecaActorState.pushToScope();
+    	coreRebecaActorState.addVariableToScope("second", 3);
+
+    	PopARInstructionBean pib = new PopARInstructionBean(2, false);
+    	popSOSRule.applyRule(coreRebecaActorState, coreRebecaActorState, pib);
+
+    	Assertions.assertFalse(coreRebecaActorState.hasVariableInScope("second"));
+    	Assertions.assertFalse(coreRebecaActorState.hasVariableInScope("first"));
+    	Assertions.assertTrue(coreRebecaActorState.hasVariableInScope("outer"));
+    	Assertions.assertEquals(1, coreRebecaActorState.getPC().getSecond());
+    }
+
+    @Test
+    public void GIVEN_TwoNestedFrames_WHEN_PopInstructionRequestsOnePop_THEN_OnlyTheInnermostIsDropped() {
+    	coreRebecaActorState.addVariableToScope(CoreRebecaActorState.PC, new Pair<String, Integer>("-", 0));
+    	coreRebecaActorState.pushToScope();
+    	coreRebecaActorState.addVariableToScope("first", 2);
+    	coreRebecaActorState.pushToScope();
+    	coreRebecaActorState.addVariableToScope("second", 3);
+
+    	popSOSRule.applyRule(coreRebecaActorState, coreRebecaActorState,
+    			new PopARInstructionBean(1, false));
+
+    	Assertions.assertFalse(coreRebecaActorState.hasVariableInScope("second"));
+    	Assertions.assertTrue(coreRebecaActorState.hasVariableInScope("first"));
+    }
+
+    private MethodCallInstructionBean methodCall(String methodName, String resolvedName,
+    		Map<String, Object> parameters, Variable result) {
+    	MethodLookup methodLookup = new MethodLookup();
+    	methodLookup.addMethod(methodName, resolvedName);
+    	// the rule keeps a plain field for the lookup table, it is not injected
+    	methodCallSOSRule.setMethodLookup(methodLookup);
+    	MethodCallInstructionBean mcib =
+    			new MethodCallInstructionBean(null, methodName, parameters);
+    	mcib.setFunctionCallResult(result);
+    	return mcib;
+    }
+
+    @Test
+    public void GIVEN_AMethodWithALiteralArgument_WHEN_MethodCallIsExecuted_THEN_TheCalleeFrameIsEntered() {
+    	coreRebecaActorState.addVariableToScope("res", 0);
+    	coreRebecaActorState.addVariableToScope(CoreRebecaActorState.PC, new Pair<String, Integer>("-", 0));
+    	Map<String, Object> parameters = new HashMap<String, Object>();
+    	parameters.put("p", 5);
+
+    	Transition<AbstractActorState> result = methodCallSOSRule.applyRule(
+    			coreRebecaActorState, coreRebecaActorState,
+    			methodCall("m", "A.m", parameters, new Variable("res")));
+
+    	Assertions.assertEquals("A.m", coreRebecaActorState.getPC().getFirst());
+    	Assertions.assertEquals(0, coreRebecaActorState.getPC().getSecond());
+    	Assertions.assertEquals(5, coreRebecaActorState.getVariableValue(new Variable("p")));
+    	Assertions.assertTrue(result.getDestinationsActions().get(0) instanceof MethodCallAction);
+    }
+
+    @Test
+    public void GIVEN_AMethodWithAVariableArgument_WHEN_MethodCallIsExecuted_THEN_TheArgumentIsEvaluatedInTheCaller() {
+    	coreRebecaActorState.addVariableToScope("x", 7);
+    	coreRebecaActorState.addVariableToScope("res", 0);
+    	coreRebecaActorState.addVariableToScope(CoreRebecaActorState.PC, new Pair<String, Integer>("-", 0));
+    	Map<String, Object> parameters = new HashMap<String, Object>();
+    	parameters.put("p", new Variable("x"));
+
+    	methodCallSOSRule.applyRule(coreRebecaActorState, coreRebecaActorState,
+    			methodCall("m", "A.m", parameters, new Variable("res")));
+
+    	Assertions.assertEquals(7, coreRebecaActorState.getVariableValue(new Variable("p")));
+    }
+
+    @Test
+    public void GIVEN_ACalleeFrame_WHEN_EndMethodCallIsExecuted_THEN_TheCallersProgramCounterIsRestored() {
+    	coreRebecaActorState.addVariableToScope("res", 0);
+    	coreRebecaActorState.addVariableToScope(CoreRebecaActorState.PC, new Pair<String, Integer>("-", 0));
+    	methodCallSOSRule.applyRule(coreRebecaActorState, coreRebecaActorState,
+    			methodCall("m", "A.m", new HashMap<String, Object>(), new Variable("res")));
+    	Assertions.assertEquals("A.m", coreRebecaActorState.getPC().getFirst());
+
+    	Transition<AbstractActorState> result = endMethodCallSOSRule.applyRule(
+    			coreRebecaActorState, coreRebecaActorState);
+
+    	Assertions.assertEquals("-", coreRebecaActorState.getPC().getFirst());
+    	Assertions.assertEquals(1, coreRebecaActorState.getPC().getSecond());
+    	Assertions.assertEquals(TauAction.TAU, result.getDestinationsActions().get(0));
+    }
+
+    @Test
+    public void GIVEN_AMessageServerFrame_WHEN_EndMsgSrvIsExecuted_THEN_TheFrameIsDropped() {
+    	coreRebecaActorState.addVariableToScope("actorField", 1);
+    	coreRebecaActorState.addVariableToScope(CoreRebecaActorState.PC, new Pair<String, Integer>("-", 0));
+    	coreRebecaActorState.pushToScope();
+    	coreRebecaActorState.addVariableToScope("msgsrvLocal", 2);
+
+    	Transition<AbstractActorState> result = endMsgSrvSOSRule.applyRule(
+    			coreRebecaActorState, coreRebecaActorState);
+
+    	Assertions.assertFalse(coreRebecaActorState.hasVariableInScope("msgsrvLocal"));
+    	Assertions.assertTrue(coreRebecaActorState.hasVariableInScope("actorField"));
+    	Assertions.assertEquals(TauAction.TAU, result.getDestinationsActions().get(0));
+    }
+
+    @Test
+    public void GIVEN_AKnownPeer_WHEN_SendMessageIsExecuted_THEN_TheMessageIsAddressedToThatPeer() {
+    	CoreRebecaActorState peer = new CoreRebecaActorState(1);
+    	peer.setEnvironment(coreRebecaActorState.getEnvironment());
+    	((ActorsContainer) coreRebecaActorState.getEnvironment().getVariableValue(
+    			ActorScope.ACTORS_IN_ENVIRONMENT_VARIABLE_NAME)).setActor(1, peer);
+    	coreRebecaActorState.addVariableToScope("peer", peer);
+    	coreRebecaActorState.addVariableToScope(CoreRebecaActorState.PC, new Pair<String, Integer>("-", 0));
+
+    	Map<String, Object> parameters = new HashMap<String, Object>();
+    	parameters.put("v", 3);
+    	MsgsrvCallInstructionBean bean =
+    			new MsgsrvCallInstructionBean(new Variable("peer"), "ping", parameters);
+
+    	Transition<AbstractActorState> result = sendMessageSOSRule.applyRule(
+    			coreRebecaActorState, coreRebecaActorState, bean);
+
+    	MessageAction action = (MessageAction) result.getDestinationsActions().get(0);
+    	AbstractMessageState message = action.getMessage();
+    	Assertions.assertEquals("ping", message.getName());
+    	Assertions.assertEquals(0, message.getSenderId());
+    	Assertions.assertEquals(1, message.getReceiverId());
+    	Assertions.assertEquals(3, message.getParameters().get("v"));
+    	Assertions.assertEquals(1, coreRebecaActorState.getPC().getSecond());
+    }
+
+    @Test
+    public void GIVEN_NoReceiverIsNamed_WHEN_SendMessageIsExecuted_THEN_TheMessageIsSentToSelf() {
+    	coreRebecaActorState.addVariableToScope(CoreRebecaActorState.PC, new Pair<String, Integer>("-", 0));
+    	MsgsrvCallInstructionBean bean = new MsgsrvCallInstructionBean(
+    			null, "tick", new HashMap<String, Object>());
+
+    	Transition<AbstractActorState> result = sendMessageSOSRule.applyRule(
+    			coreRebecaActorState, coreRebecaActorState, bean);
+
+    	AbstractMessageState message = ((MessageAction) result.getDestinationsActions().get(0)).getMessage();
+    	Assertions.assertEquals(coreRebecaActorState.getId(), message.getReceiverId());
+    	Assertions.assertEquals(coreRebecaActorState.getId(), message.getSenderId());
+    }
+
+    @Test
+    public void GIVEN_AnActorValuedArgument_WHEN_SendMessageIsExecuted_THEN_ItTravelsAsAnActorReference() {
+    	CoreRebecaActorState peer = new CoreRebecaActorState(1);
+    	peer.setEnvironment(coreRebecaActorState.getEnvironment());
+    	((ActorsContainer) coreRebecaActorState.getEnvironment().getVariableValue(
+    			ActorScope.ACTORS_IN_ENVIRONMENT_VARIABLE_NAME)).setActor(1, peer);
+    	coreRebecaActorState.addVariableToScope("peer", peer);
+    	coreRebecaActorState.addVariableToScope(CoreRebecaActorState.PC, new Pair<String, Integer>("-", 0));
+
+    	Map<String, Object> parameters = new HashMap<String, Object>();
+    	parameters.put("who", new Variable("peer"));
+    	MsgsrvCallInstructionBean bean =
+    			new MsgsrvCallInstructionBean(null, "notify", parameters);
+
+    	Transition<AbstractActorState> result = sendMessageSOSRule.applyRule(
+    			coreRebecaActorState, coreRebecaActorState, bean);
+
+    	AbstractMessageState message = ((MessageAction) result.getDestinationsActions().get(0)).getMessage();
+    	Assertions.assertTrue(message.getParameters().get("who") instanceof ActorStateRepresentor);
+    	Assertions.assertEquals(1, ((ActorStateRepresentor) message.getParameters().get("who")).getActorID());
+    }
+
 //    @Configuration
 //    @ComponentScan(basePackages = { 
 //    		"org.rebecalang.transparentactormodelchecker.abstractrebeca", 

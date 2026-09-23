@@ -83,4 +83,114 @@ public class TimedRebecaMessageTest {
 		result = message1.shiftEquals(message2);
 		assertTrue(result.getFirst());
 	}
+
+	@Test
+	public void GIVEN_TheSameMessage_WHEN_ShiftEqualsIsCalled_THEN_TheShiftIsZero() {
+		message2.setName("m1");
+
+		Pair<Boolean, Integer> result = message1.shiftEquals(message2);
+
+		assertTrue(result.getFirst());
+		assertEquals(0, result.getSecond());
+	}
+
+	@Test
+	public void GIVEN_AnEarlierMessage_WHEN_ShiftEqualsIsCalled_THEN_TheShiftIsNegative() {
+		message2.setName("m1");
+		message2.setArrival(4);
+		message2.setDeadline(14);
+
+		Pair<Boolean, Integer> result = message1.shiftEquals(message2);
+
+		assertTrue(result.getFirst());
+		assertEquals(-6, result.getSecond());
+	}
+
+	@Test
+	public void GIVEN_ArrivalAndDeadlineMoveByDifferentAmounts_WHEN_ShiftEqualsIsCalled_THEN_TheyAreNotEquivalent() {
+		message2.setName("m1");
+		message2.setArrival(20);
+		message2.setDeadline(25);
+
+		assertFalse(message1.shiftEquals(message2).getFirst());
+	}
+
+	@Test
+	public void GIVEN_ADifferentReceiver_WHEN_ShiftEqualsIsCalled_THEN_TheyAreNotEquivalent() {
+		message2.setName("m1");
+		message2.setReceiverId(coreRebecaActorState.getId() + 1);
+
+		assertFalse(message1.shiftEquals(message2).getFirst());
+	}
+
+	@Test
+	public void GIVEN_AMessage_WHEN_ItIsCloned_THEN_TimingIsCopiedAndIndependent() {
+		TimedRebecaMessageState clone = message1.clone();
+
+		assertEquals(message1.getName(), clone.getName());
+		assertEquals(10, clone.getArrival());
+		assertEquals(20, clone.getDeadline());
+
+		clone.setArrival(99);
+		assertEquals(10, message1.getArrival());
+	}
+
+	private TimedRebecaMessageState incoming(String name, int sender, int arrival) {
+		TimedRebecaMessageState message = new TimedRebecaMessageState();
+		message.setName(name);
+		message.setSenderId(sender);
+		message.setReceiverId(coreRebecaActorState.getId());
+		message.setParameters(new HashMap<String, Object>());
+		message.setArrival(arrival);
+		message.setDeadline(arrival + 10);
+		return message;
+	}
+
+	@Test
+	public void GIVEN_AFreshActor_WHEN_TheBagIsInspected_THEN_ItIsEmptyUntilAMessageArrives() {
+		assertTrue(coreRebecaActorState.bagIsEmpty());
+		assertTrue(coreRebecaActorState.messageQueueIsEmpty());
+
+		coreRebecaActorState.receiveMessage(incoming("m", 1, 10));
+
+		assertFalse(coreRebecaActorState.bagIsEmpty());
+		assertFalse(coreRebecaActorState.messageQueueIsEmpty());
+	}
+
+	@Test
+	public void GIVEN_MessagesArriveOutOfOrder_WHEN_TheyAreReceived_THEN_TheBagIsOrderedByArrival() {
+		coreRebecaActorState.receiveMessage(incoming("late", 1, 30));
+		coreRebecaActorState.receiveMessage(incoming("early", 2, 10));
+
+		assertEquals(10, coreRebecaActorState.getFirstMessageArrivalTime());
+	}
+
+	@Test
+	public void GIVEN_MessagesWithDifferentArrivals_WHEN_EnabledIndecesAreAskedForATime_THEN_OnlyArrivedOnesAreEnabled() {
+		coreRebecaActorState.receiveMessage(incoming("early", 1, 10));
+		coreRebecaActorState.receiveMessage(incoming("late", 2, 30));
+
+		assertEquals(1, coreRebecaActorState.getEnableMessagesIndeces(20).size());
+		assertEquals(2, coreRebecaActorState.getEnableMessagesIndeces(30).size());
+		assertEquals(0, coreRebecaActorState.getEnableMessagesIndeces(5).size());
+	}
+
+	@Test
+	public void GIVEN_TwoMessagesFromOneSender_WHEN_EnabledIndecesAreAsked_THEN_OnlyTheFirstIsEnabled() {
+		coreRebecaActorState.receiveMessage(incoming("first", 1, 10));
+		coreRebecaActorState.receiveMessage(incoming("second", 1, 20));
+
+		assertEquals(1, coreRebecaActorState.getEnableMessagesIndeces(30).size());
+		assertEquals(0, coreRebecaActorState.getEnableMessagesIndeces(30).get(0));
+	}
+
+	@Test
+	public void GIVEN_AMessageInTheBag_WHEN_ItIsTakenAsEnabled_THEN_ItLeavesTheBag() {
+		coreRebecaActorState.receiveMessage(incoming("m", 1, 10));
+
+		TimedRebecaMessageState taken = coreRebecaActorState.getEnableMessage(0);
+
+		assertEquals("m", taken.getName());
+		assertTrue(coreRebecaActorState.bagIsEmpty());
+	}
 }

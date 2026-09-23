@@ -37,14 +37,15 @@ public class TimedRebecaNetworkState extends AbstractNetworkState implements Ser
 		} else {
 			int arrivalTime = message.getArrival();
 			int cnt = 0;
+			boolean sameTimeBucketExists = false;
 			for(; cnt < receivedMessages.size(); cnt++) {
 				int time = receivedMessages.get(cnt).getTime();
 				if(time < arrivalTime)
 					continue;
-				if(time == arrivalTime)
-					break;
-			}			
-			if(cnt != receivedMessages.size()) {
+				sameTimeBucketExists = (time == arrivalTime);
+				break;
+			}
+			if(sameTimeBucketExists) {
 				timeBucket = receivedMessages.get(cnt);
  			} else {
  				timeBucket = new TimeBucket(arrivalTime);

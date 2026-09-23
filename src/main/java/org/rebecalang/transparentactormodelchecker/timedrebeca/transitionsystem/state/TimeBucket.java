@@ -37,7 +37,7 @@ public class TimeBucket implements Cloneable {
 	
 	public TimeBucket clone() {
 		TimeBucket timeBucket = new TimeBucket(time);
-		for(Entry<Integer, ActorReceivingBucket> arBucket : timeBucket.messages.entrySet()) {
+		for(Entry<Integer, ActorReceivingBucket> arBucket : this.messages.entrySet()) {
 			timeBucket.messages.put(arBucket.getKey(), arBucket.getValue().clone());
 		}
 		return timeBucket;
