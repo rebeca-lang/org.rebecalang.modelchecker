@@ -3,7 +3,7 @@ package org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state;
 import java.io.Serializable;
 
 @SuppressWarnings("serial")
-public class ActorStateRepresentor implements Serializable {
+public class ActorStateRepresentor implements Serializable, Cloneable {
 	private int actorID;
 
 	public ActorStateRepresentor(int id) {

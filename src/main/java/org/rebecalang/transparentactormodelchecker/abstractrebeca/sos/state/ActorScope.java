@@ -13,6 +13,7 @@ public class ActorScope implements Serializable, Cloneable {
 	public final static String RETURN_VALUE_VARIABLE_NAME = "$RETURN$";
 	public final static int ENVIRONMENT_INDEX = 0;
 	public final static String ACTORS_IN_ENVIRONMENT_VARIABLE_NAME = "actors";
+	public final static Variable ACTORS_IN_ENVIRONMENT_VARIABLE = new Variable("actors");
 	
 	private ArrayList<ActivationRecord> scope;
 	
@@ -53,8 +54,11 @@ public class ActorScope implements Serializable, Cloneable {
 	}
 
 	private int getIndexValue(Object indexObject) {
-		if (indexObject instanceof Variable) 
+		if (indexObject instanceof Variable) {
+			if(!(getVariableValue((Variable) indexObject) instanceof Number))
+				System.out.println(getVariableValue((Variable) indexObject));
 			return ((Number)getVariableValue((Variable) indexObject)).intValue();
+		}
 		return ((Number)indexObject).intValue();
 	}
 	

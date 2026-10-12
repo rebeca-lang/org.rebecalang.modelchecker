@@ -20,7 +20,7 @@
 	</Appenders>
 	<Loggers>
 		<!-- pattern layout actually uses location, so we need to include it -->
-		<Root level="debug" includeLocation="true">
+		<Root level="info" includeLocation="true">
 			<AppenderRef ref="RandomAccessFile" />
 		</Root>
 	</Loggers>

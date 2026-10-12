@@ -3,12 +3,14 @@ package org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem
 import static org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.state.TimedRebecaMessageState.FALSE;
 import static org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.state.TimedRebecaMessageState.TRUE;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
 import org.rebecalang.compiler.utils.Pair;
 
-public class TimeBucket implements Cloneable {
+@SuppressWarnings("serial")
+public class TimeBucket implements Serializable, Cloneable {
 	private int time;
 	private HashMap<Integer,ActorReceivingBucket> messages;
 	
@@ -37,7 +39,7 @@ public class TimeBucket implements Cloneable {
 	
 	public TimeBucket clone() {
 		TimeBucket timeBucket = new TimeBucket(time);
-		for(Entry<Integer, ActorReceivingBucket> arBucket : timeBucket.messages.entrySet()) {
+		for(Entry<Integer, ActorReceivingBucket> arBucket : messages.entrySet()) {
 			timeBucket.messages.put(arBucket.getKey(), arBucket.getValue().clone());
 		}
 		return timeBucket;

@@ -44,4 +44,14 @@ public class HashCodeAndEqualsTest {
     	assertTrue(coreRebecaActorState1.deepEquals(coreRebecaActorState2));
     	assertTrue(coreRebecaActorState2.deepEquals(coreRebecaActorState1));
 	}
+    
+    @Test
+    public void GIVEN_ActorState_WHEN_ValueIsNull_THEN_CorrectHashValueIsComputer() {
+		
+    	coreRebecaActorState1.addVariableToScope("var1", null);
+    	coreRebecaActorState1.addVariableToScope(CoreRebecaActorState.PC, new Pair<String, Integer>("-", 0));
+    	
+    	assertEquals(-1998859882, coreRebecaActorState1.hashCode());
+	}
+
 }

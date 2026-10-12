@@ -128,7 +128,7 @@ public class ExecuteStatementRule extends AbstractSOSRule<AbstractActorState> {
 					instruction instanceof PopARInstructionBean;
 			AbstractSOSRule<AbstractActorState> rule = getRule(instruction);
 
-//			logger.debug("Executing instruction " + instruction);
+			logger.debug("Executing instruction " + instruction);
 			destinations = rule.applyRule(state, state, instruction);
 		} while(ignorableInstructionIsExecuted);
 		return destinations;

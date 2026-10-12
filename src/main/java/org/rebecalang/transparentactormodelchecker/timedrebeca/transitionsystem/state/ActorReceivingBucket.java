@@ -3,6 +3,7 @@ package org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem
 import static org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.state.TimedRebecaMessageState.FALSE;
 import static org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.state.TimedRebecaMessageState.TRUE;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
@@ -10,7 +11,8 @@ import java.util.Map.Entry;
 import org.rebecalang.compiler.utils.Pair;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.util.CloningRepository;
 
-public class ActorReceivingBucket implements Cloneable {
+@SuppressWarnings("serial")
+public class ActorReceivingBucket implements Serializable, Cloneable {
 	private HashMap<Integer,ArrayList<TimedRebecaMessageState>> sentMessages;
 
 	public ActorReceivingBucket() {
@@ -60,13 +62,12 @@ public class ActorReceivingBucket implements Cloneable {
 //		return sentMessages;
 //	}
 	
-	public ArrayList<TimedRebecaMessageState> getAllSentMessages() {
-		ArrayList<TimedRebecaMessageState> allMessages = new ArrayList<TimedRebecaMessageState>();
-		for(ArrayList<TimedRebecaMessageState> messageStates : sentMessages.values())
-			allMessages.addAll(messageStates);
-		return allMessages;
-	}
-	
+//	public ArrayList<TimedRebecaMessageState> getAllSentMessages() {
+//		ArrayList<TimedRebecaMessageState> allMessages = new ArrayList<TimedRebecaMessageState>();
+//		for(ArrayList<TimedRebecaMessageState> messageStates : sentMessages.values())
+//			allMessages.addAll(messageStates);
+//		return allMessages;
+//	}
 	
 	public ActorReceivingBucket clone() {
 		ActorReceivingBucket arBucket = new ActorReceivingBucket();
@@ -106,5 +107,14 @@ public class ActorReceivingBucket implements Cloneable {
 	@Override
 	public String toString() {
 		return sentMessages.toString();
+	}
+	public TimedRebecaMessageState removeFirstMessage() {
+		return sentMessages.values().iterator().next().remove(0);
+	}
+	public boolean isEmpty() {
+		for(ArrayList<TimedRebecaMessageState> value : sentMessages.values())
+			if(!value.isEmpty())
+				return false;
+		return true;
 	}
 }

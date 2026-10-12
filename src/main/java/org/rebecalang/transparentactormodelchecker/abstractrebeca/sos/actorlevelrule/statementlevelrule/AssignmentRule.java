@@ -1,5 +1,6 @@
 package org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.actorlevelrule.statementlevelrule;
 
+import org.apache.logging.log4j.LogManager;
 import org.rebecalang.compiler.modelcompiler.SemanticCheckerUtils;
 import org.rebecalang.modelchecker.corerebeca.RebecaRuntimeInterpreterException;
 import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.AssignmentInstructionBean;
@@ -11,19 +12,19 @@ import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.Abst
 import org.rebecalang.transparentactormodelchecker.transitionsystem.AbstractSOSRule;
 import org.rebecalang.transparentactormodelchecker.transitionsystem.Transition;
 import org.springframework.stereotype.Component;
+import org.apache.logging.log4j.Logger;
 
 @Component
 public class AssignmentRule extends AbstractSOSRule<AbstractActorState> {
 
+	Logger logger;
+	public AssignmentRule() {
+		logger = LogManager.getRootLogger();	
+	}
+	
 	public static Object getValue(Object reference, AbstractActorState actorState) {
 		if (reference instanceof Variable) {
-//			if(((Variable) reference).getIndeces().size() != 0) {
-//				Object j = actorState.getVariableValue(((Variable) reference));
-//				System.out.println(j);
-//			}
 			return actorState.getVariableValue(((Variable) reference));
-//		} else if (reference instanceof RebecInstantiationInstructionBean) {
-//			return CoreRebecaActorState.createTempCoreRebecaActorState();
 		}
 		return reference;
 	}
@@ -82,9 +83,8 @@ public class AssignmentRule extends AbstractSOSRule<AbstractActorState> {
 								"this case should have been reported as an error by the compiler.");
 				} else {
 					rightSideResult = SemanticCheckerUtils.evaluateConstantTerm(operator, null, valueFirst, valueSecond);
-//					if(rightSideResult == AbstractSemanticCheck.NO_VALUE)
-//						System.out.println(valueFirst + operator + valueSecond + "  ...   " + rightSideResult);
 				}
+				logger.debug("Statement {} {} {} -> {}", valueFirst, operator, valueSecond, rightSideResult);
 			}
 			state.setVariableValue((Variable) aib.getLeftVarName(), rightSideResult);			
 			state.movePCtoTheNextInstruction();

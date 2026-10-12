@@ -31,10 +31,16 @@ public class TimedRebecaActorState extends AbstractActorState implements Seriali
 		bag.add(message);
 		for(int cnt = bag.size() - 2; cnt >= 0; cnt--) {
 			int arrival = bag.get(cnt).getArrival();
+//			if(message.getArrival() >= arrival)
+//				break;
+
 			if(message.getArrival() > arrival)
 				break;
+//			if(message.getArrival() == arrival)
+//				if(message.getName().compareTo(bag.get(cnt).getName()) < 0)
+//					break;
 			if(message.getArrival() == arrival)
-				if(message.getName().compareTo(bag.get(cnt).getName()) < 0)
+				if(message.getSenderId() > bag.get(cnt).getSenderId())
 					break;
 			bag.set(cnt + 1, bag.get(cnt));
 			bag.set(cnt, message);
@@ -57,7 +63,7 @@ public class TimedRebecaActorState extends AbstractActorState implements Seriali
 			BaseClassDeclaration metaData = type.getTypeSystem().getMetaData(type);
 			if(metaData instanceof ReactiveClassDeclaration) {
 				ReactiveClassDeclaration rcd = (ReactiveClassDeclaration) metaData;
-				temp.addFieldsVariablesToScope(rcd.getStatevars());
+				temp.addFieldsVariablesToScopeWithDefaultValues(rcd.getStatevars());
 				temp.addFieldsVariablesToScope(rcd.getKnownRebecs());
 			}
 		} catch (CodeCompilationException e) {
@@ -162,18 +168,23 @@ public class TimedRebecaActorState extends AbstractActorState implements Seriali
 	
 	public ArrayList<Integer> getEnableMessagesIndeces(int time) {
 		ArrayList<Integer> result = new ArrayList<Integer>();
-		for(int cnt = 0; cnt < bag.size(); cnt++) {
-			if(bag.get(cnt).getArrival() > time)
+		for(int cnt = 0; cnt < bag.size();) {
+			TimedRebecaMessageState candidateMessage = bag.get(cnt);
+			if(candidateMessage.getArrival() > time)
 				break;
-			boolean repeated = false;
-			for(int cnt2 = 0; cnt2 < cnt; cnt2++) {
-				if(bag.get(cnt2).getSenderId() == bag.get(cnt).getSenderId()) {
-					repeated = true;
-					break;
-				}
-			}
-			if(!repeated)
-				result.add(cnt);
+			result.add(cnt);
+			cnt++;
+			while(cnt < bag.size() && (candidateMessage.getSenderId() == bag.get(cnt).getSenderId()))
+				cnt++;
+//			boolean repeated = false;
+//			for(int cnt2 = 0; cnt2 < cnt; cnt2++) {
+//				if(bag.get(cnt2).getSenderId() == candidateMessage.getSenderId()) {
+//					repeated = true;
+//					break;
+//				}
+//			}
+//			if(!repeated)
+//				result.add(cnt);
 		}
 		return result;
 	}

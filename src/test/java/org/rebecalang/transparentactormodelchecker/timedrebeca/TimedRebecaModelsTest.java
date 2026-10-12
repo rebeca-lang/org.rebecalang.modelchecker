@@ -51,25 +51,26 @@ public class TimedRebecaModelsTest {
     
     @Autowired
     TransparentActorTimedRebecaFTTSModelChecker fttsModelChecker;
-    
+
 	@Test
-    public void GIVEN_ArrayVariable_RebecaModel_WHEN_No_Error() throws ModelCheckingException, IOException {
+    public void sendingAMessageWithActorParameter() throws ModelCheckingException, IOException {
 		String rebecaModel = 
 				"""
-					reactiveclass Test(3) {
+					reactiveclass A(3) {
 						knownrebecs {}
-						statevars{int[2] t;}
-						Test() {
-							t[0] = 4;
-							t[1] = 3;
+						statevars{}
+						A() {
 							self.m1();
 						}
 						msgsrv m1() {
-							self.m1();
+							self.m2(self);
+						}
+						msgsrv m2(A a) {
+							a.m2((A)sender) after(1);
 						}
 					}
 					main {
-						Test t1():();
+						A a():();
 					}				
 				""";
 		File rebecaFile = FileUtils.createTempFile(rebecaModel);
@@ -80,7 +81,7 @@ public class TimedRebecaModelsTest {
 				rebecaModelCompiler.compileRebecaFile(rebecaFile, extention, CoreVersion.CORE_2_3);
 		if(!exceptionContainer.exceptionsIsEmpty()) {
 			exceptionContainer.print(System.out);
-			return;
+			Assertions.assertTrue(false);
 		}
         RILModel transformedRILModel = rebeca2RILModelTransformer.transformModel(
         		compiledRebecaFile, extention, CoreVersion.CORE_2_3);
@@ -89,14 +90,165 @@ public class TimedRebecaModelsTest {
 		printRILModel(transformedRILModel);
 		
 		TransparentActorModelCheckingResult coarseDfsResult = fttsModelChecker.modelcheck(compiledRebecaFile, transformedRILModel, new HashSet<Feature>());
-		Assertions.assertEquals(1, coarseDfsResult.getTransitionSystem().size());
+		Assertions.assertEquals(2, coarseDfsResult.getTransitionSystem().size());
+		System.out.println(coarseDfsResult.getTime());
+		System.out.print(coarseDfsResult.getTransitionSystem().size());
+		System.out.println("(" + coarseDfsResult.getTransitionSystem().getCollisions() + ")");
+	}
+	@Test
+    public void twoSentMessagesInConstruction() throws ModelCheckingException, IOException {
+		String rebecaModel = 
+				"""
+					reactiveclass A(3) {
+						knownrebecs {}
+						statevars{}
+						A() {
+							self.m1();
+							self.m2();
+						}
+						msgsrv m1() {
+						}
+						msgsrv m2() {
+							self.m3() after(1);
+						}
+						msgsrv m3() {
+							self.m3() after(1);
+						}
+					}
+					main {
+						A a():();
+					}				
+				""";
+		File rebecaFile = FileUtils.createTempFile(rebecaModel);
+		
+		HashSet<CompilerExtension> extention = new HashSet<CompilerExtension>();
+		extention.add(CompilerExtension.TIMED_REBECA);
+		Pair<RebecaModel, SymbolTable> compiledRebecaFile = 
+				rebecaModelCompiler.compileRebecaFile(rebecaFile, extention, CoreVersion.CORE_2_3);
+		if(!exceptionContainer.exceptionsIsEmpty()) {
+			exceptionContainer.print(System.out);
+			Assertions.assertTrue(false);
+		}
+        RILModel transformedRILModel = rebeca2RILModelTransformer.transformModel(
+        		compiledRebecaFile, extention, CoreVersion.CORE_2_3);
+        
+
+		printRILModel(transformedRILModel);
+		
+		TransparentActorModelCheckingResult coarseDfsResult = fttsModelChecker.modelcheck(compiledRebecaFile, transformedRILModel, new HashSet<Feature>());
+		Assertions.assertEquals(3, coarseDfsResult.getTransitionSystem().size());
+		System.out.println(coarseDfsResult.getTime());
+		System.out.print(coarseDfsResult.getTransitionSystem().size());
+		System.out.println("(" + coarseDfsResult.getTransitionSystem().getCollisions() + ")");
+	}
+	@Test
+    public void messagesSentFromConstrutorsHavePriorityOverOthers() throws ModelCheckingException, IOException {
+		String rebecaModel = 
+				"""
+					reactiveclass A(3) {
+						knownrebecs {}
+						statevars{}
+						A() {
+							self.m1();
+						}
+						msgsrv m1() {
+						}
+					}
+					reactiveclass B(3) {
+						knownrebecs {A a;}
+						statevars{}
+						B() {
+							self.m2();
+						}
+						msgsrv m2() {
+							a.m1();
+							self.m3() after(1);
+						}
+						msgsrv m3() {
+							self.m3() after(1);
+						}
+					}
+					main {
+						A a():();
+						B b(a):();
+					}				
+				""";
+		File rebecaFile = FileUtils.createTempFile(rebecaModel);
+		
+		HashSet<CompilerExtension> extention = new HashSet<CompilerExtension>();
+		extention.add(CompilerExtension.TIMED_REBECA);
+		Pair<RebecaModel, SymbolTable> compiledRebecaFile = 
+				rebecaModelCompiler.compileRebecaFile(rebecaFile, extention, CoreVersion.CORE_2_3);
+		if(!exceptionContainer.exceptionsIsEmpty()) {
+			exceptionContainer.print(System.out);
+			Assertions.assertTrue(false);
+		}
+        RILModel transformedRILModel = rebeca2RILModelTransformer.transformModel(
+        		compiledRebecaFile, extention, CoreVersion.CORE_2_3);
+        
+
+		printRILModel(transformedRILModel);
+		
+		TransparentActorModelCheckingResult coarseDfsResult = fttsModelChecker.modelcheck(compiledRebecaFile, transformedRILModel, new HashSet<Feature>());
+		Assertions.assertEquals(6, coarseDfsResult.getTransitionSystem().size());
 		System.out.println(coarseDfsResult.getTime());
 		System.out.print(coarseDfsResult.getTransitionSystem().size());
 		System.out.println("(" + coarseDfsResult.getTransitionSystem().getCollisions() + ")");
 	}
     
+	@Test
+    public void racingBetweenTwoSentMessagesAtTheSameTime() throws ModelCheckingException, IOException {
+		String rebecaModel = 
+				"""
+					reactiveclass A(3) {
+						knownrebecs {}
+						statevars{}
+						A() {
+							self.m1();
+						}
+						msgsrv m1() {
+							self.m1() after(1);
+						}
+					}
+					reactiveclass B(3) {
+						knownrebecs {A a;}
+						statevars{}
+						B() {
+							self.m2();
+						}
+						msgsrv m2() {
+							a.m1() after(1);;
+						}
+					}
+					main {
+						A a():();
+						B b(a):();
+					}				
+				""";
+		File rebecaFile = FileUtils.createTempFile(rebecaModel);
+		
+		HashSet<CompilerExtension> extention = new HashSet<CompilerExtension>();
+		extention.add(CompilerExtension.TIMED_REBECA);
+		Pair<RebecaModel, SymbolTable> compiledRebecaFile = 
+				rebecaModelCompiler.compileRebecaFile(rebecaFile, extention, CoreVersion.CORE_2_3);
+		if(!exceptionContainer.exceptionsIsEmpty()) {
+			exceptionContainer.print(System.out);
+			Assertions.assertTrue(false);
+		}
+        RILModel transformedRILModel = rebeca2RILModelTransformer.transformModel(
+        		compiledRebecaFile, extention, CoreVersion.CORE_2_3);
+        
+
+		printRILModel(transformedRILModel);
+		
+		TransparentActorModelCheckingResult coarseDfsResult = fttsModelChecker.modelcheck(compiledRebecaFile, transformedRILModel, new HashSet<Feature>());
+		Assertions.assertEquals(7, coarseDfsResult.getTransitionSystem().size());
+		System.out.println(coarseDfsResult.getTime());
+		System.out.print(coarseDfsResult.getTransitionSystem().size());
+		System.out.println("(" + coarseDfsResult.getTransitionSystem().getCollisions() + ")");
+	}
 	@ParameterizedTest
-	@MethodSource("customers")
+	@MethodSource("models")
     public void ticketService(String model, int statespaceSize) throws ModelCheckingException, IOException {
 		File rebecaFile = FileUtils.createTempFile(model);
 		
@@ -110,9 +262,12 @@ public class TimedRebecaModelsTest {
 		}
         RILModel transformedRILModel = rebeca2RILModelTransformer.transformModel(
         		compiledRebecaFile, extention, CoreVersion.CORE_2_3);
-        
-        TransparentActorModelCheckingResult result = 
-        		fttsModelChecker.modelcheck(compiledRebecaFile, transformedRILModel, new HashSet<Feature>());
+		printRILModel(transformedRILModel);
+
+        HashSet<Feature> features = new HashSet<Feature>();
+        features.add(Feature.CompleteTransitionSystem);
+		TransparentActorModelCheckingResult result = 
+        		fttsModelChecker.modelcheck(compiledRebecaFile, transformedRILModel, features);
 		Assertions.assertEquals(statespaceSize, result.getTransitionSystem().size());
 		System.out.println("time: " + result.getTime());
 		System.out.print("size: " + result.getTransitionSystem().size());
@@ -122,35 +277,16 @@ public class TimedRebecaModelsTest {
 		printRILModel(transformedRILModel);
 	}
 	
-	protected static Stream<Arguments> customers() {
+	protected static Stream<Arguments> models() {
 	    return Stream.of(
 	    		Arguments.arguments(TicketServiceSourceCodes.ONE_CUSTOMER, 5)
-	    		, Arguments.arguments(TicketServiceSourceCodes.TWO_CUSTOMERS, 345)
-	    		, Arguments.arguments(TicketServiceSourceCodes.THREE_CUSTOMERS, 13723)
+	    		, Arguments.arguments(TicketServiceSourceCodes.TWO_CUSTOMERS, 346)
+	    		, Arguments.arguments(TicketServiceSourceCodes.THREE_CUSTOMERS, 13868)
+	    		, Arguments.arguments(WSANSourceCodes.ONE_SENSOR, 13)
+	    		, Arguments.arguments(WSANSourceCodes.TWO_SENSOR, 69)
 	    );
 	}
-
-//	@ParameterizedTest
-//	@MethodSource("philosophers")
-//	public void GIVEN_DiningPhilosopherModel_WHEN_No_Error(String model, int statespaceSize) throws ModelCheckingException, IOException {
-//		File rebecaFile = FileUtils.createTempFile(model);
-//		
-//		Pair<RebecaModel, SymbolTable> compiledRebecaFile = 
-//				rebecaModelCompiler.compileRebecaFile(rebecaFile, new HashSet<CompilerExtension>(), CoreVersion.CORE_2_3);
-//		if(!exceptionContainer.exceptionsIsEmpty()) {
-//			exceptionContainer.print(System.out);
-//			return;
-//		}
-//        RILModel transformedRILModel = rebeca2RILModelTransformer.transformModel(
-//        		compiledRebecaFile, new HashSet<CompilerExtension>(), CoreVersion.CORE_2_3);
-//        
-//
-//		printRILModel(transformedRILModel);
-//		
-//		TransparentActorModelCheckingResult coarseDfsResult = coarseGrainedDFSModelChecker.modelcheck(compiledRebecaFile, transformedRILModel);
-//		Assertions.assertEquals(statespaceSize, coarseDfsResult.getTransitionSystem().size());
-//	}
-//	
+	
 	private void printRILModel(RILModel transformedRILModel) {
 		for(String methodName : transformedRILModel.getMethodNames()) {
 			System.out.println(methodName);

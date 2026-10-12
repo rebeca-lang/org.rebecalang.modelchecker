@@ -1,6 +1,9 @@
 package org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state;
 
-public abstract class AbstractNetworkState {
+import java.io.Serializable;
+
+@SuppressWarnings("serial")
+public abstract class AbstractNetworkState implements Serializable, Cloneable {
 	
 	public abstract boolean hasMessage();
 	

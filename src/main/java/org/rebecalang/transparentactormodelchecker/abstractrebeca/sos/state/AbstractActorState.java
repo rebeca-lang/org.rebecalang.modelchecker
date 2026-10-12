@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.rebecalang.compiler.modelcompiler.corerebeca.CoreRebecaTypeSystem;
 import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.ArrayType;
 import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.FieldDeclaration;
 import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.Type;
@@ -69,7 +70,6 @@ public abstract class AbstractActorState implements Serializable, Cloneable {
 		Pair<String, Integer> pc = getPC();
 		if (pc == null)
 			return null;
-
 		ArrayList<InstructionBean> instructionsList = rilModel.getInstructionList(pc.getFirst());
 
 		return instructionsList.get(pc.getSecond());
@@ -153,6 +153,49 @@ public abstract class AbstractActorState implements Serializable, Cloneable {
 				} else
 					addVariableToScope(vd.getVariableName(), null);
 			}
+		}
+	}
+
+	public void addFieldsVariablesToScopeWithDefaultValues(List<FieldDeclaration> fields) {
+		for(FieldDeclaration fd : fields) {
+			for(VariableDeclarator vd : fd.getVariableDeclarators()) {
+				Object value = null;
+				Type fieldType = fd.getType();
+				if(fieldType instanceof ArrayType)
+					fieldType = ((ArrayType)fieldType).getOrdinaryPrimitiveType();
+				
+				if(fieldType == CoreRebecaTypeSystem.BOOLEAN_TYPE)
+					value = false;
+				if(fieldType == CoreRebecaTypeSystem.BYTE_TYPE || 
+						fieldType == CoreRebecaTypeSystem.SHORT_TYPE || 
+						fieldType == CoreRebecaTypeSystem.INT_TYPE || 
+						fieldType == CoreRebecaTypeSystem.FLOAT_TYPE || 
+						fieldType == CoreRebecaTypeSystem.DOUBLE_TYPE)
+					value = 0;
+				if(fd.getType() instanceof ArrayType) {
+					ArrayType type = (ArrayType) fd.getType();
+					int[] dimentions = new int[type.getDimensions().size()];
+					for(int cnt = 0; cnt < dimentions.length; cnt++)
+						dimentions[cnt] = type.getDimensions().get(cnt);
+					addVariableToScope(vd.getVariableName(), 
+							Array.newInstance(Object.class, dimentions));
+					if(value != null) {
+						setDefaultValueForArrays(getVariableValue(new Variable(vd.getVariableName())), value);
+					}
+				} else
+					addVariableToScope(vd.getVariableName(), value);
+			}
+		}
+	}
+
+	private void setDefaultValueForArrays(Object variable, Object value) {
+		int length = Array.getLength(variable);
+		for(int cnt = 0; cnt < length; cnt++) {
+			Object object = Array.get(variable, cnt);
+			if(object != null && object.getClass().isArray())
+				setDefaultValueForArrays(object, value);
+			else
+				Array.set(variable, cnt, value);
 		}
 	}
 

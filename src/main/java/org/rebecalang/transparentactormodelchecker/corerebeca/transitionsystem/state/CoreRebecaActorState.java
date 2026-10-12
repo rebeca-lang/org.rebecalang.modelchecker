@@ -1,11 +1,16 @@
 package org.rebecalang.transparentactormodelchecker.corerebeca.transitionsystem.state;
 
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
+import org.rebecalang.compiler.modelcompiler.corerebeca.CoreRebecaTypeSystem;
+import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.ArrayType;
 import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.BaseClassDeclaration;
+import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.FieldDeclaration;
 import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.ReactiveClassDeclaration;
 import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.Type;
+import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.VariableDeclarator;
 import org.rebecalang.compiler.utils.CodeCompilationException;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractActorState;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractMessageState;
@@ -47,7 +52,7 @@ public class CoreRebecaActorState extends AbstractActorState implements Serializ
 			BaseClassDeclaration metaData = type.getTypeSystem().getMetaData(type);
 			if(metaData instanceof ReactiveClassDeclaration) {
 				ReactiveClassDeclaration rcd = (ReactiveClassDeclaration) metaData;
-				temp.addFieldsVariablesToScope(rcd.getStatevars());
+				temp.addFieldsVariablesToScopeWithDefaultValues(rcd.getStatevars());
 				temp.addFieldsVariablesToScope(rcd.getKnownRebecs());
 			}
 		} catch (CodeCompilationException e) {

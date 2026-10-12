@@ -103,8 +103,6 @@ public class TransparentActorCoreRebecaCoarseGrainedDFSModelChecker extends Tran
 			Action action = transitions.getDestinationsActions().get(cnt);
 			destinations.add(systemState);
 			destinations.addAll(courseGraindExecuteMessageServer(systemState));
-			if(transitionSystem.size() == 3)
-				System.out.println(transitionSystem.size());
 			deliverAllMessagesAndStore(state, destinations, action);
 		}
 	}

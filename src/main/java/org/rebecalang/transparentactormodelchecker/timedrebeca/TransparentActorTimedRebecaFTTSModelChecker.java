@@ -1,6 +1,5 @@
 package org.rebecalang.transparentactormodelchecker.timedrebeca;
 
-import java.nio.MappedByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -65,19 +64,19 @@ public class TransparentActorTimedRebecaFTTSModelChecker extends TransparentActo
 	}
 
 
-	private StringBuilder toStringRILModel(RILModel transformedRILModel) {
-		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append("RIL-MODEL\n========================================================\n");
-		for(String methodName : transformedRILModel.getMethodNames()) {
-			stringBuilder.append(methodName + "\n");
-			int counter = 0;
-			for(InstructionBean instruction : transformedRILModel.getInstructionList(methodName)) {
-				stringBuilder.append("" + counter++ +":" + instruction + "\n");
-			}
-			stringBuilder.append("...............................................\n");
-		}
-		return stringBuilder;
-	}
+//	private StringBuilder toStringRILModel(RILModel transformedRILModel) {
+//		StringBuilder stringBuilder = new StringBuilder();
+//		stringBuilder.append("RIL-MODEL\n========================================================\n");
+//		for(String methodName : transformedRILModel.getMethodNames()) {
+//			stringBuilder.append(methodName + "\n");
+//			int counter = 0;
+//			for(InstructionBean instruction : transformedRILModel.getInstructionList(methodName)) {
+//				stringBuilder.append("" + counter++ +":" + instruction + "\n");
+//			}
+//			stringBuilder.append("...............................................\n");
+//		}
+//		return stringBuilder;
+//	}
 
 	@Override
 	public TransparentActorModelCheckingResult modelcheck(Pair<RebecaModel, SymbolTable> compiledRebecaFile,
@@ -88,24 +87,27 @@ public class TransparentActorTimedRebecaFTTSModelChecker extends TransparentActo
 		if(features.contains(Feature.CompleteTransitionSystem))
 			this.completeTransitionSystem = true;
 		
-		logger.debug("{}", toStringRILModel(rilModel));
+		logger.debug("{}", rilModel);
 
 		setInitialState();
 		
 		
 		TransparentActorTransitionSystemState<TimedRebecaSystemState> initialState = 
 				transitionSystem.getInitialState();
-		logger.debug("The initial state is: {}", initialState.getState());
-//		long time = System.currentTimeMillis();
-//		for(int cnt = 0; cnt < 100000; cnt++)
-//			logger.debug("State is {}", initialState.getState());
-//			initialState.getState().toString();
-//		System.out.println(System.currentTimeMillis() - time);
+		TimedRebecaSystemState systemState = initialState.getState();
+		logger.debug("The initial state is: {}", systemState);
 		
 		try {
+			int enablingTime = systemState.getEnablingTime();
+			for(int actorId : systemState.getActorsIds()) {
+				AbstractActorState actorState = systemState.getActorState(actorId);
+				int now = (int) actorState.getVariableValue(TimedActorScope.TIME_VARIABLE);
+				if(now < enablingTime)
+					actorState.setVariableValue(TimedActorScope.TIME_VARIABLE, enablingTime);
+			}
 			dfs(initialState);
 		} catch (Exception e) {
-			e.printStackTrace();;
+			e.printStackTrace();
 			TransparentActorModelCheckingResult result = 
 					new TransparentActorModelCheckingResult(TransparentActorModelCheckingResult.INTERNAL_ERROR);
 			result.setTransitionSystem(transitionSystem);
@@ -122,9 +124,6 @@ public class TransparentActorTimedRebecaFTTSModelChecker extends TransparentActo
 		TimedRebecaSystemState systemState = state.getState().clone();
 		Transition<AbstractSystemState> transitions = null;
 
-		if(state.getId() > 99) {
-			state.getId();
-		}
 		try {
 			transitions = takeMessageSOSRule.applyRule(state.getState(), systemState);
 			for(int cnt = 0; cnt < transitions.size(); cnt++) {
@@ -142,7 +141,6 @@ public class TransparentActorTimedRebecaFTTSModelChecker extends TransparentActo
 			else
 				throw new ModelCheckingException(state);
 		}
-		
 	}
 
 	private void deliverAllMessagesAndExpand(TransparentActorTransitionSystemState<TimedRebecaSystemState> state,
@@ -168,7 +166,6 @@ public class TransparentActorTimedRebecaFTTSModelChecker extends TransparentActo
 			logger.info("S{} -> S{} [label=\"{}@{}\"]", state.getId(), 
 					result.getSecond().getId(), action.getActionLabel(), 
 					state.getState().getEnablingTime());
-//			outputStatespace.
 			if(result.getFirst())
 				dfs(result.getSecond());
 		}

@@ -1,5 +1,6 @@
 package org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state;
 
+import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -8,7 +9,8 @@ import java.util.Map.Entry;
 
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.util.CloningRepository;
 
-public class ActivationRecord implements Cloneable {
+@SuppressWarnings("serial")
+public class ActivationRecord implements Serializable, Cloneable {
 	
 	protected HashMap<String, Object> activationRecord;
 	
@@ -43,17 +45,18 @@ public class ActivationRecord implements Cloneable {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
 		int result = 1;
+//		final int prime = 31;
 //		result = prime * result + ((activationRecord == null) ? 0 : activationRecord.hashCode());
 		for (Entry<String, Object> entry : activationRecord.entrySet()) {
 			Object value = entry.getValue();
+			if(value == null)
+				value = 0;
 			if(value.getClass().isArray())
 				result += entry.getKey().hashCode() ^ Arrays.deepHashCode((Object[]) value);
 			else
 				result += entry.getKey().hashCode() ^ value.hashCode();
 		}
-//		System.out.println("\t" + result);
 		return result;
 	}
 

@@ -41,6 +41,7 @@ public class TimedRebecaTransitionSystem extends TransparentActorTransitionSyste
 		newState.addPreviousState(previousSystemState);
 		result.add(newState);
 		
+		System.out.println(size + ":" + transitionSystemStates.size());
 		size++;
 		return new Pair<Boolean, TransparentActorTransitionSystemState<TimedRebecaSystemState>>(true, newState); 
 	}

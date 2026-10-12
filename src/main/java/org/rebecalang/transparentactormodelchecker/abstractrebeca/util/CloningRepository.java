@@ -64,7 +64,7 @@ public class CloningRepository {
 				cloned[cnt] = cloneObject(valueData[cnt]);
 			return cloned;
 		}
-		throw new ModelCheckingRuntimeException("Unknown cloning strategy for " + value.getClass());
+		throw new ModelCheckingRuntimeException(null, "Unknown cloning strategy for " + value.getClass());
 	}
 
 	@SuppressWarnings("unchecked")

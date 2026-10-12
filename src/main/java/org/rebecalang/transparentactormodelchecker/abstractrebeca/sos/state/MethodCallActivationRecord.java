@@ -4,6 +4,7 @@ import java.util.Map.Entry;
 
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.util.CloningRepository;
 
+@SuppressWarnings("serial")
 public class MethodCallActivationRecord extends ActivationRecord {
 	private int scopeIndex;
 	

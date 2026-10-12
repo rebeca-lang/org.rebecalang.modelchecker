@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.rebecalang.transparentactormodelchecker.ModelCheckingRuntimeException;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.MethodLookup;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.action.Action;
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.action.MessageAction;
@@ -16,72 +17,74 @@ import org.rebecalang.transparentactormodelchecker.transitionsystem.RuleIsDisabl
 import org.rebecalang.transparentactormodelchecker.transitionsystem.Transition;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class CompositionLevelExecuteStatementRule extends AbstractSOSRule<AbstractSystemState>{
-	
+public class CompositionLevelExecuteStatementRule extends AbstractSOSRule<AbstractSystemState> {
+
 	ExecuteStatementRule executeStatementSOSRule;
-	
+
 	@Autowired
 	NetworkReceiveMessageRule networkLevelReceiveMessageRule;
-	
+
 	public void setExecuteStatementSOSRule(ExecuteStatementRule executeStatementSOSRule) {
 		this.executeStatementSOSRule = executeStatementSOSRule;
 	}
-	
+
 	@Override
 	public Transition<AbstractSystemState> applyRule(AbstractSystemState base, AbstractSystemState state,
 			Object... additional) throws RuleIsDisabledException {
-		Transition<AbstractSystemState> transitions = 
-				new Transition<AbstractSystemState>();
-
+		Transition<AbstractSystemState> transitions = new Transition<AbstractSystemState>();
 		Set<Integer> actorsIds = base.getActorsIds();
 		int priority = getPriority(state, actorsIds);
 		boolean firstRound = true;
-		for(Iterator<Integer> iterator = actorsIds.iterator(); iterator.hasNext();) {
+		for (Iterator<Integer> iterator = actorsIds.iterator(); iterator.hasNext();) {
 			Integer actorId = iterator.next();
 			AbstractActorState baseActorState = base.getActorState(actorId);
-			if(!executeStatementSOSRule.isEnabled(baseActorState) ||
-					baseActorState.getPriority() > priority)
-				continue;
-			
-			if(!firstRound)
-				state = base.clone();
-			firstRound = false;
-			
-			AbstractActorState actorState = state.getActorState(actorId);
-			Transition<AbstractActorState> executionResult = 
-					executeStatementSOSRule.applyRule(baseActorState, actorState);
-			
-			if(isSendMessageTransition(executionResult)) {
-				Action action = executionResult.getDestinationsActions().get(0);
-				networkLevelReceiveMessageRule.applyRule(
-						base.getNetworkState(), state.getNetworkState(),
-						action);
-				transitions.addDestination(action, state);
-			} else {
-				int size = executionResult.size();
-				List<Action> actions = executionResult.getDestinationsActions();
-				List<AbstractActorState> states = executionResult.getDestinationsStates();
-				for(int cnt = 0; cnt < size; cnt++) {
-					AbstractActorState newState = states.get(cnt);
-					state.setActorState(newState.getId(), newState);
-					transitions.addDestination(actions.get(cnt), state);
-					if(cnt != size - 1) {
-						state = base.clone();
+			try {
+				if (!executeStatementSOSRule.isEnabled(baseActorState) || baseActorState.getPriority() > priority)
+					continue;
+
+				if (!firstRound)
+					state = base.clone();
+				firstRound = false;
+
+				AbstractActorState actorState = state.getActorState(actorId);
+				Transition<AbstractActorState> executionResult = executeStatementSOSRule.applyRule(baseActorState,
+						actorState);
+
+				if (isSendMessageTransition(executionResult)) {
+					Action action = executionResult.getDestinationsActions().get(0);
+					networkLevelReceiveMessageRule.applyRule(base.getNetworkState(), state.getNetworkState(), action);
+					transitions.addDestination(action, state);
+				} else {
+					int size = executionResult.size();
+					List<Action> actions = executionResult.getDestinationsActions();
+					List<AbstractActorState> states = executionResult.getDestinationsStates();
+					for (int cnt = 0; cnt < size; cnt++) {
+						AbstractActorState newState = states.get(cnt);
+						state.setActorState(newState.getId(), newState);
+						transitions.addDestination(actions.get(cnt), state);
+						if (cnt != size - 1) {
+							state = base.clone();
+						}
 					}
 				}
+			} catch (RuntimeException re) {
+				String message = baseActorState.getEnabledInstruction().toString();
+				message += "\r\n" + re.getMessage();
+				throw new ModelCheckingRuntimeException(re, message);
+			} catch (RuleIsDisabledException rie) {
+				throw rie;
 			}
 		}
-		
-		if(transitions.isEmpty())
+		if (transitions.isEmpty())
 			throw new RuleIsDisabledException();
 		return transitions;
 	}
 
 	private int getPriority(AbstractSystemState state, Set<Integer> actorsIds) {
 		int priority = Integer.MAX_VALUE;
-		for(Integer actorId : actorsIds) {
+		for (Integer actorId : actorsIds) {
 			AbstractActorState actorState = state.getActorState(actorId);
-			if(executeStatementSOSRule.isEnabled(actorState))
+			if (executeStatementSOSRule.isEnabled(actorState))
 				priority = Math.min(priority, actorState.getPriority());
 		}
 		return priority;
@@ -89,13 +92,13 @@ public class CompositionLevelExecuteStatementRule extends AbstractSOSRule<Abstra
 
 	private boolean isSendMessageTransition(Transition<AbstractActorState> transition) {
 		List<Action> actions = transition.getDestinationsActions();
-		if(actions.size() != 1)
+		if (actions.size() != 1)
 			return false;
 		return (transition.getDestinationsActions().get(0) instanceof MessageAction);
 	}
 
 	public void setMethodLookup(MethodLookup methodLookup) {
 		executeStatementSOSRule.setMethodLookup(methodLookup);
-		
+
 	}
 }

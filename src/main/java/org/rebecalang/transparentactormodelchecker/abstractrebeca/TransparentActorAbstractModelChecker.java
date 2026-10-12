@@ -12,7 +12,6 @@ import org.rebecalang.compiler.modelcompiler.corerebeca.objectmodel.RebecaModel;
 import org.rebecalang.compiler.utils.Pair;
 import org.rebecalang.modeltransformer.ril.RILModel;
 import org.rebecalang.modeltransformer.ril.RILUtilities;
-import org.rebecalang.modeltransformer.ril.corerebeca.rilinstruction.InstructionBean;
 import org.rebecalang.transparentactormodelchecker.TransparentActorModelCheckingResult;
 import org.rebecalang.transparentactormodelchecker.TransparentActorTransitionSystem;
 import org.rebecalang.transparentactormodelchecker.TransparentActorTransitionSystemState;
@@ -77,7 +76,7 @@ public abstract class TransparentActorAbstractModelChecker<T extends AbstractSys
 		AbstractActorState tempState = createAbstractActorState();
 		tempState.setRILModel(rilModel);
 	
-		ArrayList<InstructionBean> instructions = rilModel.getInstructionList("main");
+//		ArrayList<InstructionBean> instructions = rilModel.getInstructionList("main");
 //		InstructionBean lastStatement = instructions.remove(instructions.size() - 2);
 	
 		tempState.addVariableToScope(AbstractActorState.PC, 

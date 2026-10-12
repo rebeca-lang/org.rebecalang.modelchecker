@@ -9,7 +9,6 @@ import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.networklev
 import org.rebecalang.transparentactormodelchecker.abstractrebeca.sos.state.AbstractNetworkState;
 import org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.state.ActorReceivingBucket;
 import org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.state.TimeBucket;
-import org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.state.TimedRebecaMessageState;
 import org.rebecalang.transparentactormodelchecker.timedrebeca.transitionsystem.state.TimedRebecaNetworkState;
 import org.rebecalang.transparentactormodelchecker.transitionsystem.RuleIsDisabledException;
 import org.rebecalang.transparentactormodelchecker.transitionsystem.Transition;
@@ -27,19 +26,18 @@ public class TimedRebecaFTTSNetworkLevelDeliverMessage extends NetworkLevelDeliv
 		ArrayList<TimeBucket> receivedMessages = timedRebecaNetworkState.getReceivedMessages();
 		if(!receivedMessages.isEmpty()) {
 			TimeBucket timeBucket = receivedMessages.get(0);
-			if(timeBucket.getMessages().size() == 1)
-				receivedMessages.remove(0);
 			Iterator<Entry<Integer, ActorReceivingBucket>> timeIntanceReceivedMessagesIterator = 
 					timeBucket.getMessages().entrySet().iterator();
-			if(timeIntanceReceivedMessagesIterator.hasNext()) {
-				ActorReceivingBucket receivingBucket =
-						timeIntanceReceivedMessagesIterator.next().getValue();
+			Entry<Integer, ActorReceivingBucket> next = timeIntanceReceivedMessagesIterator.next();
+			ActorReceivingBucket receivingBucket = next.getValue();
+			MessageAction action = new MessageAction(receivingBucket.removeFirstMessage());
+			if(receivingBucket.isEmpty()) {
 				timeIntanceReceivedMessagesIterator.remove();
-				ArrayList<TimedRebecaMessageState> allSentMessages = 
-						receivingBucket.getAllSentMessages();
-				MessageAction action = new MessageAction(allSentMessages.get(0));
-				transitions.addDestination(action, state);					
+				if(timeBucket.getMessages().isEmpty()) {
+					receivedMessages.remove(0);
+				}
 			}
+			transitions.addDestination(action, state);			
 		}
 //		while(!receivedMessages.isEmpty()) {
 //			TimeBucket timeBucket = receivedMessages.remove(0);

@@ -74,20 +74,9 @@ public class CoreRebecaSystemState extends AbstractSystemState implements Serial
 	
 	
 	public CoreRebecaSystemState clone() {
-//		counter++;
-//		long temp = System.nanoTime();
 		CoreRebecaSystemState clonedState = new CoreRebecaSystemState();
 		clone(clonedState);
 		clonedState.networkState = networkState.clone();
-//		time += System.nanoTime() - temp;
-//		System.out.println(System.nanoTime() - time);
-//		clonedState.actorsState = (HashMap<Integer, AbstractActorState>) new HashMap<Integer, AbstractActorState>();
-//		for(Entry<Integer, AbstractActorState> entry : actorsState.entrySet()) {
-//			clonedState.actorsState.put(entry.getKey(), entry.getValue().memoizedClone());
-//		}
-//		long end = System.currentTimeMillis();
-//		if((end - start) != 0)
-//			System.out.println(end-start);
 		return clonedState;
 	}
 	
