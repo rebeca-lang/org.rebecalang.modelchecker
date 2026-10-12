@@ -30,6 +30,14 @@
 			<version>LATEST</version>
 		</dependency>
 
+		<!--<dependency>
+			<groupId>org.rebecalang</groupId>
+			<artifactId>modeltransformer</artifactId>
+			<version>LATEST</version>
+			<scope>test</scope>
+			<type>test-jar</type>
+		</dependency> -->
+
 		<!-- Add Log4j2 -->
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
@@ -186,6 +194,7 @@
 						<version>${org.apache.maven.plugins.surefire.version}</version>
 						<configuration>
 							<useSystemClassLoader>false</useSystemClassLoader>
+							<argLine>-Xss256M</argLine>
 						</configuration>
 					</plugin>
 					<plugin>
@@ -221,6 +230,7 @@
 						<version>${org.apache.maven.plugins.surefire.version}</version>
 						<configuration>
 							<useSystemClassLoader>false</useSystemClassLoader>
+							<argLine>-Xss256M</argLine>							
 						</configuration>
 					</plugin>
 					<plugin>
